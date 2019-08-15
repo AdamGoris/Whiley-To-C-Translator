@@ -4,9 +4,9 @@ import org.bitbucket.inkytonik.kiama.util.{Messaging, PositionStore}
 
 object Main extends Messaging with PositionStore {
 
-    import javak.java.javai.JavaI
-    import javak.java.javai.JavaIPrettyPrinter._
-    import javak.java.javai.JavaISyntax.Program
+    import whiley.WhileyI
+    //import javak.java.javai.JavaIPrettyPrinter._
+    //import javak.java.javai.JavaISyntax.Program
     import org.bitbucket.inkytonik.kiama.util.FileSource
 
     def main(args : Array[String]) {
