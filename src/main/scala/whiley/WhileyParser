@@ -1,0 +1,14 @@
+module whiley.WhileyI
+
+header {
+    import whiley.WhileyParser.*;
+}
+
+Stm {line} =
+
+
+Type = 
+    "null"  {NullType}
+    "int"   {IntType}
+    "byte"  {ByteType}
+    "bool"  {BoolType}
