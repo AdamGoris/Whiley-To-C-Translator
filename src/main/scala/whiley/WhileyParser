@@ -5,10 +5,21 @@ header {
 }
 
 Stm {line} =
-
+		Type Loc								{Decl}
 
 Type = 
-    "null"  {NullType}
-    "int"   {IntType}
-    "byte"  {ByteType}
-    "bool"  {BoolType}
+    "int"   								{IntType}
+    "byte"  								{ByteType}
+    "bool"  								{BoolType}
+
+Digits : String = 
+		Digit*
+
+Digit : String =
+		[0-9].
+
+Loc = 
+    Identifier.
+
+Lab : String =
+		Identifier.
