@@ -1,4 +1,4 @@
-name := "ScalaProjectTemplate"
+name := "WhileyParser"
 
 version := "0.1"
 

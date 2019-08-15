@@ -4,13 +4,16 @@ header {
     import whiley.WhileyParser.*;
 }
 
+Program =
+  Spacing Stm* EOF.
+
 Stm {line} =
-		Type Loc								{Decl}
+		Type Loc								{Decl}.
 
 Type = 
     "int"   								{IntType}
     "byte"  								{ByteType}
-    "bool"  								{BoolType}
+    "bool"  								{BoolType}.
 
 Digits : String = 
 		Digit*
