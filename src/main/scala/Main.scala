@@ -5,12 +5,12 @@ import org.bitbucket.inkytonik.kiama.util.{Messaging, PositionStore}
 object Main extends Messaging with PositionStore {
 
     import whiley.WhileyI
-    //import javak.java.javai.JavaIPrettyPrinter._
-    //import javak.java.javai.JavaISyntax.Program
+    import whiley.WhileyIPrettyPrinter._
+    import whiley.WhileyISyntax.Program
     import org.bitbucket.inkytonik.kiama.util.FileSource
 
     def main(args : Array[String]) {
-        val p = new JavaI(FileSource(args(0)), positions)
+        val p = new WhileyI(FileSource(args(0)), positions)
         val pr = p.pProgram(0)
         if (pr.hasValue) {
             val v = p.value(pr).asInstanceOf[Program]
