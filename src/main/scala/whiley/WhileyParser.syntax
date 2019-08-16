@@ -1,7 +1,7 @@
-module whiley.WhileyI
+module whiley.WhileyI;
 
 header {
-    import whiley.WhileyParser.*;
+    import whiley.WhileyISyntax.*;
 }
 
 Program =
@@ -12,11 +12,11 @@ Stm {line} =
 
 Type = 
     "int"   								{IntType}
-    "byte"  								{ByteType}
-    "bool"  								{BoolType}.
+  | "byte"  								{ByteType}
+  | "bool"  								{BoolType}.
 
 Digits : String = 
-		Digit*
+		Digit*.
 
 Digit : String =
 		[0-9].
