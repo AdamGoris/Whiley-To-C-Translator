@@ -19,18 +19,39 @@ trait WhileyIPrettyPrinter extends PP with PPP {
         astNode match {
             case v @ Program (v1) =>
                 emptyDoc <> ssep (v1.map (toDoc), emptyDoc) <> emptyDoc 
+            case v @ DeclAsgn (v1, v2, v3) =>
+                line <> toDoc (v1) <> toDoc (v2) <> space <> text ("=") <> space <> toDoc (v3) 
             case v @ Decl (v1, v2) =>
-                line <> toDoc (v1) <> toDoc (v2) 
+                line <> toDoc (v1) <> toDoc (v2) <> space 
+            case v @ AsgnStm (v1) =>
+                line <> toDoc (v1) 
             case v @ IntType () =>
                 text ("int") <> space 
             case v @ ByteType () =>
                 text ("byte") <> space 
             case v @ BoolType () =>
                 text ("bool") <> space   
+            case v : Exp =>
+                toParenDoc (v)           
             case v @ Loc (v1) =>
                 value (v1) 
         }
     
+    override def toParenDoc (astNode : org.bitbucket.inkytonik.kiama.output.PrettyExpression) : Doc =
+        astNode match {
+            case v @ Use (v1) =>
+                toDoc (v1) 
+            case v @ Assign (v1, v2) =>
+                toDoc (v1) <> space <> text ("=") <> space <> toDoc (v2) 
+            case v @ IntLit (v1) =>
+                value (v1) 
+            case v @ False () =>
+                text ("false") 
+            case v @ True () =>
+                text ("true")
+            case _ =>
+                super.toParenDoc (astNode)
+        }
 
 }
 

@@ -10,13 +10,40 @@ object WhileyISyntax {
     case class Program (optStms : Vector[Stm]) extends ASTNode
      
     sealed abstract class Stm extends ASTNode
+    case class DeclAsgn (typeField : Type, loc : Loc, exp : Exp) extends Stm  
     case class Decl (typeField : Type, loc : Loc) extends Stm  
+    case class AsgnStm (assign : Exp) extends Stm  
      
     sealed abstract class Type extends ASTNode
     case class IntType () extends Type  
     case class ByteType () extends Type  
     case class BoolType () extends Type  
-       
+     
+    sealed abstract class Exp extends ASTNode with org.bitbucket.inkytonik.kiama.output.PrettyExpression
+    case class Use (loc : Loc) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+     
+    case class Assign (loc : Loc, exp : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+     
+    case class IntLit (integerLiteral : Int) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+          
+    case class False () extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+    case class True () extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+     
     case class Loc (identifier : String) extends ASTNode
      
 }

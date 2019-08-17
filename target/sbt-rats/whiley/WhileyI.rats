@@ -59,12 +59,20 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
 }
                 
     static {
-        add (KEYWORDS, new String[] { "bool", "byte", "int" });
+        add (KEYWORDS, new String[] {
+            "bool", "byte", "false", "int", "true"
+        });
     }
 }
 
 option setOfString (KEYWORDS), withLocation;
 
+
+String Symbol1 =
+    Symbol1Alts Spacing;
+
+transient String Symbol1Alts =
+    "=" / "0";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -73,8 +81,14 @@ public Program Program =
     ;
 
 public Stm Stm =
-    v1:Type v2:Loc {
+    v1:Type v2:Loc  void:"=":Symbol1 v3:Exp {
+        yyValue = new DeclAsgn (v1, v2, v3);
+    }
+    / v1:Type v2:Loc  {
         yyValue = new Decl (v1, v2);
+    }
+    / v1:Assign {
+        yyValue = new AsgnStm (v1);
     }
     ;
 
@@ -90,12 +104,59 @@ public Type Type =
     }
     ;
 
+public Exp Exp =
+    v1:Lit 
+    / v1:Loc {
+        yyValue = new Use (v1);
+    }
+    / v1:Assign 
+    ;
+
+public Exp Assign =
+    v1:Loc  void:"=":Symbol1 v2:Exp {
+        yyValue = new Assign (v1, v2);
+    }
+    ;
+
+public Exp Lit =
+    v1:IntegerLiteral {
+        yyValue = new IntLit (Integer.parseInt (v1));
+    }
+    / v1:BooleanLiteral 
+    ;
+
+public String IntegerLiteral =
+    IntegerLiteralForm Spacing
+    ;
+
+public String IntegerLiteralForm =
+    DecimalNumeral
+    ;
+
+public String DecimalNumeral =
+    "0"
+    / NonZeroDigit Digits
+    ;
+
 public String Digits =
     (Digit)*
     ;
 
+public String NonZeroDigit =
+    [1-9]
+    ;
+
 public String Digit =
     [0-9]
+    ;
+
+public Exp BooleanLiteral =
+    void:"false":Word {
+        yyValue = new False ();
+    }
+    / void:"true":Word {
+        yyValue = new True ();
+    }
     ;
 
 public Loc Loc =

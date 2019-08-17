@@ -8,18 +8,46 @@ Program =
   Spacing Stm* EOF.
 
 Stm {line} =
-		Type Loc								{Decl}.
+		Type Loc sp "=" Exp		  {DeclAsgn}
+  | Type Loc sp             {Decl}
+  | Assign                  {AsgnStm}.
 
 Type = 
     "int"   								{IntType}
   | "byte"  								{ByteType}
   | "bool"  								{BoolType}.
 
+Exp {paren} = 
+    Lit
+  | Loc                     {Use}
+  | Assign.
+
+Assign : Exp = 
+    Loc sp "=" Exp.
+
+Lit : Exp =
+    IntegerLiteral          {IntLit, 1: Integer.parseInt : Int}
+  | BooleanLiteral.
+
+IntegerLiteral : Token =
+    DecimalNumeral.
+
+DecimalNumeral : String =
+    '0'
+  | NonZeroDigit Digits.
+
 Digits : String = 
 		Digit*.
 
+NonZeroDigit : String =
+    [1-9].
+
 Digit : String =
 		[0-9].
+
+BooleanLiteral : Exp =
+    'false'                 {False}
+  | 'true'                  {True}.
 
 Loc = 
     Identifier.
