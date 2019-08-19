@@ -20,7 +20,14 @@ Type =
 Exp {paren} = 
     Lit
   | Loc                     {Use}
-  | Assign.
+  | Assign
+  | Exp sp "+" Exp          {Add, left, 2}
+  | Exp sp "-" Exp          {Sub, left, 2}
+  | Exp sp "*" Exp          {Mul, left, 1}
+  | Exp sp "/" Exp          {Div, left, 1}
+  | Exp sp "%" Exp          {Rem, left, 1}
+  | '!' Exp                 {Not}
+  | '(' Exp ')'.
 
 Assign : Exp = 
     Loc sp "=" Exp.

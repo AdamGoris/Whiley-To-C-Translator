@@ -72,7 +72,7 @@ String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "=" / "0";
+    "*" / "%" / "=" / "!" / ")" / "-" / "0" / "+" / "(" / "/";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -105,11 +105,7 @@ public Type Type =
     ;
 
 public Exp Exp =
-    v1:Lit 
-    / v1:Loc {
-        yyValue = new Use (v1);
-    }
-    / v1:Assign 
+    v1:ExpLevel2 
     ;
 
 public Exp Assign =
@@ -167,6 +163,81 @@ public Loc Loc =
 
 public String Lab =
     Identifier
+    ;
+
+public Exp ExpLevel2 =
+    v1:ExpLevel1 v2:(ExpLevel2Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel2Tail =
+     void:"+":Symbol1 v1:ExpLevel1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Add node = new Add (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"-":Symbol1 v1:ExpLevel1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Sub node = new Sub (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel1 =
+    v1:ExpLevel0 v2:(ExpLevel1Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel1Tail =
+     void:"*":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Mul node = new Mul (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"/":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Div node = new Div (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"%":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Rem node = new Rem (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel0 =
+    v1:Lit 
+    / v1:Loc {
+        yyValue = new Use (v1);
+    }
+    / v1:Assign 
+    / void:"!":Symbol1 v1:ExpLevel0 {
+        yyValue = new Not (v1);
+    }
+    / void:"(":Symbol1 v1:Exp void:")":Symbol1 
     ;
 
 // Default spacing specification

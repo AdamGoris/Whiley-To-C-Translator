@@ -2037,31 +2037,31 @@
 [0m[[0m[0mdebug[0m] [0m[0mignoring unhandled DependencyDescriptorMediator: class sbt.internal.librarymanagement.IvyScalaUtil$OverrideScalaMediator[0m
 [0m[[0m[0mdebug[0m] [0m[0m	resolved ivy file produced in cache[0m
 [0m[[0m[0mdebug[0m] [0m[0m:: downloading artifacts ::[0m
-[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] com.google.code.findbugs#jsr305;3.0.1!jsr305.jar[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] junit#junit;4.8.2!junit.jar[0m
-[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.scala-lang#scala-library;2.12.8!scala-library.jar[0m
-[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] com.google.guava#guava;19.0!guava.jar(bundle)[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] xtc#rats;2.3.1!rats.jar[0m
-[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.bitbucket.inkytonik.kiama#kiama_2.12;2.0.0!kiama_2.12.jar[0m
+[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.scala-lang#scala-library;2.12.8!scala-library.jar[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.bitbucket.inkytonik.dsinfo#dsinfo_2.12;0.4.0!dsinfo_2.12.jar[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.rogach#scallop_2.12;1.0.0!scallop_2.12.jar[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.bitbucket.inkytonik.dsprofile#dsprofile_2.12;0.4.0!dsprofile_2.12.jar[0m
+[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] com.google.code.findbugs#jsr305;3.0.1!jsr305.jar[0m
+[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.bitbucket.inkytonik.kiama#kiama_2.12;2.0.0!kiama_2.12.jar[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.12;1.0.6!scala-xml_2.12.jar(bundle)[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.scala-lang#scala-reflect;2.12.8!scala-reflect.jar[0m
-[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] jline#jline;2.14.1!jline.jar[0m
+[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] com.google.guava#guava;19.0!guava.jar(bundle)[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] org.scala-lang#scala-compiler;2.12.8!scala-compiler.jar[0m
 [0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] jline#jline;2.14.6!jline.jar[0m
-[0m[[0m[0mdebug[0m] [0m[0m:: resolution report :: resolve 136ms :: artifacts dl 3ms[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 compile produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-compile.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 runtime produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-runtime.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 test produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-test.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 provided produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-provided.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 optional produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-optional.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 compile-internal produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-compile-internal.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 runtime-internal produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-runtime-internal.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 test-internal produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-test-internal.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 plugin produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-plugin.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 pom produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-pom.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 scala-tool produced in C:\WhileyParser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-scala-tool.xml[0m
-[0m[[0m[0mdebug[0m] [0m[0m	resolve done (136ms resolve - 3ms download)[0m
+[0m[[0m[0mdebug[0m] [0m[0m	[NOT REQUIRED] jline#jline;2.14.1!jline.jar[0m
+[0m[[0m[0mdebug[0m] [0m[0m:: resolution report :: resolve 2188ms :: artifacts dl 69ms[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 compile produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-compile.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 runtime produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-runtime.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 test produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-test.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 provided produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-provided.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 optional produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-optional.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 compile-internal produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-compile-internal.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 runtime-internal produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-runtime-internal.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 test-internal produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-test-internal.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 plugin produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-plugin.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 pom produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-pom.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	report for default#whileyparser_2.12;0.1 scala-tool produced in C:\whileyparser\target\scala-2.12\resolution-cache\reports\default-whileyparser_2.12-scala-tool.xml[0m
+[0m[[0m[0mdebug[0m] [0m[0m	resolve done (2188ms resolve - 69ms download)[0m
 [0m[[0m[0minfo[0m] [0m[0mDone updating.[0m

@@ -1,3 +1,3 @@
-int a
-int b = 2
-a = 1
+a = !a
+a = (a)
+
