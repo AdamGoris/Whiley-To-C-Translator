@@ -21,6 +21,14 @@ Exp {paren} =
     Lit
   | Loc                     {Use}
   | Assign
+  | Exp sp "==" Exp         {EQ, left, 5}
+  | Exp sp "!=" Exp         {NE, left, 5}
+  | Exp sp "<"  Exp         {LT, left, 4}
+  | Exp sp "<=" Exp         {LE, left, 4}
+  | Exp sp ">"  Exp         {GT, left, 4}
+  | Exp sp ">=" Exp         {GE, left, 4}
+  | Exp sp "<<" Exp         {Lsh, left, 3}
+  | Exp sp ">>" Exp         {ARsh, left, 3}
   | Exp sp "+" Exp          {Add, left, 2}
   | Exp sp "-" Exp          {Sub, left, 2}
   | Exp sp "*" Exp          {Mul, left, 1}
@@ -33,11 +41,20 @@ Assign : Exp =
     Loc sp "=" Exp.
 
 Lit : Exp =
-    IntegerLiteral          {IntLit, 1: Integer.parseInt : Int}
+    ByteLiteral
+  | IntegerLiteral          {IntLit, 1: Integer.parseInt : Int}
   | BooleanLiteral.
+
 
 IntegerLiteral : Token =
     DecimalNumeral.
+
+ByteLiteral : Exp = 
+    '0b' Bit*.
+
+BooleanLiteral : Exp =
+    'false'                 {False}
+  | 'true'                  {True}.
 
 DecimalNumeral : String =
     '0'
@@ -52,9 +69,8 @@ NonZeroDigit : String =
 Digit : String =
 		[0-9].
 
-BooleanLiteral : Exp =
-    'false'                 {False}
-  | 'true'                  {True}.
+Bit : String = 
+    [0-1].
 
 Loc = 
     Identifier.

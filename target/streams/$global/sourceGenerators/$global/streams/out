@@ -1,8 +1,8 @@
-[0m[[0m[0minfo[0m] [0m[0mRats! generating Scala support file C:\whileyparser\target\scala-2.12\src_managed\main\sbt-rats\sbtrats\ParserSupport.scala[0m
-[0m[[0m[0minfo[0m] [0m[0mRunning Syntax generation on C:\whileyparser\src\main\scala\whiley\WhileyParser.syntax, output to C:\whileyparser\target\sbt-rats and C:\whileyparser\target\scala-2.12\src_managed\main\sbt-rats[0m
-[0m[[0m[0minfo[0m] [0m[0mSyntax generating Rats! file C:\whileyparser\target\sbt-rats\whiley\WhileyI.rats[0m
-[0m[[0m[0minfo[0m] [0m[0mSyntax generating AST classes C:\whileyparser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyISyntax.scala[0m
-[0m[[0m[0minfo[0m] [0m[0mSyntax generating pretty-printer C:\whileyparser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala[0m
-[0m[[0m[0minfo[0m] [0m[0mRunning Rats! on C:\whileyparser\target\sbt-rats\whiley\WhileyI.rats, input from C:\whileyparser\target\sbt-rats\whiley and C:\whileyparser\target\sbt-rats, output to C:\whileyparser\target\sbt-rats\whiley[0m
-[0m[[0m[0minfo[0m] [0m[0mRats! generated C:\whileyparser\target\sbt-rats\whiley\WhileyI.java[0m
-[0m[[0m[0minfo[0m] [0m[0mRats! transforming C:\whileyparser\target\sbt-rats\whiley\WhileyI.java for Scala into C:\whileyparser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyI.java[0m
+[0m[[0m[0minfo[0m] [0m[0mRats! generating Scala support file C:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\sbtrats\ParserSupport.scala[0m
+[0m[[0m[0minfo[0m] [0m[0mRunning Syntax generation on C:\WhileyParser\src\main\scala\whiley\WhileyParser.syntax, output to C:\WhileyParser\target\sbt-rats and C:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats[0m
+[0m[[0m[0minfo[0m] [0m[0mSyntax generating Rats! file C:\WhileyParser\target\sbt-rats\whiley\WhileyI.rats[0m
+[0m[[0m[0minfo[0m] [0m[0mSyntax generating AST classes C:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyISyntax.scala[0m
+[0m[[0m[0minfo[0m] [0m[0mSyntax generating pretty-printer C:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala[0m
+[0m[[0m[0minfo[0m] [0m[0mRunning Rats! on C:\WhileyParser\target\sbt-rats\whiley\WhileyI.rats, input from C:\WhileyParser\target\sbt-rats\whiley and C:\WhileyParser\target\sbt-rats, output to C:\WhileyParser\target\sbt-rats\whiley[0m
+[0m[[0m[0minfo[0m] [0m[0mRats! generated C:\WhileyParser\target\sbt-rats\whiley\WhileyI.java[0m
+[0m[[0m[0minfo[0m] [0m[0mRats! transforming C:\WhileyParser\target\sbt-rats\whiley\WhileyI.java for Scala into C:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyI.java[0m

@@ -1,4 +1,3 @@
-[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:22:22: not found: value Stm[0m
-[0m[[0m[31merror[0m] [0m[0m            case v @ Stm (v1, v2, v3) =>[0m
-[0m[[0m[31merror[0m] [0m[0m                     ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyI.java:989:1: reference to Byte is ambiguous[0m
+[0m[[0m[31merror[0m] [0m[0m  both class whiley.WhileyISyntax.Byte in whiley.WhileyISyntax and class java.lang.Byte in java.lang match[0m
+[0m[[0m[31merror[0m] [0m[0m      yyValue = new Byte ();[0m

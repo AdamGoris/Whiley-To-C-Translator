@@ -68,11 +68,17 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
 option setOfString (KEYWORDS), withLocation;
 
 
+String Symbol2 =
+    Symbol2Alts Spacing;
+
+transient String Symbol2Alts =
+    "0b" / "<=" / "<<" / ">=" / ">>" / "==" / "!=";
+
 String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "=" / "!" / ")" / "-" / "0" / "+" / "(" / "/";
+    "*" / "%" / "=" / "<" / "!" / ")" / "-" / "0" / "+" / "(" / "/" / ">";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -105,7 +111,7 @@ public Type Type =
     ;
 
 public Exp Exp =
-    v1:ExpLevel2 
+    v1:ExpLevel5 
     ;
 
 public Exp Assign =
@@ -115,7 +121,8 @@ public Exp Assign =
     ;
 
 public Exp Lit =
-    v1:IntegerLiteral {
+    v1:ByteLiteral 
+    / v1:IntegerLiteral {
         yyValue = new IntLit (Integer.parseInt (v1));
     }
     / v1:BooleanLiteral 
@@ -127,6 +134,21 @@ public String IntegerLiteral =
 
 public String IntegerLiteralForm =
     DecimalNumeral
+    ;
+
+public Exp ByteLiteral =
+    void:"0b":Symbol2 v1:(Bit)* {
+        yyValue = new ByteLiteral (v1);
+    }
+    ;
+
+public Exp BooleanLiteral =
+    void:"false":Word {
+        yyValue = new False ();
+    }
+    / void:"true":Word {
+        yyValue = new True ();
+    }
     ;
 
 public String DecimalNumeral =
@@ -146,13 +168,8 @@ public String Digit =
     [0-9]
     ;
 
-public Exp BooleanLiteral =
-    void:"false":Word {
-        yyValue = new False ();
-    }
-    / void:"true":Word {
-        yyValue = new True ();
-    }
+public String Bit =
+    [0-1]
     ;
 
 public Loc Loc =
@@ -165,26 +182,38 @@ public String Lab =
     Identifier
     ;
 
-public Exp ExpLevel2 =
-    v1:ExpLevel1 v2:(ExpLevel2Tail)* {
+public Exp ExpLevel0 =
+    v1:Lit 
+    / v1:Loc {
+        yyValue = new Use (v1);
+    }
+    / v1:Assign 
+    / void:"!":Symbol1 v1:ExpLevel0 {
+        yyValue = new Not (v1);
+    }
+    / void:"(":Symbol1 v1:Exp void:")":Symbol1 
+    ;
+
+public Exp ExpLevel5 =
+    v1:ExpLevel4 v2:(ExpLevel5Tail)* {
         yyValue = ParserSupport.apply(v2, v1);
     }
     ;
 
-constant Action<Exp> ExpLevel2Tail =
-     void:"+":Symbol1 v1:ExpLevel1 {
+constant Action<Exp> ExpLevel5Tail =
+     void:"==":Symbol2 v1:ExpLevel4 {
         yyValue = new Action<Exp>() {
             public Exp run (Exp left) {
-                Add node = new Add (left, v1);
+                EQ node = new EQ (left, v1);
                 copyLocation(node, left);
                 return node;
             };
         };
     }
-    /  void:"-":Symbol1 v1:ExpLevel1 {
+    /  void:"!=":Symbol2 v1:ExpLevel4 {
         yyValue = new Action<Exp>() {
             public Exp run (Exp left) {
-                Sub node = new Sub (left, v1);
+                NE node = new NE (left, v1);
                 copyLocation(node, left);
                 return node;
             };
@@ -228,16 +257,103 @@ constant Action<Exp> ExpLevel1Tail =
     }
     ;
 
-public Exp ExpLevel0 =
-    v1:Lit 
-    / v1:Loc {
-        yyValue = new Use (v1);
+public Exp ExpLevel2 =
+    v1:ExpLevel1 v2:(ExpLevel2Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
     }
-    / v1:Assign 
-    / void:"!":Symbol1 v1:ExpLevel0 {
-        yyValue = new Not (v1);
+    ;
+
+constant Action<Exp> ExpLevel2Tail =
+     void:"+":Symbol1 v1:ExpLevel1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Add node = new Add (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
     }
-    / void:"(":Symbol1 v1:Exp void:")":Symbol1 
+    /  void:"-":Symbol1 v1:ExpLevel1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Sub node = new Sub (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel3 =
+    v1:ExpLevel2 v2:(ExpLevel3Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel3Tail =
+     void:"<<":Symbol2 v1:ExpLevel2 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Lsh node = new Lsh (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:">>":Symbol2 v1:ExpLevel2 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                ARsh node = new ARsh (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel4 =
+    v1:ExpLevel3 v2:(ExpLevel4Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel4Tail =
+     void:"<":Symbol1 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                LT node = new LT (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"<=":Symbol2 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                LE node = new LE (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:">":Symbol1 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                GT node = new GT (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:">=":Symbol2 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                GE node = new GE (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
     ;
 
 // Default spacing specification
