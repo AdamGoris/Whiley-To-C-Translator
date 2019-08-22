@@ -20,3 +20,9 @@ compile
 run c:\whileyparser\src\test\whiley\simpleTest.whiley
 compile
 run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley

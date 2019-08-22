@@ -13,6 +13,7 @@ object WhileyISyntax {
     case class DeclAsgn (typeField : Type, loc : Loc, exp : Exp) extends Stm  
     case class Decl (typeField : Type, loc : Loc) extends Stm  
     case class AsgnStm (assign : Exp) extends Stm  
+    case class If (exp : Exp, stm : Stm, optElse : Option[Else]) extends Stm  
      
     sealed abstract class Type extends ASTNode
     case class IntType () extends Type  
@@ -85,6 +86,8 @@ object WhileyISyntax {
         val priority = 0
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
     }
+     
+    case class Else (stm : Stm) extends ASTNode
      
     case class IntLit (integerLiteral : Int) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 0

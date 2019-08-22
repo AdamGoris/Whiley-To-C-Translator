@@ -60,7 +60,7 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
                 
     static {
         add (KEYWORDS, new String[] {
-            "bool", "byte", "false", "int", "true"
+            "bool", "byte", "else", "false", "if", "int", "true"
         });
     }
 }
@@ -78,7 +78,8 @@ String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "=" / "<" / "!" / ")" / "-" / "0" / "+" / "(" / "/" / ">";
+    "*" / "%" / "=" / "<" / "!" / ")" / "-" / "0" / "+" / "(" / ":" / "/" /
+    ">";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -95,6 +96,9 @@ public Stm Stm =
     }
     / v1:Assign {
         yyValue = new AsgnStm (v1);
+    }
+    / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  v3:(Else)? {
+        yyValue = new If (v1, v2, Option.apply (v3));
     }
     ;
 
@@ -117,6 +121,12 @@ public Exp Exp =
 public Exp Assign =
     v1:Loc  void:"=":Symbol1 v2:Exp {
         yyValue = new Assign (v1, v2);
+    }
+    ;
+
+public Else Else =
+    void:"else":Word void:":":Symbol1 v1:Stm {
+        yyValue = new Else (v1);
     }
     ;
 
@@ -169,7 +179,7 @@ public String Digit =
     ;
 
 public String Bit =
-    [0-1]
+    [0|1]
     ;
 
 public Loc Loc =

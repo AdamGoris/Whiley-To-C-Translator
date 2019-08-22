@@ -25,6 +25,8 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> toDoc (v1) <> toDoc (v2) <> space 
             case v @ AsgnStm (v1) =>
                 line <> toDoc (v1) 
+            case v @ If (v1, v2, v3) =>
+                line <> text ("if") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line <> v3.map (toDoc).getOrElse (emptyDoc) 
             case v @ IntType () =>
                 text ("int") <> space 
             case v @ ByteType () =>
@@ -32,7 +34,9 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v @ BoolType () =>
                 text ("bool") <> space                  
             case v : Exp =>
-                toParenDoc (v)              
+                toParenDoc (v)  
+            case v @ Else (v1) =>
+                text ("else") <> space <> text (":") <> nest (toDoc (v1))             
             case v @ Loc (v1) =>
                 value (v1) 
         }
