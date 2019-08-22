@@ -60,7 +60,7 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
                 
     static {
         add (KEYWORDS, new String[] {
-            "bool", "byte", "else", "false", "if", "int", "true"
+            "bool", "byte", "else", "false", "if", "int", "true", "while"
         });
     }
 }
@@ -99,6 +99,9 @@ public Stm Stm =
     }
     / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  v3:(Else)? {
         yyValue = new If (v1, v2, Option.apply (v3));
+    }
+    / void:"while":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  {
+        yyValue = new While (v1, v2);
     }
     ;
 

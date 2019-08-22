@@ -14,6 +14,7 @@ object WhileyISyntax {
     case class Decl (typeField : Type, loc : Loc) extends Stm  
     case class AsgnStm (assign : Exp) extends Stm  
     case class If (exp : Exp, stm : Stm, optElse : Option[Else]) extends Stm  
+    case class While (exp : Exp, stm : Stm) extends Stm  
      
     sealed abstract class Type extends ASTNode
     case class IntType () extends Type  

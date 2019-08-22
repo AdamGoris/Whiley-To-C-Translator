@@ -11,7 +11,8 @@ Stm {line} =
 		Type Loc sp "=" Exp		                                      {DeclAsgn}
   | Type Loc sp                                                 {Decl}
   | Assign                                                      {AsgnStm}
-  | "if" '(' Exp ')' ':' nest (Stm)\n Else?                     {If}.
+  | "if" '(' Exp ')' ':' nest (Stm)\n Else?                     {If}
+  | "while" '(' Exp ')' ':' nest (Stm)\n                        {While}.
 
 Type = 
     "int"   								                                    {IntType}
@@ -48,7 +49,6 @@ Lit : Exp =
     ByteLiteral
   | IntegerLiteral                                              {IntLit, 1: Integer.parseInt : Int}
   | BooleanLiteral.
-
 
 IntegerLiteral : Token =
     DecimalNumeral.

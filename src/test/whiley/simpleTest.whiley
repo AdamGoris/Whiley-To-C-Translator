@@ -1,7 +1,3 @@
-if (a == 0):
-    if (a == 0):
-        a = 1
-    else:
-        a = 2
-else:
-    a = 3
+int a = 0
+while (a < 10):
+    a = a + 1

@@ -27,6 +27,8 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> toDoc (v1) 
             case v @ If (v1, v2, v3) =>
                 line <> text ("if") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line <> v3.map (toDoc).getOrElse (emptyDoc) 
+            case v @ While (v1, v2) =>
+                line <> text ("while") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line 
             case v @ IntType () =>
                 text ("int") <> space 
             case v @ ByteType () =>
