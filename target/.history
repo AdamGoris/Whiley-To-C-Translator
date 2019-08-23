@@ -29,3 +29,4 @@ run c:\WhileyParser\src\test\whiley\simpleTest.whiley
 git config --global user.email adam.goris@students.mq.edu.au
 compile
 run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
