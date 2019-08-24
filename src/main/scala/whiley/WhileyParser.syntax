@@ -13,7 +13,8 @@ Stm {line} =
   | Assign                                                                  {AsgnStm}
   | "if" '(' Exp ')' ':' nest (Stm)\n Else?                                 {If}
   | "while" '(' Exp ')' ':' nest (Stm)\n                                    {While}
-  | "function" Loc '(' Parameter ')' '->' ReturnType ':' nest (Stm)\n       {FnDecl}.
+  | "function" Loc '(' Parameter? ')' ReturnType? ':' nest (Stm)\n          {FnDecl}
+  | "return" Loc CommLoc*                                                   {RtnStm}.
 
 Type = 
     "int"   								                                                {IntType}
@@ -21,9 +22,6 @@ Type =
   | "bool"  								                                                {BoolType}.
 
 Exp {paren} = 
-    Lit
-  | Loc                                                                     {Use}
-  | Assign
   | Exp sp "==" Exp                                                         {EQ, left, 5}
   | Exp sp "!=" Exp                                                         {NE, left, 5}
   | Exp sp "<"  Exp                                                         {LT, left, 4}
@@ -38,7 +36,10 @@ Exp {paren} =
   | Exp sp "/" Exp                                                          {Div, left, 1}
   | Exp sp "%" Exp                                                          {Rem, left, 1}
   | '!' Exp                                                                 {Not}
-  | '(' Exp ')'.
+  | '(' Exp ')'
+  | Assign
+  | Lit
+  | Loc                                                                     {Use}.
 
 Assign : Exp = 
     Loc sp "=" Exp.
@@ -47,11 +48,11 @@ Else =
     "else" ':' nest (Stm).
 
 Parameter = 
-    (Type Loc)? (',' Type Loc)*.
+    TypeLoc CommTypeLoc*                                                    {Params}.
 
 ReturnType = 
-    '(' (Type Loc)? (',' Type Loc)* ')'
-  | Type.
+    '->' '(' Parameter ')'                                                  {RtnParams}
+  | '->' Type                                                               {RtnType}.
 
 Lit : Exp =
     ByteLiteral
@@ -89,3 +90,12 @@ Loc =
 
 Lab : String =
 		Identifier.
+
+CommLoc =
+    ',' Loc.
+
+TypeLoc = 
+    Type Loc.
+
+CommTypeLoc = 
+    ',' TypeLoc.

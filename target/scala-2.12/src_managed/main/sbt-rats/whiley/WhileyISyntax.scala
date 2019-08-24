@@ -15,6 +15,8 @@ object WhileyISyntax {
     case class AsgnStm (assign : Exp) extends Stm  
     case class If (exp : Exp, stm : Stm, optElse : Option[Else]) extends Stm  
     case class While (exp : Exp, stm : Stm) extends Stm  
+    case class FnDecl (loc : Loc, optParameter : Option[Parameter], optReturnType : Option[ReturnType], stm : Stm) extends Stm  
+    case class RtnStm (loc : Loc, optCommLocs : Vector[CommLoc]) extends Stm  
      
     sealed abstract class Type extends ASTNode
     case class IntType () extends Type  
@@ -90,6 +92,13 @@ object WhileyISyntax {
      
     case class Else (stm : Stm) extends ASTNode
      
+    sealed abstract class Parameter extends ASTNode
+    case class Params (typeLoc : TypeLoc, optCommTypeLocs : Vector[CommTypeLoc]) extends Parameter  
+     
+    sealed abstract class ReturnType extends ASTNode
+    case class RtnParams (parameter : Parameter) extends ReturnType  
+    case class RtnType (typeField : Type) extends ReturnType  
+     
     case class IntLit (integerLiteral : Int) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 0
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
@@ -110,5 +119,11 @@ object WhileyISyntax {
     }
           
     case class Loc (identifier : String) extends ASTNode
+      
+    case class CommLoc (loc : Loc) extends ASTNode
      
+    case class TypeLoc (typeField : Type, loc : Loc) extends ASTNode
+     
+    case class CommTypeLoc (typeLoc : TypeLoc) extends ASTNode
+    
 }

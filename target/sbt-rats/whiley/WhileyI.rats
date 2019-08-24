@@ -60,7 +60,8 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
                 
     static {
         add (KEYWORDS, new String[] {
-            "bool", "byte", "else", "false", "if", "int", "true", "while"
+            "bool", "byte", "else", "false", "function", "if", "int", "return",
+            "true", "while"
         });
     }
 }
@@ -72,14 +73,14 @@ String Symbol2 =
     Symbol2Alts Spacing;
 
 transient String Symbol2Alts =
-    "0b" / "<=" / "<<" / ">=" / ">>" / "==" / "!=";
+    "0b" / "<=" / "<<" / "->" / ">=" / ">>" / "==" / "!=";
 
 String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "=" / "<" / "!" / ")" / "-" / "0" / "+" / "(" / ":" / "/" /
-    ">";
+    "*" / "%" / "=" / "<" / "!" / ")" / "-" / "," / "0" / "+" / "(" / ":" /
+    "/" / ">";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -102,6 +103,12 @@ public Stm Stm =
     }
     / void:"while":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  {
         yyValue = new While (v1, v2);
+    }
+    / void:"function":Word v1:Loc void:"(":Symbol1 v2:(Parameter)? void:")":Symbol1 v3:(ReturnType)? void:":":Symbol1 v4:Stm  {
+        yyValue = new FnDecl (v1, Option.apply (v2), Option.apply (v3), v4);
+    }
+    / void:"return":Word v1:Loc v2:(CommLoc)* {
+        yyValue = new RtnStm (v1, v2);
     }
     ;
 
@@ -130,6 +137,21 @@ public Exp Assign =
 public Else Else =
     void:"else":Word void:":":Symbol1 v1:Stm {
         yyValue = new Else (v1);
+    }
+    ;
+
+public Parameter Parameter =
+    v1:TypeLoc v2:(CommTypeLoc)* {
+        yyValue = new Params (v1, v2);
+    }
+    ;
+
+public ReturnType ReturnType =
+    void:"->":Symbol2 void:"(":Symbol1 v1:Parameter void:")":Symbol1 {
+        yyValue = new RtnParams (v1);
+    }
+    / void:"->":Symbol2 v1:Type {
+        yyValue = new RtnType (v1);
     }
     ;
 
@@ -193,6 +215,24 @@ public Loc Loc =
 
 public String Lab =
     Identifier
+    ;
+
+public CommLoc CommLoc =
+    void:",":Symbol1 v1:Loc {
+        yyValue = new CommLoc (v1);
+    }
+    ;
+
+public TypeLoc TypeLoc =
+    v1:Type v2:Loc {
+        yyValue = new TypeLoc (v1, v2);
+    }
+    ;
+
+public CommTypeLoc CommTypeLoc =
+    void:",":Symbol1 v1:TypeLoc {
+        yyValue = new CommTypeLoc (v1);
+    }
     ;
 
 public Exp ExpLevel0 =

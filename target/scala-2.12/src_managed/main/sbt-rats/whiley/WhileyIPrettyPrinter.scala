@@ -29,6 +29,10 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> text ("if") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line <> v3.map (toDoc).getOrElse (emptyDoc) 
             case v @ While (v1, v2) =>
                 line <> text ("while") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line 
+            case v @ FnDecl (v1, v2, v3, v4) =>
+                line <> text ("function") <> space <> toDoc (v1) <> text ("(") <> v2.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v3.map (toDoc).getOrElse (emptyDoc) <> text (":") <> nest (toDoc (v4)) <> line 
+            case v @ RtnStm (v1, v2) =>
+                line <> text ("return") <> space <> toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
             case v @ IntType () =>
                 text ("int") <> space 
             case v @ ByteType () =>
@@ -38,9 +42,21 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v : Exp =>
                 toParenDoc (v)  
             case v @ Else (v1) =>
-                text ("else") <> space <> text (":") <> nest (toDoc (v1))             
+                text ("else") <> space <> text (":") <> nest (toDoc (v1)) 
+            case v @ Params (v1, v2) =>
+                toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
+            case v @ RtnParams (v1) =>
+                text ("->") <> text ("(") <> toDoc (v1) <> text (")") 
+            case v @ RtnType (v1) =>
+                text ("->") <> toDoc (v1)             
             case v @ Loc (v1) =>
-                value (v1) 
+                value (v1)  
+            case v @ CommLoc (v1) =>
+                text (",") <> toDoc (v1) 
+            case v @ TypeLoc (v1, v2) =>
+                toDoc (v1) <> toDoc (v2) 
+            case v @ CommTypeLoc (v1) =>
+                text (",") <> toDoc (v1)
         }
     
     override def toParenDoc (astNode : org.bitbucket.inkytonik.kiama.output.PrettyExpression) : Doc =

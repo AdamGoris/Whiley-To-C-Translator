@@ -1,3 +1,3 @@
-int a = 0
-while (a < 10):
-    a = a + 1
+function sum(int a) -> (int b, int c):
+    b = a + 1
+    return b, b
