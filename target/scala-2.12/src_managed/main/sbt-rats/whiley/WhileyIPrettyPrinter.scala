@@ -23,7 +23,7 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> toDoc (v1) <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) <> space <> text ("=") <> space <> toDoc (v4) <> ssep (v5.map (toDoc), emptyDoc) 
             case v @ Decl (v1, v2) =>
                 line <> toDoc (v1) <> toDoc (v2) <> space 
-            case v @ AsgnStm (v1) =>
+            case v @ Asgn (v1) =>
                 line <> toDoc (v1) 
             case v @ TypeDeclType (v1, v2, v3) =>
                 line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
@@ -65,10 +65,6 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 text ("bool") <> space                  
             case v : Exp =>
                 toParenDoc (v)  
-            case v @ Tipe (v1) =>
-                toDoc (v1) 
-            case v @ Idne (v1) =>
-                toDoc (v1) 
             case v @ WhereExp (v1) =>
                 text ("where") <> space <> toDoc (v1) 
             case v @ ElseIf (v1, v2) =>
@@ -99,7 +95,15 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 text ("export") <> space     
             case v @ NullLiteral () =>
                 text ("null")          
-            case v @ Idn (v1) =>
+            case v @ FieldAsgn (v1, v2) =>
+                toDoc (v1) <> text (".") <> value (v2) 
+            case v @ ListAsgn (v1, v2) =>
+                toDoc (v1) <> text ("[") <> toDoc (v2) <> text ("]") 
+            case v @ Pointer (v1) =>
+                text ("*") <> toDoc (v1) 
+            case v @ IdnAsgn (v1) =>
+                value (v1) 
+            case v @ Loc (v1) =>
                 value (v1)  
             case v @ CommLoc (v1) =>
                 text (",") <> toDoc (v1) 

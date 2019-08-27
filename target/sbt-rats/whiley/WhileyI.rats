@@ -88,8 +88,8 @@ String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "=" / "<" / "!" / ")" / "-" / "," / "0" / "+" / "(" / ":" /
-    "/" / ">";
+    "*" / "%" / "." / "]" / "=" / "<" / "!" / ")" / "-" / "," / "[" / "0" /
+    "+" / "(" / ":" / "/" / ">";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -98,14 +98,14 @@ public Program Program =
     ;
 
 public Stm Stm =
-    v1:Type v2:Loc v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
+    v1:Type v2:LVal v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
         yyValue = new DeclAsgn (v1, v2, v3, v4, v5);
     }
-    / v1:Type v2:Loc  {
+    / v1:Type v2:LVal  {
         yyValue = new Decl (v1, v2);
     }
     / v1:Assign {
-        yyValue = new AsgnStm (v1);
+        yyValue = new Asgn (v1);
     }
     / void:"type":Word v1:Loc  void:"is":Word v2:Type v3:(WhereExpr)* {
         yyValue = new TypeDeclType (v1, v2, v3);
@@ -174,17 +174,8 @@ public Exp Exp =
     ;
 
 public Exp Assign =
-    v1:Loc  void:"=":Symbol1 v2:Exp {
+    v1:LVal  void:"=":Symbol1 v2:Exp {
         yyValue = new Assign (v1, v2);
-    }
-    ;
-
-public TypeOrLoc TypeOrLoc =
-    v1:Type {
-        yyValue = new Tipe (v1);
-    }
-    / v1:Loc {
-        yyValue = new Idne (v1);
     }
     ;
 
@@ -319,9 +310,24 @@ public String Bit =
     [0|1]
     ;
 
+public LVal LVal =
+    v1:Loc void:".":Symbol1 v2:Identifier {
+        yyValue = new FieldAsgn (v1, v2);
+    }
+    / v1:Loc void:"[":Symbol1 v2:Exp void:"]":Symbol1 {
+        yyValue = new ListAsgn (v1, v2);
+    }
+    / void:"*":Symbol1 v1:Exp {
+        yyValue = new Pointer (v1);
+    }
+    / v1:Identifier {
+        yyValue = new IdnAsgn (v1);
+    }
+    ;
+
 public Loc Loc =
     v1:Identifier {
-        yyValue = new Idn (v1);
+        yyValue = new Loc (v1);
     }
     ;
 
@@ -354,11 +360,11 @@ public CommExp CommExp =
     ;
 
 public Exp ExpLevel0 =
-    v1:Assign 
-    / void:"!":Symbol1 v1:ExpLevel0 {
+    void:"!":Symbol1 v1:ExpLevel0 {
         yyValue = new Not (v1);
     }
     / void:"(":Symbol1 v1:Exp void:")":Symbol1 
+    / v1:Assign 
     / v1:Loc {
         yyValue = new Use (v1);
     }

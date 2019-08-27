@@ -10,9 +10,9 @@ object WhileyISyntax {
     case class Program (optStms : Vector[Stm]) extends ASTNode
      
     sealed abstract class Stm extends ASTNode
-    case class DeclAsgn (typeField : Type, loc : Loc, optCommTypeLocs : Vector[CommTypeLoc], exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
-    case class Decl (typeField : Type, loc : Loc) extends Stm  
-    case class AsgnStm (assign : Exp) extends Stm  
+    case class DeclAsgn (typeField : Type, lVal : LVal, optCommTypeLocs : Vector[CommTypeLoc], exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
+    case class Decl (typeField : Type, lVal : LVal) extends Stm  
+    case class Asgn (assign : Exp) extends Stm  
     case class TypeDeclType (loc : Loc, typeField : Type, optWhereExprs : Vector[WhereExpr]) extends Stm  
     case class TypeDeclLoc (loc1 : Loc, loc2 : Loc, optWhereExprs : Vector[WhereExpr]) extends Stm  
     case class ConstDecl (loc : Loc, exp : Exp) extends Stm  
@@ -97,14 +97,10 @@ object WhileyISyntax {
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
     }
      
-    case class Assign (loc : Loc, exp : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+    case class Assign (lVal : LVal, exp : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 0
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
     }
-     
-    sealed abstract class TypeOrLoc extends ASTNode
-    case class Tipe (typeField : Type) extends TypeOrLoc  
-    case class Idne (loc : Loc) extends TypeOrLoc  
      
     sealed abstract class WhereExpr extends ASTNode
     case class WhereExp (exp : Exp) extends WhereExpr  
@@ -167,8 +163,13 @@ object WhileyISyntax {
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
     }
          
-    sealed abstract class Loc extends ASTNode
-    case class Idn (identifier : String) extends Loc  
+    sealed abstract class LVal extends ASTNode
+    case class FieldAsgn (loc : Loc, identifier : String) extends LVal  
+    case class ListAsgn (loc : Loc, exp : Exp) extends LVal  
+    case class Pointer (exp : Exp) extends LVal  
+    case class IdnAsgn (identifier : String) extends LVal  
+     
+    case class Loc (identifier : String) extends ASTNode
       
     case class CommLoc (loc : Loc) extends ASTNode
      

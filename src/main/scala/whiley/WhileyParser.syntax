@@ -8,9 +8,9 @@ Program =
   Spacing Stm* EOF.
 
 Stm {line} =
-		Type Loc CommTypeLoc* sp "=" Exp CommExp*                                                 {DeclAsgn}
-  | Type Loc sp                                                                               {Decl}
-  | Assign                                                                                    {AsgnStm}
+		Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
+  | Type LVal sp                                                                              {Decl}
+  | Assign                                                                                    {Asgn}
   | "type" Loc sp "is" Type WhereExpr*                                                       	{TypeDeclType}
 	| "type" Loc sp "is" Loc WhereExpr*                                                       	{TypeDeclLoc}
   | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
@@ -34,8 +34,7 @@ Type =
   | "bool"  								                                                                  {BoolType}.
 
 Exp {paren} = 
-  	Assign
-  | Exp sp "==" Exp                                                                           {EQ, left, 5}
+		Exp sp "==" Exp                                                                           {EQ, left, 5}
   | Exp sp "!=" Exp                                                                           {NE, left, 5}
   | Exp sp "<"  Exp                                                                           {LT, left, 4}
   | Exp sp "<=" Exp                                                                           {LE, left, 4}
@@ -50,15 +49,12 @@ Exp {paren} =
   | Exp sp "%" Exp                                                                            {Rem, left, 1}
   | '!' Exp                                                                                   {Not}
   | '(' Exp ')'
+	| Assign
 	| Loc                                                                                       {Use}
 	|	Lit.
 
 Assign : Exp = 
-    Loc sp "=" Exp.
-
-TypeOrLoc = 
-		Type {Tipe}
-	| Loc {Idne}.
+    LVal sp "=" Exp.
 
 WhereExpr =
     "where" Exp                                                                               {WhereExp}.
@@ -112,8 +108,8 @@ DecimalNumeral : String =
   | NonZeroDigit Digits.
 
 BooleanLiteral : Exp =
-    'false'                                                                                   {False}
-  | 'true'                                                                                    {True}.
+    'false'                                                                                    {False}
+  | 'true'                                                                                     {True}.
 /*
 CharacterLiteral = 
 		"'" Character "'".
@@ -137,8 +133,15 @@ Digit : String =
 Bit : String = 
     [0|1].
 
+// Used in Assign and DeclAsgn Statements
+LVal = 
+		Loc '.' Identifier 																		{FieldAsgn}
+	| Loc '[' Exp ']'																				{ListAsgn}	
+	| '*' Exp																								{Pointer}
+	| Identifier																						{IdnAsgn}.
+
 Loc = 
-    Identifier {Idn}.
+    Identifier.
 
 Lab : String =
 		Identifier.
