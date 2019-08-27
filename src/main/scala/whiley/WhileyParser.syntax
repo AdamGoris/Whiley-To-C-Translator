@@ -29,12 +29,15 @@ Stm {line} =
   | "fail"                                                                                    {FailStm}.
 
 Type = 
-    "int"   								                                                                  {IntType}
-  | "byte"  								                                                                  {ByteType}
-  | "bool"  								                                                                  {BoolType}.
+    "int" "[]"?  								                                                                  {IntType}
+  | "byte" "[]"? 								                                                                  {ByteType}
+  | "bool" "[]"? 								                                                                  {BoolType}.
 
 Exp {paren} = 
-		Exp sp "==" Exp                                                                           {EQ, left, 5}
+		Exp sp "|" Exp																																						{Or, none, 8}
+	|	Exp sp "^" Exp																																						{Xor, left, 7}
+	|	Exp sp "&&" Exp																																						{And, left, 6}
+	|	Exp sp "==" Exp                                                                           {EQ, left, 5}
   | Exp sp "!=" Exp                                                                           {NE, left, 5}
   | Exp sp "<"  Exp                                                                           {LT, left, 4}
   | Exp sp "<=" Exp                                                                           {LE, left, 4}
@@ -50,6 +53,7 @@ Exp {paren} =
   | '!' Exp                                                                                   {Not}
   | '(' Exp ')'
 	| Assign
+	| Length
 	| Loc                                                                                       {Use}
 	|	Lit.
 
@@ -142,6 +146,9 @@ LVal =
 
 Loc = 
     Identifier.
+
+Length : Exp = 
+		'|' Loc '|'																						{Len}.
 
 Lab : String =
 		Identifier.

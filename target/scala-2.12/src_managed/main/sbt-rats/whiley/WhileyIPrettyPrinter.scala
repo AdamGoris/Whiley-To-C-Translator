@@ -58,11 +58,11 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v @ FailStm () =>
                 line <> text ("fail") <> space 
             case v @ IntType () =>
-                text ("int") <> space 
+                text ("int") <> space <> emptyDoc 
             case v @ ByteType () =>
-                text ("byte") <> space 
+                text ("byte") <> space <> emptyDoc 
             case v @ BoolType () =>
-                text ("bool") <> space                  
+                text ("bool") <> space <> emptyDoc                      
             case v : Exp =>
                 toParenDoc (v)  
             case v @ WhereExp (v1) =>
@@ -104,7 +104,7 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v @ IdnAsgn (v1) =>
                 value (v1) 
             case v @ Loc (v1) =>
-                value (v1)  
+                value (v1)   
             case v @ CommLoc (v1) =>
                 text (",") <> toDoc (v1) 
             case v @ TypeLoc (v1, v2) =>
@@ -117,6 +117,12 @@ trait WhileyIPrettyPrinter extends PP with PPP {
     
     override def toParenDoc (astNode : org.bitbucket.inkytonik.kiama.output.PrettyExpression) : Doc =
         astNode match {
+            case v @ Or (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("|") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ Xor (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("^") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ And (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("&&") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ EQ (v1, v2) =>
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("==") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ NE (v1, v2) =>
@@ -162,7 +168,9 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v @ False () =>
                 text ("false") 
             case v @ True () =>
-                text ("true")
+                text ("true") 
+            case v @ Len (v1) =>
+                text ("|") <> toDoc (v1) <> text ("|")
             case _ =>
                 super.toParenDoc (astNode)
         }

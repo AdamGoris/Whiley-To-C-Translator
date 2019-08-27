@@ -36,6 +36,18 @@ object WhileyISyntax {
     case class BoolType () extends Type  
      
     sealed abstract class Exp extends ASTNode with org.bitbucket.inkytonik.kiama.output.PrettyExpression
+    case class Or (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 8
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+    case class Xor (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 7
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
+    }
+    case class And (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 6
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
+    }
     case class EQ (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 5
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
@@ -170,6 +182,11 @@ object WhileyISyntax {
     case class IdnAsgn (identifier : String) extends LVal  
      
     case class Loc (identifier : String) extends ASTNode
+     
+    case class Len (loc : Loc) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
       
     case class CommLoc (loc : Loc) extends ASTNode
      

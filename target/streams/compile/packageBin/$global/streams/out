@@ -56,6 +56,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$ASTNode.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$DoWhile.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$DoWhile.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$15.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$15.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$6.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$6.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$ByteLit.class[0m
@@ -98,6 +100,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$While$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$RtnParams.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$RtnParams.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Len.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Len.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$5.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$5.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Exp.class[0m
@@ -132,8 +136,12 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$False.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Case$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Case$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$Chunk5.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$Chunk5.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$ReturnType.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$ReturnType.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Len$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Len$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$DeclAsgn$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$DeclAsgn$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Modifier.class[0m
@@ -180,6 +188,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\sbtrats\SVector.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Ensures$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Ensures$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Or$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Or$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Requires.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Requires.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$WhereExpr.class[0m
@@ -188,6 +198,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$12.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$EQ$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$EQ$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Xor.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Xor.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Decl$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Decl$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$CommExp$.class[0m
@@ -276,6 +288,12 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$WhereExp$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Case.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Case.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Or.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Or.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Xor$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Xor$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$And.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$And.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$4.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$4.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Params$.class[0m
@@ -332,6 +350,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Switch$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Rem.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Rem.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$14.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$14.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyI$WhileyIColumn.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyI$WhileyIColumn.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$RtnType.class[0m
@@ -344,6 +364,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$Export$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$NE.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$NE.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$And$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$And$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$EQ.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  C:\WhileyParser\target\scala-2.12\classes\whiley\WhileyISyntax$EQ.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	whiley\WhileyISyntax$Switch.class[0m

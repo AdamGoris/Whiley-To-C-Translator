@@ -76,7 +76,7 @@ String Symbol2 =
     Symbol2Alts Spacing;
 
 transient String Symbol2Alts =
-    "0b" / "<=" / "<<" / "->" / ">=" / ">>" / "==" / "!=";
+    "0b" / "<=" / "<<" / "->" / ">=" / ">>" / "==" / "[]" / "!=" / "&&";
 
 String Symbol7 =
     Symbol7Alts Spacing;
@@ -88,8 +88,8 @@ String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "." / "]" / "=" / "<" / "!" / ")" / "-" / "," / "[" / "0" /
-    "+" / "(" / ":" / "/" / ">";
+    "*" / "%" / "." / "]" / "=" / "<" / "!" / "|" / ")" / "-" / "," / "[" /
+    "0" / "+" / "(" / ":" / "^" / "/" / ">";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -158,19 +158,19 @@ public Stm Stm =
     ;
 
 public Type Type =
-    void:"int":Word {
+    void:"int":Word (void:"[]":Symbol2)? {
         yyValue = new IntType ();
     }
-    / void:"byte":Word {
+    / void:"byte":Word (void:"[]":Symbol2)? {
         yyValue = new ByteType ();
     }
-    / void:"bool":Word {
+    / void:"bool":Word (void:"[]":Symbol2)? {
         yyValue = new BoolType ();
     }
     ;
 
 public Exp Exp =
-    v1:ExpLevel5 
+    v1:ExpLevel8 
     ;
 
 public Exp Assign =
@@ -331,6 +331,12 @@ public Loc Loc =
     }
     ;
 
+public Exp Length =
+    void:"|":Symbol1 v1:Loc void:"|":Symbol1 {
+        yyValue = new Len (v1);
+    }
+    ;
+
 public String Lab =
     Identifier
     ;
@@ -365,6 +371,7 @@ public Exp ExpLevel0 =
     }
     / void:"(":Symbol1 v1:Exp void:")":Symbol1 
     / v1:Assign 
+    / v1:Length 
     / v1:Loc {
         yyValue = new Use (v1);
     }
@@ -434,6 +441,24 @@ constant Action<Exp> ExpLevel1Tail =
     }
     ;
 
+public Exp ExpLevel6 =
+    v1:ExpLevel5 v2:(ExpLevel6Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel6Tail =
+     void:"&&":Symbol2 v1:ExpLevel5 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                And node = new And (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
 public Exp ExpLevel2 =
     v1:ExpLevel1 v2:(ExpLevel2Tail)* {
         yyValue = ParserSupport.apply(v2, v1);
@@ -454,6 +479,24 @@ constant Action<Exp> ExpLevel2Tail =
         yyValue = new Action<Exp>() {
             public Exp run (Exp left) {
                 Sub node = new Sub (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel7 =
+    v1:ExpLevel6 v2:(ExpLevel7Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel7Tail =
+     void:"^":Symbol1 v1:ExpLevel6 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Xor node = new Xor (left, v1);
                 copyLocation(node, left);
                 return node;
             };
@@ -486,6 +529,13 @@ constant Action<Exp> ExpLevel3Tail =
             };
         };
     }
+    ;
+
+public Exp ExpLevel8 =
+    v1:ExpLevel7  void:"|":Symbol1 v2:ExpLevel7 {
+        yyValue = new Or (v1, v2);
+    }
+    / v1:ExpLevel7 
     ;
 
 public Exp ExpLevel4 =

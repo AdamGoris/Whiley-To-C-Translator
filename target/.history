@@ -45,3 +45,11 @@ compile
 run c:\WhileyParser\src\test\whiley\simpleTest.whiley
 compile
 run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\BoolRequires_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\BoolRequires_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\BoolRequires_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\BoolRequires_Valid_1.whiley
