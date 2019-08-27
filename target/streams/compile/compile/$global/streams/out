@@ -1,7 +1,13 @@
-[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:46:22: not found: value ReturnType[0m
-[0m[[0m[31merror[0m] [0m[0m            case v @ ReturnType (v1) =>[0m
+[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:92:22: not found: value Modifier[0m
+[0m[[0m[31merror[0m] [0m[0m            case v @ Modifier () =>[0m
 [0m[[0m[31merror[0m] [0m[0m                     ^[0m
-[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:48:22: not found: value ReturnType[0m
-[0m[[0m[31merror[0m] [0m[0m            case v @ ReturnType (v1) =>[0m
+[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:94:22: not found: value Modifier[0m
+[0m[[0m[31merror[0m] [0m[0m            case v @ Modifier () =>[0m
 [0m[[0m[31merror[0m] [0m[0m                     ^[0m
-[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
+[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:96:22: not found: value Modifier[0m
+[0m[[0m[31merror[0m] [0m[0m            case v @ Modifier () =>[0m
+[0m[[0m[31merror[0m] [0m[0m                     ^[0m
+[0m[[0m[31merror[0m] [0m[0mC:\WhileyParser\target\scala-2.12\src_managed\main\sbt-rats\whiley\WhileyIPrettyPrinter.scala:98:22: not found: value Modifier[0m
+[0m[[0m[31merror[0m] [0m[0m            case v @ Modifier () =>[0m
+[0m[[0m[31merror[0m] [0m[0m                     ^[0m
+[0m[[0m[31merror[0m] [0m[0mfour errors found[0m

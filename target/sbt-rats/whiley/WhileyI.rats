@@ -60,8 +60,11 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
                 
     static {
         add (KEYWORDS, new String[] {
-            "bool", "byte", "else", "false", "function", "if", "int", "return",
-            "true", "while"
+            "assert", "assume", "bool", "break", "byte", "case", "const", "continue",
+            "default", "do", "else", "ensures", "export", "fail", "false", "function",
+            "if", "int", "is", "method", "native", "null", "private", "public",
+            "requires", "return", "skip", "switch", "true", "type", "where",
+            "while"
         });
     }
 }
@@ -74,6 +77,12 @@ String Symbol2 =
 
 transient String Symbol2Alts =
     "0b" / "<=" / "<<" / "->" / ">=" / ">>" / "==" / "!=";
+
+String Symbol7 =
+    Symbol7Alts Spacing;
+
+transient String Symbol7Alts =
+    "else if";
 
 String Symbol1 =
     Symbol1Alts Spacing;
@@ -89,8 +98,8 @@ public Program Program =
     ;
 
 public Stm Stm =
-    v1:Type v2:Loc  void:"=":Symbol1 v3:Exp {
-        yyValue = new DeclAsgn (v1, v2, v3);
+    v1:Type v2:Loc v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
+        yyValue = new DeclAsgn (v1, v2, v3, v4, v5);
     }
     / v1:Type v2:Loc  {
         yyValue = new Decl (v1, v2);
@@ -98,17 +107,53 @@ public Stm Stm =
     / v1:Assign {
         yyValue = new AsgnStm (v1);
     }
-    / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  v3:(Else)? {
-        yyValue = new If (v1, v2, Option.apply (v3));
+    / void:"type":Word v1:Loc  void:"is":Word v2:Type v3:(WhereExpr)* {
+        yyValue = new TypeDeclType (v1, v2, v3);
+    }
+    / void:"type":Word v1:Loc  void:"is":Word v2:Loc v3:(WhereExpr)* {
+        yyValue = new TypeDeclLoc (v1, v2, v3);
+    }
+    / void:"const":Word v1:Loc void:"is":Word v2:Exp {
+        yyValue = new ConstDecl (v1, v2);
+    }
+    / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  v3:(ElseIf)* v4:(Else)? {
+        yyValue = new If (v1, v2, v3, Option.apply (v4));
+    }
+    / void:"switch":Word v1:Exp void:":":Symbol1 v2:CaseStm {
+        yyValue = new Switch (v1, v2);
     }
     / void:"while":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  {
         yyValue = new While (v1, v2);
     }
-    / void:"function":Word v1:Loc void:"(":Symbol1 v2:(Parameter)? void:")":Symbol1 v3:(ReturnType)? void:":":Symbol1 v4:Stm  {
-        yyValue = new FnDecl (v1, Option.apply (v2), Option.apply (v3), v4);
+    / void:"do":Word void:":":Symbol1 v1:Stm  void:"while":Word v2:Exp v3:(WhereExpr)* {
+        yyValue = new DoWhile (v1, v2, v3);
     }
-    / void:"return":Word v1:Loc v2:(CommLoc)* {
+    / void:"function":Word v1:(Modifier)? v2:Loc void:"(":Symbol1 v3:(Parameters)? void:")":Symbol1 v4:(ReturnType)? v5:(RequiresEnsures)* void:":":Symbol1 v6:Stm  {
+        yyValue = new FnDecl (Option.apply (v1), v2, Option.apply (v3), Option.apply (v4), v5, v6);
+    }
+    / void:"method":Word v1:(Modifier)? v2:Loc void:"(":Symbol1 v3:(Parameters)? void:")":Symbol1 v4:(ReturnType)? v5:(RequiresEnsures)* void:":":Symbol1 v6:Stm  {
+        yyValue = new MthdDecl (Option.apply (v1), v2, Option.apply (v3), Option.apply (v4), v5, v6);
+    }
+    / void:"return":Word v1:Exp v2:(CommExp)* {
         yyValue = new RtnStm (v1, v2);
+    }
+    / void:"assert":Word v1:Exp {
+        yyValue = new AssertExp (v1);
+    }
+    / void:"assume":Word v1:Exp {
+        yyValue = new AssumeExp (v1);
+    }
+    / void:"skip":Word {
+        yyValue = new SkipStm ();
+    }
+    / void:"break":Word {
+        yyValue = new BreakStm ();
+    }
+    / void:"continue":Word {
+        yyValue = new ContStm ();
+    }
+    / void:"fail":Word {
+        yyValue = new FailStm ();
     }
     ;
 
@@ -134,20 +179,59 @@ public Exp Assign =
     }
     ;
 
+public TypeOrLoc TypeOrLoc =
+    v1:Type {
+        yyValue = new Tipe (v1);
+    }
+    / v1:Loc {
+        yyValue = new Idne (v1);
+    }
+    ;
+
+public WhereExpr WhereExpr =
+    void:"where":Word v1:Exp {
+        yyValue = new WhereExp (v1);
+    }
+    ;
+
+public ElseIf ElseIf =
+    void:"else if":Symbol7 v1:Exp void:":":Symbol1 v2:Stm {
+        yyValue = new ElseIf (v1, v2);
+    }
+    ;
+
 public Else Else =
     void:"else":Word void:":":Symbol1 v1:Stm {
         yyValue = new Else (v1);
     }
     ;
 
-public Parameter Parameter =
+public CaseStm CaseStm =
+    void:"case":Word v1:Exp v2:(CommExp)* void:":":Symbol1 v3:Stm  {
+        yyValue = new Case (v1, v2, v3);
+    }
+    / void:"default":Word void:":":Symbol1 v1:Stm  {
+        yyValue = new DefaultCase (v1);
+    }
+    ;
+
+public RequiresEnsures RequiresEnsures =
+    void:"requires":Word v1:Exp {
+        yyValue = new Requires (v1);
+    }
+    / void:"ensures":Word v1:Exp {
+        yyValue = new Ensures (v1);
+    }
+    ;
+
+public Parameters Parameters =
     v1:TypeLoc v2:(CommTypeLoc)* {
         yyValue = new Params (v1, v2);
     }
     ;
 
 public ReturnType ReturnType =
-    void:"->":Symbol2 void:"(":Symbol1 v1:Parameter void:")":Symbol1 {
+    void:"->":Symbol2 void:"(":Symbol1 v1:Parameters void:")":Symbol1 {
         yyValue = new RtnParams (v1);
     }
     / void:"->":Symbol2 v1:Type {
@@ -155,12 +239,46 @@ public ReturnType ReturnType =
     }
     ;
 
+public Modifier Modifier =
+    void:"public":Word {
+        yyValue = new Public ();
+    }
+    / void:"private":Word {
+        yyValue = new Private ();
+    }
+    / void:"native":Word {
+        yyValue = new Native ();
+    }
+    / void:"export":Word {
+        yyValue = new Export ();
+    }
+    ;
+
 public Exp Lit =
-    v1:ByteLiteral 
+    v1:NullLiteral {
+        yyValue = new NullLit (v1);
+    }
+    / v1:ByteLiteral {
+        yyValue = new ByteLit (v1);
+    }
     / v1:IntegerLiteral {
         yyValue = new IntLit (Integer.parseInt (v1));
     }
-    / v1:BooleanLiteral 
+    / v1:BooleanLiteral {
+        yyValue = new BoolLit (v1);
+    }
+    ;
+
+public NullLiteral NullLiteral =
+    void:"null":Word {
+        yyValue = new NullLiteral ();
+    }
+    ;
+
+public Exp ByteLiteral =
+    void:"0b":Symbol2 v1:(Bit)* {
+        yyValue = new ByteLiteral (v1);
+    }
     ;
 
 public String IntegerLiteral =
@@ -171,10 +289,9 @@ public String IntegerLiteralForm =
     DecimalNumeral
     ;
 
-public Exp ByteLiteral =
-    void:"0b":Symbol2 v1:(Bit)* {
-        yyValue = new ByteLiteral (v1);
-    }
+public String DecimalNumeral =
+    "0"
+    / NonZeroDigit Digits
     ;
 
 public Exp BooleanLiteral =
@@ -184,11 +301,6 @@ public Exp BooleanLiteral =
     / void:"true":Word {
         yyValue = new True ();
     }
-    ;
-
-public String DecimalNumeral =
-    "0"
-    / NonZeroDigit Digits
     ;
 
 public String Digits =
@@ -209,7 +321,7 @@ public String Bit =
 
 public Loc Loc =
     v1:Identifier {
-        yyValue = new Loc (v1);
+        yyValue = new Idn (v1);
     }
     ;
 
@@ -235,16 +347,22 @@ public CommTypeLoc CommTypeLoc =
     }
     ;
 
-public Exp ExpLevel0 =
-    v1:Lit 
-    / v1:Loc {
-        yyValue = new Use (v1);
+public CommExp CommExp =
+    void:",":Symbol1 v1:Exp {
+        yyValue = new CommExp (v1);
     }
-    / v1:Assign 
+    ;
+
+public Exp ExpLevel0 =
+    v1:Assign 
     / void:"!":Symbol1 v1:ExpLevel0 {
         yyValue = new Not (v1);
     }
     / void:"(":Symbol1 v1:Exp void:")":Symbol1 
+    / v1:Loc {
+        yyValue = new Use (v1);
+    }
+    / v1:Lit 
     ;
 
 public Exp ExpLevel5 =

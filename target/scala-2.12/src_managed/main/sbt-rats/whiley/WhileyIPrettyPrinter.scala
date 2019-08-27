@@ -19,20 +19,44 @@ trait WhileyIPrettyPrinter extends PP with PPP {
         astNode match {
             case v @ Program (v1) =>
                 emptyDoc <> ssep (v1.map (toDoc), emptyDoc) <> emptyDoc 
-            case v @ DeclAsgn (v1, v2, v3) =>
-                line <> toDoc (v1) <> toDoc (v2) <> space <> text ("=") <> space <> toDoc (v3) 
+            case v @ DeclAsgn (v1, v2, v3, v4, v5) =>
+                line <> toDoc (v1) <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) <> space <> text ("=") <> space <> toDoc (v4) <> ssep (v5.map (toDoc), emptyDoc) 
             case v @ Decl (v1, v2) =>
                 line <> toDoc (v1) <> toDoc (v2) <> space 
             case v @ AsgnStm (v1) =>
                 line <> toDoc (v1) 
-            case v @ If (v1, v2, v3) =>
-                line <> text ("if") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line <> v3.map (toDoc).getOrElse (emptyDoc) 
+            case v @ TypeDeclType (v1, v2, v3) =>
+                line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ TypeDeclLoc (v1, v2, v3) =>
+                line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ ConstDecl (v1, v2) =>
+                line <> text ("const") <> space <> toDoc (v1) <> text ("is") <> space <> toDoc (v2) 
+            case v @ If (v1, v2, v3, v4) =>
+                line <> text ("if") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line <> ssep (v3.map (toDoc), emptyDoc) <> v4.map (toDoc).getOrElse (emptyDoc) 
+            case v @ Switch (v1, v2) =>
+                line <> text ("switch") <> space <> toDoc (v1) <> text (":") <> toDoc (v2) 
             case v @ While (v1, v2) =>
                 line <> text ("while") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line 
-            case v @ FnDecl (v1, v2, v3, v4) =>
-                line <> text ("function") <> space <> toDoc (v1) <> text ("(") <> v2.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v3.map (toDoc).getOrElse (emptyDoc) <> text (":") <> nest (toDoc (v4)) <> line 
+            case v @ DoWhile (v1, v2, v3) =>
+                line <> text ("do") <> space <> text (":") <> nest (toDoc (v1)) <> line <> text ("while") <> space <> nest (toDoc (v2)) <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ FnDecl (v1, v2, v3, v4, v5, v6) =>
+                line <> text ("function") <> space <> v1.map (toDoc).getOrElse (emptyDoc) <> toDoc (v2) <> text ("(") <> v3.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v4.map (toDoc).getOrElse (emptyDoc) <> ssep (v5.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v6)) <> line 
+            case v @ MthdDecl (v1, v2, v3, v4, v5, v6) =>
+                line <> text ("method") <> space <> v1.map (toDoc).getOrElse (emptyDoc) <> toDoc (v2) <> text ("(") <> v3.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v4.map (toDoc).getOrElse (emptyDoc) <> ssep (v5.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v6)) <> line 
             case v @ RtnStm (v1, v2) =>
                 line <> text ("return") <> space <> toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
+            case v @ AssertExp (v1) =>
+                line <> text ("assert") <> space <> toDoc (v1) 
+            case v @ AssumeExp (v1) =>
+                line <> text ("assume") <> space <> toDoc (v1) 
+            case v @ SkipStm () =>
+                line <> text ("skip") <> space 
+            case v @ BreakStm () =>
+                line <> text ("break") <> space 
+            case v @ ContStm () =>
+                line <> text ("continue") <> space 
+            case v @ FailStm () =>
+                line <> text ("fail") <> space 
             case v @ IntType () =>
                 text ("int") <> space 
             case v @ ByteType () =>
@@ -41,28 +65,54 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 text ("bool") <> space                  
             case v : Exp =>
                 toParenDoc (v)  
+            case v @ Tipe (v1) =>
+                toDoc (v1) 
+            case v @ Idne (v1) =>
+                toDoc (v1) 
+            case v @ WhereExp (v1) =>
+                text ("where") <> space <> toDoc (v1) 
+            case v @ ElseIf (v1, v2) =>
+                text ("else if") <> space <> toDoc (v1) <> text (":") <> nest (toDoc (v2)) 
             case v @ Else (v1) =>
                 text ("else") <> space <> text (":") <> nest (toDoc (v1)) 
+            case v @ Case (v1, v2, v3) =>
+                text ("case") <> space <> toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v3)) <> line 
+            case v @ DefaultCase (v1) =>
+                text ("default") <> space <> text (":") <> nest (toDoc (v1)) <> line 
+            case v @ Requires (v1) =>
+                text ("requires") <> space <> toDoc (v1) 
+            case v @ Ensures (v1) =>
+                text ("ensures") <> space <> toDoc (v1) 
             case v @ Params (v1, v2) =>
                 toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
             case v @ RtnParams (v1) =>
                 text ("->") <> text ("(") <> toDoc (v1) <> text (")") 
             case v @ RtnType (v1) =>
-                text ("->") <> toDoc (v1)             
-            case v @ Loc (v1) =>
+                text ("->") <> toDoc (v1) 
+            case v @ Public () =>
+                text ("public") <> space 
+            case v @ Private () =>
+                text ("private") <> space 
+            case v @ Native () =>
+                text ("native") <> space 
+            case v @ Export () =>
+                text ("export") <> space     
+            case v @ NullLiteral () =>
+                text ("null")          
+            case v @ Idn (v1) =>
                 value (v1)  
             case v @ CommLoc (v1) =>
                 text (",") <> toDoc (v1) 
             case v @ TypeLoc (v1, v2) =>
                 toDoc (v1) <> toDoc (v2) 
             case v @ CommTypeLoc (v1) =>
+                text (",") <> toDoc (v1) 
+            case v @ CommExp (v1) =>
                 text (",") <> toDoc (v1)
         }
     
     override def toParenDoc (astNode : org.bitbucket.inkytonik.kiama.output.PrettyExpression) : Doc =
         astNode match {
-            case v @ Use (v1) =>
-                toDoc (v1) 
             case v @ EQ (v1, v2) =>
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("==") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ NE (v1, v2) =>
@@ -91,10 +141,18 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("%") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ Not (v1) =>
                 text ("!") <> recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ Use (v1) =>
+                toDoc (v1) 
             case v @ Assign (v1, v2) =>
                 toDoc (v1) <> space <> text ("=") <> space <> toDoc (v2) 
+            case v @ NullLit (v1) =>
+                toDoc (v1) 
+            case v @ ByteLit (v1) =>
+                toDoc (v1) 
             case v @ IntLit (v1) =>
                 value (v1) 
+            case v @ BoolLit (v1) =>
+                toDoc (v1) 
             case v @ ByteLiteral (v1) =>
                 text ("0b") <> ssep (v1.map (text), emptyDoc) 
             case v @ False () =>

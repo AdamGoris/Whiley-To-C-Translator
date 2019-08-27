@@ -8,71 +8,123 @@ Program =
   Spacing Stm* EOF.
 
 Stm {line} =
-		Type Loc sp "=" Exp		                                                  {DeclAsgn}
-  | Type Loc sp                                                             {Decl}
-  | Assign                                                                  {AsgnStm}
-  | "if" '(' Exp ')' ':' nest (Stm)\n Else?                                 {If}
-  | "while" '(' Exp ')' ':' nest (Stm)\n                                    {While}
-  | "function" Loc '(' Parameter? ')' ReturnType? ':' nest (Stm)\n          {FnDecl}
-  | "return" Loc CommLoc*                                                   {RtnStm}.
+		Type Loc CommTypeLoc* sp "=" Exp CommExp*                                                 {DeclAsgn}
+  | Type Loc sp                                                                               {Decl}
+  | Assign                                                                                    {AsgnStm}
+  | "type" Loc sp "is" Type WhereExpr*                                                       	{TypeDeclType}
+	| "type" Loc sp "is" Loc WhereExpr*                                                       	{TypeDeclLoc}
+  | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
+  | "if" '(' Exp ')' ':' nest (Stm)\n ElseIf* Else?                                           {If}
+  | "switch" Exp ':' CaseStm                                                       						{Switch}
+  | "while" '(' Exp ')' ':' nest (Stm)\n                                                      {While}
+  | "do" ':' nest (Stm)\n "while" nest (Exp) WhereExpr*                                       {DoWhile}
+  | "function" Modifier? Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n     			{FnDecl}
+  | "method" Modifier? Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n       			{MthdDecl} 
+  | "return" Exp CommExp*                                                                     {RtnStm}
+  | "assert" Exp                                                                              {AssertExp}
+  | "assume" Exp                                                                              {AssumeExp}
+  | "skip"                                                                                    {SkipStm}
+  | "break"                                                                                   {BreakStm}
+  | "continue"                                                                                {ContStm}
+  | "fail"                                                                                    {FailStm}.
 
 Type = 
-    "int"   								                                                {IntType}
-  | "byte"  								                                                {ByteType}
-  | "bool"  								                                                {BoolType}.
+    "int"   								                                                                  {IntType}
+  | "byte"  								                                                                  {ByteType}
+  | "bool"  								                                                                  {BoolType}.
 
 Exp {paren} = 
-  | Exp sp "==" Exp                                                         {EQ, left, 5}
-  | Exp sp "!=" Exp                                                         {NE, left, 5}
-  | Exp sp "<"  Exp                                                         {LT, left, 4}
-  | Exp sp "<=" Exp                                                         {LE, left, 4}
-  | Exp sp ">"  Exp                                                         {GT, left, 4}
-  | Exp sp ">=" Exp                                                         {GE, left, 4}
-  | Exp sp "<<" Exp                                                         {Lsh, left, 3}
-  | Exp sp ">>" Exp                                                         {ARsh, left, 3}
-  | Exp sp "+" Exp                                                          {Add, left, 2}
-  | Exp sp "-" Exp                                                          {Sub, left, 2}
-  | Exp sp "*" Exp                                                          {Mul, left, 1}
-  | Exp sp "/" Exp                                                          {Div, left, 1}
-  | Exp sp "%" Exp                                                          {Rem, left, 1}
-  | '!' Exp                                                                 {Not}
+  	Assign
+  | Exp sp "==" Exp                                                                           {EQ, left, 5}
+  | Exp sp "!=" Exp                                                                           {NE, left, 5}
+  | Exp sp "<"  Exp                                                                           {LT, left, 4}
+  | Exp sp "<=" Exp                                                                           {LE, left, 4}
+  | Exp sp ">"  Exp                                                                           {GT, left, 4}
+  | Exp sp ">=" Exp                                                                           {GE, left, 4}
+  | Exp sp "<<" Exp                                                                           {Lsh, left, 3}
+  | Exp sp ">>" Exp                                                                           {ARsh, left, 3}
+  | Exp sp "+" Exp                                                                            {Add, left, 2}
+  | Exp sp "-" Exp                                                                            {Sub, left, 2}
+  | Exp sp "*" Exp                                                                            {Mul, left, 1}
+  | Exp sp "/" Exp                                                                            {Div, left, 1}
+  | Exp sp "%" Exp                                                                            {Rem, left, 1}
+  | '!' Exp                                                                                   {Not}
   | '(' Exp ')'
-  | Assign
-  | Lit
-  | Loc                                                                     {Use}.
+	| Loc                                                                                       {Use}
+	|	Lit.
 
 Assign : Exp = 
     Loc sp "=" Exp.
 
+TypeOrLoc = 
+		Type {Tipe}
+	| Loc {Idne}.
+
+WhereExpr =
+    "where" Exp                                                                               {WhereExp}.
+
+ElseIf = 
+    "else if" Exp ':' nest (Stm).
+
 Else =
     "else" ':' nest (Stm).
 
-Parameter = 
-    TypeLoc CommTypeLoc*                                                    {Params}.
+CaseStm = 
+		"case" Exp CommExp* ':' nest (Stm)\n																											{Case}
+	| "default" ':' nest (Stm)\n	                                                              {DefaultCase}.
+
+RequiresEnsures = 
+		"requires" Exp																																						{Requires}
+	| "ensures" Exp																																							{Ensures}.
+
+Parameters = 
+    TypeLoc CommTypeLoc*                                                                      {Params}.
 
 ReturnType = 
-    '->' '(' Parameter ')'                                                  {RtnParams}
-  | '->' Type                                                               {RtnType}.
+    '->' '(' Parameters ')'                                                                   {RtnParams}
+  | '->' Type                                                                                 {RtnType}.
+
+Modifier =
+	  "public"																																									{Public}
+	| "private"																																									{Private}
+	| "native"																																									{Native}
+	| "export"                                                                                  {Export}.
 
 Lit : Exp =
-    ByteLiteral
-  | IntegerLiteral                                                          {IntLit, 1: Integer.parseInt : Int}
-  | BooleanLiteral.
+		NullLiteral																																								{NullLit}
+  | ByteLiteral																																								{ByteLit}
+  | IntegerLiteral                                                                            {IntLit, 1: Integer.parseInt : Int}
+  | BooleanLiteral																																						{BoolLit}.
+	//| CharacterLiteral																																					{CharLit}
+	//| StringLiteral																																							{StringLit}.
+
+NullLiteral =
+		'null'.
+
+ByteLiteral : Exp = 
+  	'0b' Bit*.
 
 IntegerLiteral : Token =
     DecimalNumeral.
-
-ByteLiteral : Exp = 
-    '0b' Bit*.
-
-BooleanLiteral : Exp =
-    'false'                                                                 {False}
-  | 'true'                                                                  {True}.
 
 DecimalNumeral : String =
     '0'
   | NonZeroDigit Digits.
 
+BooleanLiteral : Exp =
+    'false'                                                                                   {False}
+  | 'true'                                                                                    {True}.
+/*
+CharacterLiteral = 
+		"'" Character "'".
+
+Character = 
+		Letter
+	| Digit.
+
+StringLiteral =
+		'"' Character* '"'.
+*/
 Digits : String = 
 		Digit*.
 
@@ -86,7 +138,7 @@ Bit : String =
     [0|1].
 
 Loc = 
-    Identifier.
+    Identifier {Idn}.
 
 Lab : String =
 		Identifier.
@@ -99,3 +151,6 @@ TypeLoc =
 
 CommTypeLoc = 
     ',' TypeLoc.
+
+CommExp = 
+    ',' Exp.
