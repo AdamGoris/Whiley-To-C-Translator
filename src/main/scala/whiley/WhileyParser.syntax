@@ -8,7 +8,9 @@ Program =
   Spacing Stm* EOF.
 
 Stm {line} =
-		Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
+    "package" Loc DotLoc*                                                                     {PackageDecl}
+  | "import" LocOrStar "from" Loc DotLocOrStar*                                               {ImportDecl}
+	|	Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal sp                                                                              {Decl}
   | Assign                                                                                    {Asgn}
   | "type" Loc sp "is" Type WhereExpr*                                                       	{TypeDeclType}
@@ -155,6 +157,16 @@ Lab : String =
 
 CommLoc =
     ',' Loc.
+
+DotLoc =
+    '.' Loc.
+
+LocOrStar = 
+    Loc
+  | '*'.
+
+DotLocOrStar = 
+    '.' LocOrStar.
 
 TypeLoc = 
     Type Loc.
