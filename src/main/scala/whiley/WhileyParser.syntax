@@ -10,18 +10,20 @@ Program =
 Stm {line} =
     "package" Loc DotLoc*                                                                     {PackageDecl}
   | "import" LocOrStar "from" Loc DotLocOrStar*                                               {ImportDecl}
-	|	Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
-  | Type LVal sp                                                                              {Decl}
+  | Modifier Stm                                                                               {Modify}
+	|	Type Loc CommTypeLoc* sp "=" Exp CommExp*                                                 {DeclAsgn}
+  | Type Loc                                                                                  {Decl}
   | Assign                                                                                    {Asgn}
-  | "type" Loc sp "is" Type WhereExpr*                                                       	{TypeDeclType}
-	| "type" Loc sp "is" Loc WhereExpr*                                                       	{TypeDeclLoc}
+  | "type" Loc sp "is" TypeLoc WhereExpr*                                                     {TypeDeclVar}
+  | "type" Loc sp "is" Type WhereExpr*                                                        {TypeDeclType}
+  | "type" Loc sp "is" FnType WhereExpr*                                                      {TypeDeclFn}
   | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
   | "if" '(' Exp ')' ':' nest (Stm)\n ElseIf* Else?                                           {If}
-  | "switch" Exp ':' CaseStm                                                       						{Switch}
+  | "switch" Exp ':' CaseStm                                                                  {Switch}
   | "while" '(' Exp ')' ':' nest (Stm)\n                                                      {While}
   | "do" ':' nest (Stm)\n "while" nest (Exp) WhereExpr*                                       {DoWhile}
-  | "function" Modifier? Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n     			{FnDecl}
-  | "method" Modifier? Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n       			{MthdDecl} 
+  | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n     			{FnDecl}
+  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n       			{MthdDecl} 
   | "return" Exp CommExp*                                                                     {RtnStm}
   | "assert" Exp                                                                              {AssertExp}
   | "assume" Exp                                                                              {AssumeExp}
@@ -31,15 +33,18 @@ Stm {line} =
   | "fail"                                                                                    {FailStm}.
 
 Type = 
-    "int" "[]"?  								                                                                  {IntType}
-  | "byte" "[]"? 								                                                                  {ByteType}
-  | "bool" "[]"? 								                                                                  {BoolType}.
+    "int" "[]"?                                                                               {IntType}
+  | "byte" "[]"?                                                                              {ByteType}
+  | "bool" "[]"?                                                                              {BoolType}.
+
+RefType =
+    '&' Type                                                                                  {ReferenceType}.
 
 Exp {paren} = 
 		Exp sp "|" Exp																																						{Or, none, 8}
-	|	Exp sp "^" Exp																																						{Xor, left, 7}
-	|	Exp sp "&&" Exp																																						{And, left, 6}
-	|	Exp sp "==" Exp                                                                           {EQ, left, 5}
+  |	Exp sp "^" Exp																																						{Xor, left, 7}
+  |	Exp sp "&&" Exp																																						{And, left, 6}
+  |	Exp sp "==" Exp                                                                           {EQ, left, 5}
   | Exp sp "!=" Exp                                                                           {NE, left, 5}
   | Exp sp "<"  Exp                                                                           {LT, left, 4}
   | Exp sp "<=" Exp                                                                           {LE, left, 4}
@@ -65,6 +70,9 @@ Assign : Exp =
 WhereExpr =
     "where" Exp                                                                               {WhereExp}.
 
+FnType = 
+    "function" '(' Type ')' '->' Type.
+
 ElseIf = 
     "else if" Exp ':' nest (Stm).
 
@@ -80,7 +88,8 @@ RequiresEnsures =
 	| "ensures" Exp																																							{Ensures}.
 
 Parameters = 
-    TypeLoc CommTypeLoc*                                                                      {Params}.
+    TypeLoc CommTypeLoc*                                                                      {Params}
+  | Type                                                                                      {TypeParam}.
 
 ReturnType = 
     '->' '(' Parameters ')'                                                                   {RtnParams}
@@ -141,16 +150,16 @@ Bit : String =
 
 // Used in Assign and DeclAsgn Statements
 LVal = 
-		Loc '.' Identifier 																		{FieldAsgn}
-	| Loc '[' Exp ']'																				{ListAsgn}	
-	| '*' Exp																								{Pointer}
-	| Identifier																						{IdnAsgn}.
+		Loc '.' Identifier 																		                                      {FieldAsgn}
+	| Loc '[' Exp ']'																				                                      {ListAsgn}	
+	| '*' Exp																								                                      {Pointer}
+	| Identifier																						                                      {IdnAsgn}.
 
 Loc = 
     Identifier.
 
 Length : Exp = 
-		'|' Loc '|'																						{Len}.
+		'|' Loc '|'																						                                      {Len}.
 
 Lab : String =
 		Identifier.
@@ -162,8 +171,8 @@ DotLoc =
     '.' Loc.
 
 LocOrStar = 
-    Loc
-  | '*'.
+    '*'                                                                                          {All}
+  | Loc                                                                                          {Spc}.
 
 DotLocOrStar = 
     '.' LocOrStar.

@@ -19,15 +19,23 @@ trait WhileyIPrettyPrinter extends PP with PPP {
         astNode match {
             case v @ Program (v1) =>
                 emptyDoc <> ssep (v1.map (toDoc), emptyDoc) <> emptyDoc 
+            case v @ PackageDecl (v1, v2) =>
+                line <> text ("package") <> space <> toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
+            case v @ ImportDecl (v1, v2, v3) =>
+                line <> text ("import") <> space <> toDoc (v1) <> text ("from") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ Modify (v1, v2) =>
+                line <> toDoc (v1) <> toDoc (v2) 
             case v @ DeclAsgn (v1, v2, v3, v4, v5) =>
                 line <> toDoc (v1) <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) <> space <> text ("=") <> space <> toDoc (v4) <> ssep (v5.map (toDoc), emptyDoc) 
             case v @ Decl (v1, v2) =>
-                line <> toDoc (v1) <> toDoc (v2) <> space 
+                line <> toDoc (v1) <> toDoc (v2) 
             case v @ Asgn (v1) =>
                 line <> toDoc (v1) 
+            case v @ TypeDeclVar (v1, v2, v3) =>
+                line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
             case v @ TypeDeclType (v1, v2, v3) =>
                 line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
-            case v @ TypeDeclLoc (v1, v2, v3) =>
+            case v @ TypeDeclFn (v1, v2, v3) =>
                 line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
             case v @ ConstDecl (v1, v2) =>
                 line <> text ("const") <> space <> toDoc (v1) <> text ("is") <> space <> toDoc (v2) 
@@ -39,10 +47,10 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> text ("while") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text (":") <> nest (toDoc (v2)) <> line 
             case v @ DoWhile (v1, v2, v3) =>
                 line <> text ("do") <> space <> text (":") <> nest (toDoc (v1)) <> line <> text ("while") <> space <> nest (toDoc (v2)) <> ssep (v3.map (toDoc), emptyDoc) 
-            case v @ FnDecl (v1, v2, v3, v4, v5, v6) =>
-                line <> text ("function") <> space <> v1.map (toDoc).getOrElse (emptyDoc) <> toDoc (v2) <> text ("(") <> v3.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v4.map (toDoc).getOrElse (emptyDoc) <> ssep (v5.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v6)) <> line 
-            case v @ MthdDecl (v1, v2, v3, v4, v5, v6) =>
-                line <> text ("method") <> space <> v1.map (toDoc).getOrElse (emptyDoc) <> toDoc (v2) <> text ("(") <> v3.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v4.map (toDoc).getOrElse (emptyDoc) <> ssep (v5.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v6)) <> line 
+            case v @ FnDecl (v1, v2, v3, v4, v5) =>
+                line <> text ("function") <> space <> toDoc (v1) <> text ("(") <> v2.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v3.map (toDoc).getOrElse (emptyDoc) <> ssep (v4.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v5)) <> line 
+            case v @ MthdDecl (v1, v2, v3, v4, v5) =>
+                line <> text ("method") <> space <> toDoc (v1) <> text ("(") <> v2.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v3.map (toDoc).getOrElse (emptyDoc) <> ssep (v4.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v5)) <> line 
             case v @ RtnStm (v1, v2) =>
                 line <> text ("return") <> space <> toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
             case v @ AssertExp (v1) =>
@@ -62,11 +70,15 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v @ ByteType () =>
                 text ("byte") <> space <> emptyDoc 
             case v @ BoolType () =>
-                text ("bool") <> space <> emptyDoc                      
+                text ("bool") <> space <> emptyDoc 
+            case v @ ReferenceType (v1) =>
+                text ("&") <> toDoc (v1)                      
             case v : Exp =>
                 toParenDoc (v)  
             case v @ WhereExp (v1) =>
                 text ("where") <> space <> toDoc (v1) 
+            case v @ FnType (v1, v2) =>
+                text ("function") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text ("->") <> toDoc (v2) 
             case v @ ElseIf (v1, v2) =>
                 text ("else if") <> space <> toDoc (v1) <> text (":") <> nest (toDoc (v2)) 
             case v @ Else (v1) =>
@@ -81,6 +93,8 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 text ("ensures") <> space <> toDoc (v1) 
             case v @ Params (v1, v2) =>
                 toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
+            case v @ TypeParam (v1) =>
+                toDoc (v1) 
             case v @ RtnParams (v1) =>
                 text ("->") <> text ("(") <> toDoc (v1) <> text (")") 
             case v @ RtnType (v1) =>
@@ -107,6 +121,14 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 value (v1)   
             case v @ CommLoc (v1) =>
                 text (",") <> toDoc (v1) 
+            case v @ DotLoc (v1) =>
+                text (".") <> toDoc (v1) 
+            case v @ All () =>
+                text ("*") 
+            case v @ Spc (v1) =>
+                toDoc (v1) 
+            case v @ DotLocOrStar (v1) =>
+                text (".") <> toDoc (v1) 
             case v @ TypeLoc (v1, v2) =>
                 toDoc (v1) <> toDoc (v2) 
             case v @ CommTypeLoc (v1) =>

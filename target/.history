@@ -53,3 +53,12 @@ compile
 run c:\WhileyParser\src\test\whiley\valid\BoolRequires_Valid_1.whiley
 compile
 run c:\WhileyParser\src\test\whiley\valid\BoolRequires_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\Access_Valid_1.whiley
+run c:\WhileyParser\src\test\whiley\valid\AddressExpression_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\AddressExpression_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\AddressExpression_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\valid\AddressExpression_Valid_1.whiley

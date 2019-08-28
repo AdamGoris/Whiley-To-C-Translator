@@ -61,10 +61,10 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
     static {
         add (KEYWORDS, new String[] {
             "assert", "assume", "bool", "break", "byte", "case", "const", "continue",
-            "default", "do", "else", "ensures", "export", "fail", "false", "function",
-            "if", "int", "is", "method", "native", "null", "private", "public",
-            "requires", "return", "skip", "switch", "true", "type", "where",
-            "while"
+            "default", "do", "else", "ensures", "export", "fail", "false", "from",
+            "function", "if", "import", "int", "is", "method", "native", "null",
+            "package", "private", "public", "requires", "return", "skip", "switch",
+            "true", "type", "where", "while"
         });
     }
 }
@@ -88,8 +88,8 @@ String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "." / "]" / "=" / "<" / "!" / "|" / ")" / "-" / "," / "[" /
-    "0" / "+" / "(" / ":" / "^" / "/" / ">";
+    "*" / "%" / "." / "]" / "=" / "<" / "&" / "!" / "|" / ")" / "-" / "," /
+    "[" / "0" / "+" / "(" / ":" / "^" / "/" / ">";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -98,20 +98,32 @@ public Program Program =
     ;
 
 public Stm Stm =
-    v1:Type v2:LVal v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
+    void:"package":Word v1:Loc v2:(DotLoc)* {
+        yyValue = new PackageDecl (v1, v2);
+    }
+    / void:"import":Word v1:LocOrStar void:"from":Word v2:Loc v3:(DotLocOrStar)* {
+        yyValue = new ImportDecl (v1, v2, v3);
+    }
+    / v1:Modifier v2:Stm {
+        yyValue = new Modify (v1, v2);
+    }
+    / v1:Type v2:Loc v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
         yyValue = new DeclAsgn (v1, v2, v3, v4, v5);
     }
-    / v1:Type v2:LVal  {
+    / v1:Type v2:Loc {
         yyValue = new Decl (v1, v2);
     }
     / v1:Assign {
         yyValue = new Asgn (v1);
     }
+    / void:"type":Word v1:Loc  void:"is":Word v2:TypeLoc v3:(WhereExpr)* {
+        yyValue = new TypeDeclVar (v1, v2, v3);
+    }
     / void:"type":Word v1:Loc  void:"is":Word v2:Type v3:(WhereExpr)* {
         yyValue = new TypeDeclType (v1, v2, v3);
     }
-    / void:"type":Word v1:Loc  void:"is":Word v2:Loc v3:(WhereExpr)* {
-        yyValue = new TypeDeclLoc (v1, v2, v3);
+    / void:"type":Word v1:Loc  void:"is":Word v2:FnType v3:(WhereExpr)* {
+        yyValue = new TypeDeclFn (v1, v2, v3);
     }
     / void:"const":Word v1:Loc void:"is":Word v2:Exp {
         yyValue = new ConstDecl (v1, v2);
@@ -128,11 +140,11 @@ public Stm Stm =
     / void:"do":Word void:":":Symbol1 v1:Stm  void:"while":Word v2:Exp v3:(WhereExpr)* {
         yyValue = new DoWhile (v1, v2, v3);
     }
-    / void:"function":Word v1:(Modifier)? v2:Loc void:"(":Symbol1 v3:(Parameters)? void:")":Symbol1 v4:(ReturnType)? v5:(RequiresEnsures)* void:":":Symbol1 v6:Stm  {
-        yyValue = new FnDecl (Option.apply (v1), v2, Option.apply (v3), Option.apply (v4), v5, v6);
+    / void:"function":Word v1:Loc void:"(":Symbol1 v2:(Parameters)? void:")":Symbol1 v3:(ReturnType)? v4:(RequiresEnsures)* void:":":Symbol1 v5:Stm  {
+        yyValue = new FnDecl (v1, Option.apply (v2), Option.apply (v3), v4, v5);
     }
-    / void:"method":Word v1:(Modifier)? v2:Loc void:"(":Symbol1 v3:(Parameters)? void:")":Symbol1 v4:(ReturnType)? v5:(RequiresEnsures)* void:":":Symbol1 v6:Stm  {
-        yyValue = new MthdDecl (Option.apply (v1), v2, Option.apply (v3), Option.apply (v4), v5, v6);
+    / void:"method":Word v1:Loc void:"(":Symbol1 v2:(Parameters)? void:")":Symbol1 v3:(ReturnType)? v4:(RequiresEnsures)* void:":":Symbol1 v5:Stm  {
+        yyValue = new MthdDecl (v1, Option.apply (v2), Option.apply (v3), v4, v5);
     }
     / void:"return":Word v1:Exp v2:(CommExp)* {
         yyValue = new RtnStm (v1, v2);
@@ -169,6 +181,12 @@ public Type Type =
     }
     ;
 
+public RefType RefType =
+    void:"&":Symbol1 v1:Type {
+        yyValue = new ReferenceType (v1);
+    }
+    ;
+
 public Exp Exp =
     v1:ExpLevel8 
     ;
@@ -182,6 +200,12 @@ public Exp Assign =
 public WhereExpr WhereExpr =
     void:"where":Word v1:Exp {
         yyValue = new WhereExp (v1);
+    }
+    ;
+
+public FnType FnType =
+    void:"function":Word void:"(":Symbol1 v1:Type void:")":Symbol1 void:"->":Symbol2 v2:Type {
+        yyValue = new FnType (v1, v2);
     }
     ;
 
@@ -218,6 +242,9 @@ public RequiresEnsures RequiresEnsures =
 public Parameters Parameters =
     v1:TypeLoc v2:(CommTypeLoc)* {
         yyValue = new Params (v1, v2);
+    }
+    / v1:Type {
+        yyValue = new TypeParam (v1);
     }
     ;
 
@@ -344,6 +371,27 @@ public String Lab =
 public CommLoc CommLoc =
     void:",":Symbol1 v1:Loc {
         yyValue = new CommLoc (v1);
+    }
+    ;
+
+public DotLoc DotLoc =
+    void:".":Symbol1 v1:Loc {
+        yyValue = new DotLoc (v1);
+    }
+    ;
+
+public LocOrStar LocOrStar =
+    void:"*":Symbol1 {
+        yyValue = new All ();
+    }
+    / v1:Loc {
+        yyValue = new Spc (v1);
+    }
+    ;
+
+public DotLocOrStar DotLocOrStar =
+    void:".":Symbol1 v1:LocOrStar {
+        yyValue = new DotLocOrStar (v1);
     }
     ;
 

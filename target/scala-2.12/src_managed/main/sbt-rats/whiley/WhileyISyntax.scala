@@ -10,18 +10,22 @@ object WhileyISyntax {
     case class Program (optStms : Vector[Stm]) extends ASTNode
      
     sealed abstract class Stm extends ASTNode
-    case class DeclAsgn (typeField : Type, lVal : LVal, optCommTypeLocs : Vector[CommTypeLoc], exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
-    case class Decl (typeField : Type, lVal : LVal) extends Stm  
+    case class PackageDecl (loc : Loc, optDotLocs : Vector[DotLoc]) extends Stm  
+    case class ImportDecl (locOrStar : LocOrStar, loc : Loc, optDotLocOrStars : Vector[DotLocOrStar]) extends Stm  
+    case class Modify (modifier : Modifier, stm : Stm) extends Stm  
+    case class DeclAsgn (typeField : Type, loc : Loc, optCommTypeLocs : Vector[CommTypeLoc], exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
+    case class Decl (typeField : Type, loc : Loc) extends Stm  
     case class Asgn (assign : Exp) extends Stm  
+    case class TypeDeclVar (loc : Loc, typeLoc : TypeLoc, optWhereExprs : Vector[WhereExpr]) extends Stm  
     case class TypeDeclType (loc : Loc, typeField : Type, optWhereExprs : Vector[WhereExpr]) extends Stm  
-    case class TypeDeclLoc (loc1 : Loc, loc2 : Loc, optWhereExprs : Vector[WhereExpr]) extends Stm  
+    case class TypeDeclFn (loc : Loc, fnType : FnType, optWhereExprs : Vector[WhereExpr]) extends Stm  
     case class ConstDecl (loc : Loc, exp : Exp) extends Stm  
     case class If (exp : Exp, stm : Stm, optElseIfs : Vector[ElseIf], optElse : Option[Else]) extends Stm  
     case class Switch (exp : Exp, caseStm : CaseStm) extends Stm  
     case class While (exp : Exp, stm : Stm) extends Stm  
     case class DoWhile (stm : Stm, exp : Exp, optWhereExprs : Vector[WhereExpr]) extends Stm  
-    case class FnDecl (optModifier : Option[Modifier], loc : Loc, optParameters : Option[Parameters], optReturnType : Option[ReturnType], optRequiresEnsuress : Vector[RequiresEnsures], stm : Stm) extends Stm  
-    case class MthdDecl (optModifier : Option[Modifier], loc : Loc, optParameters : Option[Parameters], optReturnType : Option[ReturnType], optRequiresEnsuress : Vector[RequiresEnsures], stm : Stm) extends Stm  
+    case class FnDecl (loc : Loc, optParameters : Option[Parameters], optReturnType : Option[ReturnType], optRequiresEnsuress : Vector[RequiresEnsures], stm : Stm) extends Stm  
+    case class MthdDecl (loc : Loc, optParameters : Option[Parameters], optReturnType : Option[ReturnType], optRequiresEnsuress : Vector[RequiresEnsures], stm : Stm) extends Stm  
     case class RtnStm (exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
     case class AssertExp (exp : Exp) extends Stm  
     case class AssumeExp (exp : Exp) extends Stm  
@@ -34,6 +38,9 @@ object WhileyISyntax {
     case class IntType () extends Type  
     case class ByteType () extends Type  
     case class BoolType () extends Type  
+     
+    sealed abstract class RefType extends ASTNode
+    case class ReferenceType (typeField : Type) extends RefType  
      
     sealed abstract class Exp extends ASTNode with org.bitbucket.inkytonik.kiama.output.PrettyExpression
     case class Or (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
@@ -117,6 +124,8 @@ object WhileyISyntax {
     sealed abstract class WhereExpr extends ASTNode
     case class WhereExp (exp : Exp) extends WhereExpr  
      
+    case class FnType (typeField1 : Type, typeField2 : Type) extends ASTNode
+     
     case class ElseIf (exp : Exp, stm : Stm) extends ASTNode
      
     case class Else (stm : Stm) extends ASTNode
@@ -131,6 +140,7 @@ object WhileyISyntax {
      
     sealed abstract class Parameters extends ASTNode
     case class Params (typeLoc : TypeLoc, optCommTypeLocs : Vector[CommTypeLoc]) extends Parameters  
+    case class TypeParam (typeField : Type) extends Parameters  
      
     sealed abstract class ReturnType extends ASTNode
     case class RtnParams (parameters : Parameters) extends ReturnType  
@@ -189,6 +199,14 @@ object WhileyISyntax {
     }
       
     case class CommLoc (loc : Loc) extends ASTNode
+     
+    case class DotLoc (loc : Loc) extends ASTNode
+     
+    sealed abstract class LocOrStar extends ASTNode
+    case class All () extends LocOrStar  
+    case class Spc (loc : Loc) extends LocOrStar  
+     
+    case class DotLocOrStar (locOrStar : LocOrStar) extends ASTNode
      
     case class TypeLoc (typeField : Type, loc : Loc) extends ASTNode
      
