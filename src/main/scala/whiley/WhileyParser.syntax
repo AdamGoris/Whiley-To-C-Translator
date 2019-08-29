@@ -42,9 +42,12 @@ RefType =
     '&' Type                                                                                  {ReferenceType}.
 
 Exp {paren} = 
-		Exp sp "|" Exp																																						{Or, none, 8}
+    Exp sp "<==>" Exp                                                                         {Iff, left, 10}
+  | Exp sp "==>" Exp                                                                          {Implies, left, 9}
+	|	Exp sp "||" Exp																																						{Or, none, 8}
   |	Exp sp "^" Exp																																						{Xor, left, 7}
   |	Exp sp "&&" Exp																																						{And, left, 6}
+  | Exp sp "&" Exp                                                                            {BitWiseAnd, left, 6}
   |	Exp sp "==" Exp                                                                           {EQ, left, 5}
   | Exp sp "!=" Exp                                                                           {NE, left, 5}
   | Exp sp "<"  Exp                                                                           {LT, left, 4}
@@ -61,11 +64,12 @@ Exp {paren} =
   | '!' Exp                                                                                   {Not}
   | '-' Exp                                                                                   {Neg}
   | '(' Exp ')'
-  | Exp '[' Exp ']'                                                                           {ArrAccess}
+  | Exp '[' Exp ']'                                                                           {ArrAccess, left, 1}
   | '[' Exp ';' Exp ']'                                                                       {ArrGen}
-  | '[' ArgsList ']'                                                                          {ArrInit}
+  | '[' ArgList ']'                                                                           {ArrInit}
 	| Assign
 	| Length
+  | QuantExp                                                                                  {QuantifierExp}
 	| Loc                                                                                       {Use}
 	|	Lit.
 
@@ -77,6 +81,14 @@ ArgList =
 
 WhereExpr =
     "where" Exp                                                                               {WhereExp}.
+
+QuantExp =
+    NoSomeAll '{' Loc 'in' Exp CommLocInExp* '|' Exp '}'.
+
+NoSomeAll = 
+    "no"                                                                                      {No}
+  | "some"                                                                                    {Some}
+  | "all"                                                                                     {All}.
 
 Lambda = 
     "function" '(' TypeLoc* ')' '->' Type.
@@ -172,14 +184,23 @@ Length : Exp =
 Lab : String =
 		Identifier.
 
+CommExp = 
+    ',' Exp.
+
 CommLoc =
     ',' Loc.
 
+CommLocInExp = 
+    ',' Loc "in" Exp.
+
+CommTypeLoc = 
+    ',' TypeLoc.
+    
 DotLoc =
     '.' Loc.
 
 LocOrStar = 
-    '*'                                                                                          {All}
+    '*'                                                                                          {ImpAll}
   | Loc                                                                                          {Spc}.
 
 DotLocOrStar = 
@@ -187,9 +208,3 @@ DotLocOrStar =
 
 TypeLoc = 
     Type Loc.
-
-CommTypeLoc = 
-    ',' TypeLoc.
-
-CommExp = 
-    ',' Exp.
