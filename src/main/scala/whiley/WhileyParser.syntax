@@ -10,23 +10,24 @@ Program =
 Stm {line} =
     "package" Loc DotLoc*                                                                     {PackageDecl}
   | "import" LocOrStar "from" Loc DotLocOrStar*                                               {ImportDecl}
-  | Modifier Stm                                                                               {Modify}
-	|	Type Loc CommTypeLoc* sp "=" Exp CommExp*                                                 {DeclAsgn}
-  | Type Loc                                                                                  {Decl}
+  | Modifier Stm                                                                              {Modify}
+  | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
+  | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {Asgn}
   | "type" Loc sp "is" TypeLoc WhereExpr*                                                     {TypeDeclVar}
   | "type" Loc sp "is" Type WhereExpr*                                                        {TypeDeclType}
-  | "type" Loc sp "is" FnType WhereExpr*                                                      {TypeDeclFn}
+  | "type" Loc sp "is" Lambda WhereExpr*                                                      {TypeDeclLambda}
   | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
   | "if" '(' Exp ')' ':' nest (Stm)\n ElseIf* Else?                                           {If}
   | "switch" Exp ':' CaseStm                                                                  {Switch}
   | "while" '(' Exp ')' ':' nest (Stm)\n                                                      {While}
   | "do" ':' nest (Stm)\n "while" nest (Exp) WhereExpr*                                       {DoWhile}
-  | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n     			{FnDecl}
-  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n       			{MthdDecl} 
+  | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n          {FnDecl}
+  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n            {MthdDecl} 
   | "return" Exp CommExp*                                                                     {RtnStm}
-  | "assert" Exp                                                                              {AssertExp}
-  | "assume" Exp                                                                              {AssumeExp}
+  | "assert" Exp                                                                              {Assert}
+  | "assume" Exp                                                                              {Assume}
+  | "debug" Exp                                                                               {DebugExp}
   | "skip"                                                                                    {SkipStm}
   | "break"                                                                                   {BreakStm}
   | "continue"                                                                                {ContStm}
@@ -58,7 +59,11 @@ Exp {paren} =
   | Exp sp "/" Exp                                                                            {Div, left, 1}
   | Exp sp "%" Exp                                                                            {Rem, left, 1}
   | '!' Exp                                                                                   {Not}
+  | '-' Exp                                                                                   {Neg}
   | '(' Exp ')'
+  | Exp '[' Exp ']'                                                                           {ArrAccess}
+  | '[' Exp ';' Exp ']'                                                                       {ArrGen}
+  | '[' ArgsList ']'                                                                          {ArrInit}
 	| Assign
 	| Length
 	| Loc                                                                                       {Use}
@@ -67,11 +72,14 @@ Exp {paren} =
 Assign : Exp = 
     LVal sp "=" Exp.
 
+ArgList = 
+    Exp CommExp*.
+
 WhereExpr =
     "where" Exp                                                                               {WhereExp}.
 
-FnType = 
-    "function" '(' Type ')' '->' Type.
+Lambda = 
+    "function" '(' TypeLoc* ')' '->' Type.
 
 ElseIf = 
     "else if" Exp ':' nest (Stm).
@@ -80,7 +88,7 @@ Else =
     "else" ':' nest (Stm).
 
 CaseStm = 
-		"case" Exp CommExp* ':' nest (Stm)\n																											{Case}
+		"case" Exp CommExp* ':' nest (Stm)\n                                                      {Case}
 	| "default" ':' nest (Stm)\n	                                                              {DefaultCase}.
 
 RequiresEnsures = 
