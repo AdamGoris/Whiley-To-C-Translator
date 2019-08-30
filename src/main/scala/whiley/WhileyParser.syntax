@@ -14,9 +14,7 @@ Stm {line} =
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {Asgn}
-  | "type" Loc sp "is" TypeLoc WhereExpr*                                                     {TypeDeclVar}
-  | "type" Loc sp "is" Type WhereExpr*                                                        {TypeDeclType}
-  | "type" Loc sp "is" Lambda WhereExpr*                                                      {TypeDeclLambda}
+  | TypeDeclaration                                                                           {TypeDecl}
   | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
   | "if" '(' Exp ')' ':' nest (Stm)\n ElseIf* Else?                                           {If}
   | "switch" Exp ':' CaseStm                                                                  {Switch}
@@ -75,6 +73,11 @@ Exp {paren} =
 
 Assign : Exp = 
     LVal sp "=" Exp.
+
+TypeDeclaration =
+    "type" Loc sp "is" TypeLoc WhereExpr*                                                     {TypeDeclVar}
+  | "type" Loc sp "is" Type WhereExpr*                                                        {TypeDeclType}
+  | "type" Loc sp "is" Lambda WhereExpr*                                                      {TypeDeclLambda}.
 
 ArgList = 
     Exp CommExp*.
