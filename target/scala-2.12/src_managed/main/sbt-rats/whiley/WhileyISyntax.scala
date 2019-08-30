@@ -13,12 +13,10 @@ object WhileyISyntax {
     case class PackageDecl (loc : Loc, optDotLocs : Vector[DotLoc]) extends Stm  
     case class ImportDecl (locOrStar : LocOrStar, loc : Loc, optDotLocOrStars : Vector[DotLocOrStar]) extends Stm  
     case class Modify (modifier : Modifier, stm : Stm) extends Stm  
-    case class DeclAsgn (typeField : Type, loc : Loc, optCommTypeLocs : Vector[CommTypeLoc], exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
-    case class Decl (typeField : Type, loc : Loc) extends Stm  
+    case class DeclAsgn (typeField : Type, lVal : LVal, optCommTypeLocs : Vector[CommTypeLoc], exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
+    case class Decl (typeField : Type, lVal : LVal) extends Stm  
     case class Asgn (assign : Exp) extends Stm  
-    case class TypeDeclVar (loc : Loc, typeLoc : TypeLoc, optWhereExprs : Vector[WhereExpr]) extends Stm  
-    case class TypeDeclType (loc : Loc, typeField : Type, optWhereExprs : Vector[WhereExpr]) extends Stm  
-    case class TypeDeclFn (loc : Loc, fnType : FnType, optWhereExprs : Vector[WhereExpr]) extends Stm  
+    case class TypeDecl (typeDeclaration : TypeDeclaration) extends Stm  
     case class ConstDecl (loc : Loc, exp : Exp) extends Stm  
     case class If (exp : Exp, stm : Stm, optElseIfs : Vector[ElseIf], optElse : Option[Else]) extends Stm  
     case class Switch (exp : Exp, caseStm : CaseStm) extends Stm  
@@ -27,8 +25,9 @@ object WhileyISyntax {
     case class FnDecl (loc : Loc, optParameters : Option[Parameters], optReturnType : Option[ReturnType], optRequiresEnsuress : Vector[RequiresEnsures], stm : Stm) extends Stm  
     case class MthdDecl (loc : Loc, optParameters : Option[Parameters], optReturnType : Option[ReturnType], optRequiresEnsuress : Vector[RequiresEnsures], stm : Stm) extends Stm  
     case class RtnStm (exp : Exp, optCommExps : Vector[CommExp]) extends Stm  
-    case class AssertExp (exp : Exp) extends Stm  
-    case class AssumeExp (exp : Exp) extends Stm  
+    case class Assert (exp : Exp) extends Stm  
+    case class Assume (exp : Exp) extends Stm  
+    case class DebugExp (exp : Exp) extends Stm  
     case class SkipStm () extends Stm  
     case class BreakStm () extends Stm  
     case class ContStm () extends Stm  
@@ -43,6 +42,14 @@ object WhileyISyntax {
     case class ReferenceType (typeField : Type) extends RefType  
      
     sealed abstract class Exp extends ASTNode with org.bitbucket.inkytonik.kiama.output.PrettyExpression
+    case class Iff (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 10
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
+    }
+    case class Implies (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 9
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
+    }
     case class Or (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 8
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
@@ -52,6 +59,10 @@ object WhileyISyntax {
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
     }
     case class And (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 6
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
+    }
+    case class BitWiseAnd (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 6
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
     }
@@ -111,6 +122,26 @@ object WhileyISyntax {
         val priority = 0
         val fixity = org.bitbucket.inkytonik.kiama.output.Prefix
     }
+    case class Neg (exp : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Prefix
+    }
+    case class ArrAccess (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 1
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.LeftAssoc)
+    }
+    case class ArrGen (exp1 : Exp, exp2 : Exp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+    case class ArrInit (argList : ArgList) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
+    case class QuantifierExp (quantExp : QuantExp) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
+        val priority = 0
+        val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
+    }
     case class Use (loc : Loc) extends Exp with org.bitbucket.inkytonik.kiama.output.PrettyNaryExpression {
         val priority = 0
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
@@ -121,10 +152,24 @@ object WhileyISyntax {
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
     }
      
+    sealed abstract class TypeDeclaration extends ASTNode
+    case class TypeDeclVar (loc : Loc, typeLoc : TypeLoc, optWhereExprs : Vector[WhereExpr]) extends TypeDeclaration  
+    case class TypeDeclType (loc : Loc, typeField : Type, optWhereExprs : Vector[WhereExpr]) extends TypeDeclaration  
+    case class TypeDeclLambda (loc : Loc, lambda : Lambda, optWhereExprs : Vector[WhereExpr]) extends TypeDeclaration  
+     
+    case class ArgList (exp : Exp, optCommExps : Vector[CommExp]) extends ASTNode
+     
     sealed abstract class WhereExpr extends ASTNode
     case class WhereExp (exp : Exp) extends WhereExpr  
      
-    case class FnType (typeField1 : Type, typeField2 : Type) extends ASTNode
+    case class QuantExp (noSomeAll : NoSomeAll, loc : Loc, exp1 : Exp, optCommLocInExps : Vector[CommLocInExp], exp2 : Exp) extends ASTNode
+     
+    sealed abstract class NoSomeAll extends ASTNode
+    case class No () extends NoSomeAll  
+    case class Some () extends NoSomeAll  
+    case class All () extends NoSomeAll  
+     
+    case class Lambda (optTypeLocs : Vector[TypeLoc], typeField : Type) extends ASTNode
      
     case class ElseIf (exp : Exp, stm : Stm) extends ASTNode
      
@@ -198,20 +243,22 @@ object WhileyISyntax {
         val fixity = org.bitbucket.inkytonik.kiama.output.Infix (org.bitbucket.inkytonik.kiama.output.NonAssoc)
     }
       
+    case class CommExp (exp : Exp) extends ASTNode
+     
     case class CommLoc (loc : Loc) extends ASTNode
+     
+    case class CommLocInExp (loc : Loc, exp : Exp) extends ASTNode
+     
+    case class CommTypeLoc (typeLoc : TypeLoc) extends ASTNode
      
     case class DotLoc (loc : Loc) extends ASTNode
      
     sealed abstract class LocOrStar extends ASTNode
-    case class All () extends LocOrStar  
+    case class ImpAll () extends LocOrStar  
     case class Spc (loc : Loc) extends LocOrStar  
      
     case class DotLocOrStar (locOrStar : LocOrStar) extends ASTNode
      
     case class TypeLoc (typeField : Type, loc : Loc) extends ASTNode
-     
-    case class CommTypeLoc (typeLoc : TypeLoc) extends ASTNode
-     
-    case class CommExp (exp : Exp) extends ASTNode
     
 }

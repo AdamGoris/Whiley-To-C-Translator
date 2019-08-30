@@ -31,12 +31,8 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> toDoc (v1) <> toDoc (v2) 
             case v @ Asgn (v1) =>
                 line <> toDoc (v1) 
-            case v @ TypeDeclVar (v1, v2, v3) =>
-                line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
-            case v @ TypeDeclType (v1, v2, v3) =>
-                line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
-            case v @ TypeDeclFn (v1, v2, v3) =>
-                line <> text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ TypeDecl (v1) =>
+                line <> toDoc (v1) 
             case v @ ConstDecl (v1, v2) =>
                 line <> text ("const") <> space <> toDoc (v1) <> text ("is") <> space <> toDoc (v2) 
             case v @ If (v1, v2, v3, v4) =>
@@ -53,10 +49,12 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 line <> text ("method") <> space <> toDoc (v1) <> text ("(") <> v2.map (toDoc).getOrElse (emptyDoc) <> text (")") <> v3.map (toDoc).getOrElse (emptyDoc) <> ssep (v4.map (toDoc), emptyDoc) <> text (":") <> nest (toDoc (v5)) <> line 
             case v @ RtnStm (v1, v2) =>
                 line <> text ("return") <> space <> toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
-            case v @ AssertExp (v1) =>
+            case v @ Assert (v1) =>
                 line <> text ("assert") <> space <> toDoc (v1) 
-            case v @ AssumeExp (v1) =>
+            case v @ Assume (v1) =>
                 line <> text ("assume") <> space <> toDoc (v1) 
+            case v @ DebugExp (v1) =>
+                line <> text ("debug") <> space <> toDoc (v1) 
             case v @ SkipStm () =>
                 line <> text ("skip") <> space 
             case v @ BreakStm () =>
@@ -72,13 +70,29 @@ trait WhileyIPrettyPrinter extends PP with PPP {
             case v @ BoolType () =>
                 text ("bool") <> space <> emptyDoc 
             case v @ ReferenceType (v1) =>
-                text ("&") <> toDoc (v1)                      
+                text ("&") <> toDoc (v1)                              
             case v : Exp =>
                 toParenDoc (v)  
+            case v @ TypeDeclVar (v1, v2, v3) =>
+                text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> emptyDoc <> toDoc (v2) <> emptyDoc <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ TypeDeclType (v1, v2, v3) =>
+                text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> emptyDoc <> toDoc (v2) <> emptyDoc <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ TypeDeclLambda (v1, v2, v3) =>
+                text ("type") <> space <> toDoc (v1) <> space <> text ("is") <> space <> toDoc (v2) <> ssep (v3.map (toDoc), emptyDoc) 
+            case v @ ArgList (v1, v2) =>
+                toDoc (v1) <> ssep (v2.map (toDoc), emptyDoc) 
             case v @ WhereExp (v1) =>
                 text ("where") <> space <> toDoc (v1) 
-            case v @ FnType (v1, v2) =>
-                text ("function") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text ("->") <> toDoc (v2) 
+            case v @ QuantExp (v1, v2, v3, v4, v5) =>
+                toDoc (v1) <> text ("{") <> toDoc (v2) <> text ("in") <> toDoc (v3) <> ssep (v4.map (toDoc), emptyDoc) <> text ("|") <> toDoc (v5) <> text ("}") 
+            case v @ No () =>
+                text ("no") <> space 
+            case v @ Some () =>
+                text ("some") <> space 
+            case v @ All () =>
+                text ("all") <> space 
+            case v @ Lambda (v1, v2) =>
+                text ("function") <> space <> text ("(") <> ssep (v1.map (toDoc), emptyDoc) <> text (")") <> text ("->") <> toDoc (v2) 
             case v @ ElseIf (v1, v2) =>
                 text ("else if") <> space <> toDoc (v1) <> text (":") <> nest (toDoc (v2)) 
             case v @ Else (v1) =>
@@ -119,32 +133,40 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 value (v1) 
             case v @ Loc (v1) =>
                 value (v1)   
+            case v @ CommExp (v1) =>
+                text (",") <> toDoc (v1) 
             case v @ CommLoc (v1) =>
+                text (",") <> toDoc (v1) 
+            case v @ CommLocInExp (v1, v2) =>
+                text (",") <> toDoc (v1) <> text ("in") <> space <> toDoc (v2) 
+            case v @ CommTypeLoc (v1) =>
                 text (",") <> toDoc (v1) 
             case v @ DotLoc (v1) =>
                 text (".") <> toDoc (v1) 
-            case v @ All () =>
+            case v @ ImpAll () =>
                 text ("*") 
             case v @ Spc (v1) =>
                 toDoc (v1) 
             case v @ DotLocOrStar (v1) =>
                 text (".") <> toDoc (v1) 
             case v @ TypeLoc (v1, v2) =>
-                toDoc (v1) <> toDoc (v2) 
-            case v @ CommTypeLoc (v1) =>
-                text (",") <> toDoc (v1) 
-            case v @ CommExp (v1) =>
-                text (",") <> toDoc (v1)
+                toDoc (v1) <> toDoc (v2)
         }
     
     override def toParenDoc (astNode : org.bitbucket.inkytonik.kiama.output.PrettyExpression) : Doc =
         astNode match {
+            case v @ Iff (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("<==>") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ Implies (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("==>") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ Or (v1, v2) =>
-                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("|") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("||") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ Xor (v1, v2) =>
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("^") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ And (v1, v2) =>
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("&&") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ BitWiseAnd (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("&") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ EQ (v1, v2) =>
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("==") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ NE (v1, v2) =>
@@ -173,6 +195,16 @@ trait WhileyIPrettyPrinter extends PP with PPP {
                 recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> space <> text ("%") <> space <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
             case v @ Not (v1) =>
                 text ("!") <> recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ Neg (v1) =>
+                text ("-") <> recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.RightAssoc) 
+            case v @ ArrAccess (v1, v2) =>
+                recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.LeftAssoc) <> text ("[") <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.NonAssoc) <> text ("]") 
+            case v @ ArrGen (v1, v2) =>
+                text ("[") <> recursiveToDoc (v, v1, org.bitbucket.inkytonik.kiama.output.NonAssoc) <> text (";") <> recursiveToDoc (v, v2, org.bitbucket.inkytonik.kiama.output.NonAssoc) <> text ("]") 
+            case v @ ArrInit (v1) =>
+                text ("[") <> toDoc (v1) <> text ("]") 
+            case v @ QuantifierExp (v1) =>
+                toDoc (v1) 
             case v @ Use (v1) =>
                 toDoc (v1) 
             case v @ Assign (v1, v2) =>

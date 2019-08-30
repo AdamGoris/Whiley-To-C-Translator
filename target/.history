@@ -62,3 +62,24 @@ compile
 run c:\WhileyParser\src\test\whiley\valid\AddressExpression_Valid_1.whiley
 compile
 run c:\WhileyParser\src\test\whiley\valid\AddressExpression_Valid_1.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+clean
+comile
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+compile
+run c:\WhileyParser\src\test\whiley\simpleTest.whiley

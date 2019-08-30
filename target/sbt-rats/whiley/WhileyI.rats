@@ -60,11 +60,12 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
                 
     static {
         add (KEYWORDS, new String[] {
-            "assert", "assume", "bool", "break", "byte", "case", "const", "continue",
-            "default", "do", "else", "ensures", "export", "fail", "false", "from",
-            "function", "if", "import", "int", "is", "method", "native", "null",
-            "package", "private", "public", "requires", "return", "skip", "switch",
-            "true", "type", "where", "while"
+            "all", "assert", "assume", "bool", "break", "byte", "case", "const",
+            "continue", "debug", "default", "do", "else", "ensures", "export",
+            "fail", "false", "from", "function", "if", "import", "in", "int",
+            "is", "method", "native", "no", "null", "package", "private", "public",
+            "requires", "return", "skip", "some", "switch", "true", "type",
+            "where", "while"
         });
     }
 }
@@ -72,11 +73,18 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
 option setOfString (KEYWORDS), withLocation;
 
 
+String Symbol1 =
+    Symbol1Alts Spacing;
+
+transient String Symbol1Alts =
+    "*" / "%" / "}" / "." / "]" / "=" / "<" / "&" / "!" / "|" / ")" / "-" /
+    "," / ";" / "[" / "{" / "0" / "+" / "(" / ":" / "^" / "/" / ">";
+
 String Symbol2 =
     Symbol2Alts Spacing;
 
 transient String Symbol2Alts =
-    "0b" / "<=" / "<<" / "->" / ">=" / ">>" / "==" / "[]" / "!=" / "&&";
+    "0b" / "<=" / "<<" / "->" / "||" / ">=" / ">>" / "==" / "[]" / "!=" / "&&";
 
 String Symbol7 =
     Symbol7Alts Spacing;
@@ -84,12 +92,17 @@ String Symbol7 =
 transient String Symbol7Alts =
     "else if";
 
-String Symbol1 =
-    Symbol1Alts Spacing;
+String Symbol3 =
+    Symbol3Alts Spacing;
 
-transient String Symbol1Alts =
-    "*" / "%" / "." / "]" / "=" / "<" / "&" / "!" / "|" / ")" / "-" / "," /
-    "[" / "0" / "+" / "(" / ":" / "^" / "/" / ">";
+transient String Symbol3Alts =
+    "==>";
+
+String Symbol4 =
+    Symbol4Alts Spacing;
+
+transient String Symbol4Alts =
+    "<==>";
 
 public Program Program =
     Spacing v1:(Stm)* EOF {
@@ -107,23 +120,17 @@ public Stm Stm =
     / v1:Modifier v2:Stm {
         yyValue = new Modify (v1, v2);
     }
-    / v1:Type v2:Loc v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
+    / v1:Type v2:LVal v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
         yyValue = new DeclAsgn (v1, v2, v3, v4, v5);
     }
-    / v1:Type v2:Loc {
+    / v1:Type v2:LVal {
         yyValue = new Decl (v1, v2);
     }
     / v1:Assign {
         yyValue = new Asgn (v1);
     }
-    / void:"type":Word v1:Loc  void:"is":Word v2:TypeLoc v3:(WhereExpr)* {
-        yyValue = new TypeDeclVar (v1, v2, v3);
-    }
-    / void:"type":Word v1:Loc  void:"is":Word v2:Type v3:(WhereExpr)* {
-        yyValue = new TypeDeclType (v1, v2, v3);
-    }
-    / void:"type":Word v1:Loc  void:"is":Word v2:FnType v3:(WhereExpr)* {
-        yyValue = new TypeDeclFn (v1, v2, v3);
+    / v1:TypeDeclaration {
+        yyValue = new TypeDecl (v1);
     }
     / void:"const":Word v1:Loc void:"is":Word v2:Exp {
         yyValue = new ConstDecl (v1, v2);
@@ -150,10 +157,13 @@ public Stm Stm =
         yyValue = new RtnStm (v1, v2);
     }
     / void:"assert":Word v1:Exp {
-        yyValue = new AssertExp (v1);
+        yyValue = new Assert (v1);
     }
     / void:"assume":Word v1:Exp {
-        yyValue = new AssumeExp (v1);
+        yyValue = new Assume (v1);
+    }
+    / void:"debug":Word v1:Exp {
+        yyValue = new DebugExp (v1);
     }
     / void:"skip":Word {
         yyValue = new SkipStm ();
@@ -188,12 +198,30 @@ public RefType RefType =
     ;
 
 public Exp Exp =
-    v1:ExpLevel8 
+    v1:ExpLevel10 
     ;
 
 public Exp Assign =
     v1:LVal  void:"=":Symbol1 v2:Exp {
         yyValue = new Assign (v1, v2);
+    }
+    ;
+
+public TypeDeclaration TypeDeclaration =
+    void:"type":Word v1:Loc  void:"is":Word (void:"(":Symbol1)? v2:TypeLoc (void:")":Symbol1)? v3:(WhereExpr)* {
+        yyValue = new TypeDeclVar (v1, v2, v3);
+    }
+    / void:"type":Word v1:Loc  void:"is":Word (void:"(":Symbol1)? v2:Type (void:")":Symbol1)? v3:(WhereExpr)* {
+        yyValue = new TypeDeclType (v1, v2, v3);
+    }
+    / void:"type":Word v1:Loc  void:"is":Word v2:Lambda v3:(WhereExpr)* {
+        yyValue = new TypeDeclLambda (v1, v2, v3);
+    }
+    ;
+
+public ArgList ArgList =
+    v1:Exp v2:(CommExp)* {
+        yyValue = new ArgList (v1, v2);
     }
     ;
 
@@ -203,9 +231,27 @@ public WhereExpr WhereExpr =
     }
     ;
 
-public FnType FnType =
-    void:"function":Word void:"(":Symbol1 v1:Type void:")":Symbol1 void:"->":Symbol2 v2:Type {
-        yyValue = new FnType (v1, v2);
+public QuantExp QuantExp =
+    v1:NoSomeAll void:"{":Symbol1 v2:Loc void:"in":Word v3:Exp v4:(CommLocInExp)* void:"|":Symbol1 v5:Exp void:"}":Symbol1 {
+        yyValue = new QuantExp (v1, v2, v3, v4, v5);
+    }
+    ;
+
+public NoSomeAll NoSomeAll =
+    void:"no":Word {
+        yyValue = new No ();
+    }
+    / void:"some":Word {
+        yyValue = new Some ();
+    }
+    / void:"all":Word {
+        yyValue = new All ();
+    }
+    ;
+
+public Lambda Lambda =
+    void:"function":Word void:"(":Symbol1 v1:(TypeLoc)* void:")":Symbol1 void:"->":Symbol2 v2:Type {
+        yyValue = new Lambda (v1, v2);
     }
     ;
 
@@ -368,9 +414,27 @@ public String Lab =
     Identifier
     ;
 
+public CommExp CommExp =
+    void:",":Symbol1 v1:Exp {
+        yyValue = new CommExp (v1);
+    }
+    ;
+
 public CommLoc CommLoc =
     void:",":Symbol1 v1:Loc {
         yyValue = new CommLoc (v1);
+    }
+    ;
+
+public CommLocInExp CommLocInExp =
+    void:",":Symbol1 v1:Loc void:"in":Word v2:Exp {
+        yyValue = new CommLocInExp (v1, v2);
+    }
+    ;
+
+public CommTypeLoc CommTypeLoc =
+    void:",":Symbol1 v1:TypeLoc {
+        yyValue = new CommTypeLoc (v1);
     }
     ;
 
@@ -382,7 +446,7 @@ public DotLoc DotLoc =
 
 public LocOrStar LocOrStar =
     void:"*":Symbol1 {
-        yyValue = new All ();
+        yyValue = new ImpAll ();
     }
     / v1:Loc {
         yyValue = new Spc (v1);
@@ -401,25 +465,25 @@ public TypeLoc TypeLoc =
     }
     ;
 
-public CommTypeLoc CommTypeLoc =
-    void:",":Symbol1 v1:TypeLoc {
-        yyValue = new CommTypeLoc (v1);
-    }
-    ;
-
-public CommExp CommExp =
-    void:",":Symbol1 v1:Exp {
-        yyValue = new CommExp (v1);
-    }
-    ;
-
 public Exp ExpLevel0 =
     void:"!":Symbol1 v1:ExpLevel0 {
         yyValue = new Not (v1);
     }
+    / void:"-":Symbol1 v1:ExpLevel0 {
+        yyValue = new Neg (v1);
+    }
     / void:"(":Symbol1 v1:Exp void:")":Symbol1 
+    / void:"[":Symbol1 v1:Exp void:";":Symbol1 v2:Exp void:"]":Symbol1 {
+        yyValue = new ArrGen (v1, v2);
+    }
+    / void:"[":Symbol1 v1:ArgList void:"]":Symbol1 {
+        yyValue = new ArrInit (v1);
+    }
     / v1:Assign 
     / v1:Length 
+    / v1:QuantExp {
+        yyValue = new QuantifierExp (v1);
+    }
     / v1:Loc {
         yyValue = new Use (v1);
     }
@@ -446,6 +510,24 @@ constant Action<Exp> ExpLevel5Tail =
         yyValue = new Action<Exp>() {
             public Exp run (Exp left) {
                 NE node = new NE (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel10 =
+    v1:ExpLevel9 v2:(ExpLevel10Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel10Tail =
+     void:"<==>":Symbol4 v1:ExpLevel9 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Iff node = new Iff (left, v1);
                 copyLocation(node, left);
                 return node;
             };
@@ -487,6 +569,15 @@ constant Action<Exp> ExpLevel1Tail =
             };
         };
     }
+    / void:"[":Symbol1 v1:ExpLevel0 void:"]":Symbol1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                ArrAccess node = new ArrAccess (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
     ;
 
 public Exp ExpLevel6 =
@@ -500,6 +591,33 @@ constant Action<Exp> ExpLevel6Tail =
         yyValue = new Action<Exp>() {
             public Exp run (Exp left) {
                 And node = new And (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"&":Symbol1 v1:ExpLevel5 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                BitWiseAnd node = new BitWiseAnd (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel9 =
+    v1:ExpLevel8 v2:(ExpLevel9Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel9Tail =
+     void:"==>":Symbol3 v1:ExpLevel8 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Implies node = new Implies (left, v1);
                 copyLocation(node, left);
                 return node;
             };
@@ -580,7 +698,7 @@ constant Action<Exp> ExpLevel3Tail =
     ;
 
 public Exp ExpLevel8 =
-    v1:ExpLevel7  void:"|":Symbol1 v2:ExpLevel7 {
+    v1:ExpLevel7  void:"||":Symbol2 v2:ExpLevel7 {
         yyValue = new Or (v1, v2);
     }
     / v1:ExpLevel7 

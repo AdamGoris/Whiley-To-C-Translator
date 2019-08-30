@@ -75,8 +75,8 @@ Assign : Exp =
     LVal sp "=" Exp.
 
 TypeDeclaration =
-    "type" Loc sp "is" TypeLoc WhereExpr*                                                     {TypeDeclVar}
-  | "type" Loc sp "is" Type WhereExpr*                                                        {TypeDeclType}
+    "type" Loc sp "is" '('? TypeLoc ')'? WhereExpr*                                           {TypeDeclVar}
+  | "type" Loc sp "is" '('? Type ')'? WhereExpr*                                              {TypeDeclType}
   | "type" Loc sp "is" Lambda WhereExpr*                                                      {TypeDeclLambda}.
 
 ArgList = 
