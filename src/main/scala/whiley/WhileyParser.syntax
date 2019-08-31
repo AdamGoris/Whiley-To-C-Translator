@@ -32,9 +32,10 @@ Stm {line} =
   | "fail"                                                                                    {FailStm}.
 
 Type = 
-    "int" "[]"?                                                                               {IntType}
-  | "byte" "[]"?                                                                              {ByteType}
-  | "bool" "[]"?                                                                              {BoolType}.
+    "int" "[]"*                                                                               {IntType}
+  | "byte" "[]"*                                                                              {ByteType}
+  | "bool" "[]"*                                                                              {BoolType}
+  | Identifier "[]"*                                                                          {IdnType}.
 
 RefType =
     '&' Type                                                                                  {ReferenceType}.
@@ -61,15 +62,17 @@ Exp {paren} =
   | Exp sp "%" Exp                                                                            {Rem, left, 1}
   | '!' Exp                                                                                   {Not}
   | '-' Exp                                                                                   {Neg}
+  | Loc '(' Exp ')'                                                                           {FunctionCall}
   | '(' Exp ')'
   | Exp '[' Exp ']'                                                                           {ArrAccess, left, 1}
   | '[' Exp ';' Exp ']'                                                                       {ArrGen}
-  | '[' ArgList ']'                                                                           {ArrInit}
+  | '[' (Exp ',')* Exp ']'                                                                    {ArrInit}
+  | Exp ',' Exp                                                                               {ExpList, left, 1}
 	| Assign
 	| Length
   | QuantExp                                                                                  {QuantifierExp}
-	| Loc                                                                                       {Use}
-	|	Lit.
+	| Loc                                                                                       {Use}                                                                               
+  | Lit.
 
 Assign : Exp = 
     LVal sp "=" Exp.
@@ -78,9 +81,6 @@ TypeDeclaration =
     "type" Loc sp "is" '('? TypeLoc ')'? WhereExpr*                                           {TypeDeclVar}
   | "type" Loc sp "is" '('? Type ')'? WhereExpr*                                              {TypeDeclType}
   | "type" Loc sp "is" Lambda WhereExpr*                                                      {TypeDeclLambda}.
-
-ArgList = 
-    Exp CommExp*.
 
 WhereExpr =
     "where" Exp                                                                               {WhereExp}.
@@ -148,7 +148,7 @@ DecimalNumeral : String =
 BooleanLiteral : Exp =
     'false'                                                                                    {False}
   | 'true'                                                                                     {True}.
-/*
+
 CharacterLiteral = 
 		"'" Character "'".
 
@@ -158,7 +158,7 @@ Character =
 
 StringLiteral =
 		'"' Character* '"'.
-*/
+
 Digits : String = 
 		Digit*.
 
@@ -196,6 +196,9 @@ CommLoc =
 CommLocInExp = 
     ',' Loc "in" Exp.
 
+CommLit =
+    ',' Lit.
+
 CommTypeLoc = 
     ',' TypeLoc.
     
@@ -204,7 +207,7 @@ DotLoc =
 
 LocOrStar = 
     '*'                                                                                          {ImpAll}
-  | Loc                                                                                          {Spc}.
+  | Loc                                                                                          {Spcfc}.
 
 DotLocOrStar = 
     '.' LocOrStar.
