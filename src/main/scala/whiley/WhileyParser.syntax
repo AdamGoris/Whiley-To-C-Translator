@@ -128,9 +128,9 @@ Lit : Exp =
 		NullLiteral																																								{NullLit}
   | ByteLiteral																																								{ByteLit}
   | IntegerLiteral                                                                            {IntLit, 1: Integer.parseInt : Int}
-  | BooleanLiteral																																						{BoolLit}.
-	//| CharacterLiteral																																					{CharLit}
-	//| StringLiteral																																							{StringLit}.
+  | BooleanLiteral																																						{BoolLit}
+	| CharacterLiteral																																					{CharLit}
+	| StringLiteral																																							{StringLit}.
 
 NullLiteral =
 		'null'.
@@ -152,12 +152,11 @@ BooleanLiteral : Exp =
 CharacterLiteral = 
 		"'" Character "'".
 
-Character = 
-		Letter
-	| Digit.
+StringLiteral  =
+		 '"' Character* '"'.
 
-StringLiteral =
-		'"' Character* '"'.
+Character : Token = 
+		[\-a-zA-Z$._0-9].
 
 Digits : String = 
 		Digit*.
