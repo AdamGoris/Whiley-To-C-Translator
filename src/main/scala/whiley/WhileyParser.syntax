@@ -97,14 +97,14 @@ Lambda =
     "function" '(' TypeLoc* ')' '->' Type.
 
 ElseIf = 
-    "else if" Exp ':' nest (Stm).
+    "else if" Exp ':' nest (Stm*).
 
 Else =
-    "else" ':' nest (Stm).
+    "else" ':' nest (Stm*).
 
 CaseStm = 
-		"case" Exp CommExp* ':' nest (Stm)\n                                                      {Case}
-	| "default" ':' nest (Stm)\n	                                                              {DefaultCase}.
+		"case" Exp CommExp* ':' nest (Stm*)\n                                                      {Case}
+	| "default" ':' nest (Stm*)\n	                                                              {DefaultCase}.
 
 RequiresEnsures = 
 		"requires" Exp																																						{Requires}
