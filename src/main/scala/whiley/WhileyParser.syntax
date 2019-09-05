@@ -20,8 +20,8 @@ Stm {line} =
   | "switch" Exp ':' CaseStm*                                                                 {Switch}
   | "while" '(' Exp ')' WhereExpr* ':' nest (Stm*)\n                                          {While}
   | "do" ':' nest (Stm*)\n "while" nest (Exp) WhereExpr*                                      {DoWhile}
-  | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n          {FnDecl}
-  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm)\n            {MthdDecl} 
+  | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n         {FnDecl}
+  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n           {MthdDecl} 
   | "return" Exp CommExp*                                                                     {RtnStm}
   | "assert" Exp                                                                              {Assert}
   | "assume" Exp                                                                              {Assume}
