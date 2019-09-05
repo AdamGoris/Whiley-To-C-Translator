@@ -14,7 +14,7 @@ Stm {line} =
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {Asgn}
-  | TypeDeclaration                                                                           {TypeDecl}
+  | "type" Loc "is" Type Loc? WhereExpr*                                                       {TypeDecl}
   | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
   | "if" '(' Exp ')' ':' nest (Stm*)\n ElseIf* Else?                                          {If}
   | "switch" Exp ':' CaseStm*                                                                 {Switch}
@@ -32,13 +32,62 @@ Stm {line} =
   | "fail"                                                                                    {FailStm}.
 
 Type = 
-    "int" "[]"*                                                                               {IntType}
-  | "byte" "[]"*                                                                              {ByteType}
-  | "bool" "[]"*                                                                              {BoolType}
-  | Identifier "[]"*                                                                          {IdnType}.
+    UnionType                                                                                 {Union}
+  | IntersectionType                                                                          {IntrsctnType}                                                                          
+  | TermType.
 
-RefType =
-    '&' Type                                                                                  {ReferenceType}.
+UnionType : Type = 
+    IntersectionType ('|' IntersectionType)*.
+
+IntersectionType : Type = 
+    TermType ('&' TermType)*.
+
+TermType : Type = 
+    PrimitiveType                                                                             {PrimType}
+  | RecordType                                                                                {RecType}
+  | ReferenceType                                                                             {RefType}
+  //| ArrayType                                                                                 {ArrType}
+  | NegationType                                                                              {NegType}
+  | FunctionType                                                                              {FuncType}
+  | MethodType                                                                                {MthdType}
+  | '(' Type ')'
+  | Identifier                                                                                {NmnlType}.
+
+PrimitiveType =
+    "null"                                                                                    {NullType}
+  | "int"                                                                                     {IntType}
+  | "byte"                                                                                    {ByteType}
+  | "bool"                                                                                    {BoolType}
+  | "real"                                                                                    {RealType}.
+
+RecordType =
+  '{' MixedType CommMixedType* ',' '...' '}'.
+
+MixedType = 
+    Type Loc                                                                                  {Mix}
+  | "function" Loc '(' Parameters ')' '->' Parameters                                         {MixFunc}
+  | "method" Loc '(' Parameters ')' '->' Parameters                                           {MixMthd}.
+
+CommMixedType = 
+    ',' MixedType.
+
+ReferenceType =
+    '&' Type.
+
+NominalType = 
+    Identifier.
+
+ArrayType = 
+    Type "[]".
+
+NegationType = 
+    '!' Type.
+
+FunctionType = 
+    "function" '(' Parameters ')' '->' Parameters.
+
+MethodType = 
+    "method" '(' Parameters ')' '->' Parameters.
 
 Exp {paren} = 
     Exp sp "<==>" Exp                                                                         {Iff, left, 10}
@@ -77,11 +126,6 @@ Exp {paren} =
 Assign : Exp = 
     LVal sp "=" Exp.
 
-TypeDeclaration =
-    "type" Loc sp "is" '('? TypeLoc ')'? WhereExpr*                                           {TypeDeclVar}
-  | "type" Loc sp "is" '('? Type ')'? WhereExpr*                                              {TypeDeclType}
-  | "type" Loc sp "is" Lambda WhereExpr*                                                      {TypeDeclLambda}.
-
 WhereExpr =
     "where" Exp                                                                               {WhereExp}.
 
@@ -92,9 +136,6 @@ NoSomeAll =
     "no"                                                                                      {No}
   | "some"                                                                                    {Some}
   | "all"                                                                                     {All}.
-
-Lambda = 
-    "function" '(' TypeLoc* ')' '->' Type.
 
 ElseIf = 
     "else if" Exp ':' nest (Stm*).
