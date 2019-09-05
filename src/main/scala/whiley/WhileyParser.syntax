@@ -14,8 +14,8 @@ Stm {line} =
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {Asgn}
-  | "type" Loc "is" Type Loc? WhereExpr*                                                       {TypeDecl}
-  | "const" Loc "is" Exp                                                                      {ConstDecl}                                                                  
+  | "type" Loc sp "is" Type Loc? WhereExpr*                                                   {TypeDecl}
+  | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
   | "if" '(' Exp ')' ':' nest (Stm*)\n ElseIf* Else?                                          {If}
   | "switch" Exp ':' CaseStm*                                                                 {Switch}
   | "while" '(' Exp ')' WhereExpr* ':' nest (Stm*)\n                                          {While}
@@ -31,10 +31,10 @@ Stm {line} =
   | "continue"                                                                                {ContStm}
   | "fail"                                                                                    {FailStm}.
 
-Type = 
-    UnionType                                                                                 {Union}
-  | IntersectionType                                                                          {IntrsctnType}                                                                          
-  | TermType.
+Type =
+    TermType
+  | UnionType                                                                                {Union}
+  | IntersectionType                                                                         {IntrsctnType}.
 
 UnionType : Type = 
     IntersectionType ('|' IntersectionType)*.
@@ -43,24 +43,24 @@ IntersectionType : Type =
     TermType ('&' TermType)*.
 
 TermType : Type = 
-    PrimitiveType                                                                             {PrimType}
-  | RecordType                                                                                {RecType}
+    RecordType                                                                                {RecType}
   | ReferenceType                                                                             {RefType}
-  //| ArrayType                                                                                 {ArrType}
+  | ArrayType                                                                                 {ArrType}
   | NegationType                                                                              {NegType}
   | FunctionType                                                                              {FuncType}
   | MethodType                                                                                {MthdType}
   | '(' Type ')'
+  | PrimitiveType
   | Identifier                                                                                {NmnlType}.
 
-PrimitiveType =
+PrimitiveType : Type =
     "null"                                                                                    {NullType}
   | "int"                                                                                     {IntType}
   | "byte"                                                                                    {ByteType}
   | "bool"                                                                                    {BoolType}
   | "real"                                                                                    {RealType}.
 
-RecordType =
+RecordType : Type =
   '{' MixedType CommMixedType* ',' '...' '}'.
 
 MixedType = 
@@ -71,22 +71,22 @@ MixedType =
 CommMixedType = 
     ',' MixedType.
 
-ReferenceType =
+ReferenceType : Type =
     '&' Type.
 
-NominalType = 
+NominalType : Type = 
     Identifier.
 
-ArrayType = 
-    Type "[]".
+ArrayType : Type = 
+    PrimitiveType "[]".
 
-NegationType = 
+NegationType : Type = 
     '!' Type.
 
-FunctionType = 
+FunctionType : Type = 
     "function" '(' Parameters ')' '->' Parameters.
 
-MethodType = 
+MethodType : Type = 
     "method" '(' Parameters ')' '->' Parameters.
 
 Exp {paren} = 
