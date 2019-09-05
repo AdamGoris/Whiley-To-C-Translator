@@ -8,59 +8,110 @@ Program =
     Spacing Stm* EOF.
 
 Stm {line} = 
-    Type Loc '=' Exp ';'                          {DeclAsgnC}
-  | Type Loc ';'                                  {DeclC}
-  | Assign                                        {AsgnC}
-  | "if" '(' Exp ')' '{' nest (Stm) '}'           {IfC}.
+    Type Loc '=' Exp ';'                              {DeclAsgnC}
+  | Type Loc ';'                                      {DeclC}
+  | Assign                                            {AsgnC}
+  | "if" '(' Exp ')' '{' nest (Stm*)\n '}'            {IfC}
+  | "switch" '(' Exp ')' '{' nest (CaseStmC*)\n '}'   {SwitchC}
+  | "while" '(' Exp ')' '{' nest (Stm*)\n '}'         {WhileC}
+  | "do" '{' nest (Stm*)\n '}' "while" '(' Exp ')'    {DoWhileC}
+  | "for" '(' Type Loc '=' Exp ';' Exp ';' Exp ')'    {ForC}
+  | Type Loc '(' ParametersC ')' '{' nest (Stm*)\n '}' {FunctionDeclC}
+  | "return" Exp                                      {ReturnC}
+  | "assert" Exp                                      {AssertC}
+  | "break"                                           {BreakC}
+  | "continue"                                        {ContinueC}.
+
+
+Type = 
+    "char"                                            {CharTypeC}
+  | "unsigned char"                                   {UnsgnCharTypeC}
+  | "signed char"                                     {SgnCharTypeC}
+  | "int"                                             {IntTypeC}
+  | "unsigned int"                                    {UnsgnIntTypeC}
+  | "short"                                           {ShortTypeC}
+  | "unsigned short"                                  {UnsgnShortTypeC}
+  | "long"                                            {LongTypeC}
+  | "unsigned long"                                   {UnsgnLongTypeC}
+  | "float"                                           {FloatTypeC}
+  | "double"                                          {DoubleTypeC}
+  | "long double"                                     {LongDoubleTypeC}
+  | "void"                                            {VoidTypeC}.
 
 Exp {paren} =
-    Exp sp "==" Exp                               {EQ, left, 5}
-  | Exp sp "!=" Exp                               {NE, left, 5}
-  | Exp sp "<"  Exp                               {LT, left, 4}
-  | Exp sp "<=" Exp                               {LE, left, 4}
-  | Exp sp ">"  Exp                               {GT, left, 4}
-  | Exp sp ">=" Exp                               {GE, left, 4}
-  | Exp sp "<<" Exp                               {Lsh, left, 3}
-  | Exp sp ">>" Exp                               {ARsh, left, 3}
-  | Exp sp "+" Exp                                {Add, left, 2}
-  | Exp sp "-" Exp                                {Sub, left, 2}
-  | Exp sp "*" Exp                                {Mul, left, 1}
-  | Exp sp "/" Exp                                {Div, left, 1}
-  | Exp sp "%" Exp                                {Rem, left, 1}
-  | '!' Exp                                       {Not}
-  | '-' Exp                                       {Neg}
+    Exp sp "==" Exp ';'                              {EQ, left, 5}
+  | Exp sp "!=" Exp ';'                             {NE, left, 5}
+  | Exp sp "<"  Exp ';'                              {LT, left, 4}
+  | Exp sp "<=" Exp ';'                              {LE, left, 4}
+  | Exp sp ">"  Exp ';'                              {GT, left, 4}
+  | Exp sp ">=" Exp ';'                              {GE, left, 4}
+  | Exp sp "<<" Exp ';'                              {Lsh, left, 3}
+  | Exp sp ">>" Exp ';'                              {ARsh, left, 3}
+  | Exp sp "+" Exp ';'                               {Add, left, 2}
+  | Exp sp "-" Exp ';'                               {Sub, left, 2}
+  | Exp sp "*" Exp ';'                               {Mul, left, 1}
+  | Exp sp "/" Exp ';'                               {Div, left, 1}
+  | Exp sp "%" Exp ';'                               {Rem, left, 1}
+  | '!' Exp ';'                                      {Not}
+  | '-' Exp ';'                                      {Neg}
   | Assign
+  | Increment                                     {Incr}
+  | Decrement                                     {Decr}
   | Loc                                           {Use}
   | Lit.
 
 Assign : Exp =
     Loc sp '=' Exp ';'.
 
-Type = 
-    "char"                                        {CharTypeC}
-  | "unsigned char"                               {UnsgnCharTypeC}
-  | "signed char"                                 {SgnCharTypeC}
-  | "int"                                         {IntTypeC}
-  | "unsigned int"                                {UnsgnIntTypeC}
-  | "short"                                       {ShortTypeC}
-  | "unsigned short"                              {UnsgnShortTypeC}
-  | "long"                                        {LongTypeC}
-  | "unsigned long"                               {UnsgnLongTypeC}
-  | "float"                                       {FloatTypeC}
-  | "double"                                      {DoubleTypeC}
-  | "long double"                                 {LongDoubleTypeC}
-  | "void"                                        {VoidTypeC}.
+Increment : Exp =
+    Loc "++" ';'.
+
+Decrement : Exp =
+    Loc "--" ';'.
+
+CaseStmC = 
+    "case" Exp ':' nest (Stm*)\n.
+
+ParametersC = 
+    Type Loc CommTypeLoc*.
 
 Lit : Exp =
-		NullLiteralC																	{NullLitC}.
-//  | IntegerLiteralC                               {IntLitC, 1: Integer.parseInt : Int}
-//	| CharacterLiteralC															{CharLitC}.
+		NullLiteralC																	{NullLitC}
+  | CharacterLiteralC															{CharLitC}
+  | IntegerLiteralC                               {IntLitC, 1: Integer.parseInt : Int}.
+  //| FloatLiteralC                                 {FloatLitC}
+  //| DoubleLiteralC                                {DoubleLitC}.
 
 NullLiteralC =
     "NULL".
+
+IntegerLiteralC : Token =
+    DecimalNumeral.
+
+DecimalNumeral : String =
+    '0'
+  | NonZeroDigit Digits.
+
+CharacterLiteralC = 
+		"'" Character "'".
+
+Character : Token = 
+		[\-a-zA-Z$._0-9].
+
+Digits : String = 
+		Digit*.
+
+NonZeroDigit : String =
+    [1-9].
+
+Digit : String =
+		[0-9].   
 
 Loc = 
     Identifier.
 
 Lab : String =
 		Identifier.
+
+CommTypeLoc =
+    ',' Type Loc.
