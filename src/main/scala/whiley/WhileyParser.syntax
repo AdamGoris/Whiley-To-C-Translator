@@ -14,7 +14,7 @@ Stm {line} =
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {Asgn}
-  | "type" Loc sp "is" Type Loc? WhereExpr*                                                   {TypeDecl}
+  | "type" Loc sp "is" '('? Type Loc? ')'? WhereExpr*                                         {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
   | "if" Exp ':' nest (Stm*)\n ElseIf* Else?                                                  {If}
   | "switch" Exp ':' CaseStm*                                                                 {Switch}
