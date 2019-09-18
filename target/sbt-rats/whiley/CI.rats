@@ -1,0 +1,513 @@
+module whiley.CI;
+
+header {
+    import whiley.CISyntax.*;
+
+    import sbtrats.Action;
+    import xtc.tree.Location;
+}
+
+body {
+    
+/**
+ * Drop the current path off string when it occurs at the beginning.
+ */
+public String dropCurrentPath (String string) {
+    int index = 0;
+    int stringlen = string.length ();
+    String prefix = System.getProperty ("user.dir");
+    int prefixlen = prefix.length ();
+    while ((index < stringlen) && (index < prefixlen) && (string.charAt (index) == prefix.charAt (index))) {
+        index++;
+    }
+    if ((index != 0) && (string.charAt (index) == java.io.File.separatorChar)) {
+        index++;
+    }
+    return string.substring (index);
+}
+
+/**
+ * Format a Rats! parser error message according to Scala compiler
+ * conventions for better compatibility with error processors.
+ */
+public String formatParseError (ParseError error, Boolean showCoord) throws IOException {
+    StringBuilder buf = new StringBuilder ();
+
+    if (error.index == -1) {
+        buf.append (error.msg);
+    } else {
+        Location loc = location (error.index);
+        if (showCoord) {
+            String filename = loc.file;
+            buf.append (filename);
+            buf.append (':');
+            buf.append (loc.line);
+            buf.append (": ");
+        }
+
+        buf.append (error.msg);
+        buf.append ("\n");
+
+        String line = lineAt (error.index);
+        buf.append (line);
+        buf.append ('\n');
+        for (int i = 1; i < loc.column; i++) buf.append (' ');
+        buf.append ("^");
+    }
+
+    return buf.toString ();
+}
+                
+    static {
+        add (KEYWORDS, new String[] {
+            "NULL", "break", "case", "char", "do", "double", "float", "for",
+            "if", "int", "long", "return", "short", "switch", "void", "while"
+        });
+    }
+}
+
+option setOfString (KEYWORDS), withLocation;
+
+
+String Symbol14 =
+    Symbol14Alts Spacing;
+
+transient String Symbol14Alts =
+    "unsigned short";
+
+String Symbol1 =
+    Symbol1Alts Spacing;
+
+transient String Symbol1Alts =
+    "*" / "%" / "}" / "=" / "<" / "!" / ")" / "-" / "," / ";" / "'" / "{" /
+    "0" / "+" / "(" / ":" / "/" / ">";
+
+String Symbol13 =
+    Symbol13Alts Spacing;
+
+transient String Symbol13Alts =
+    "unsigned char" / "unsigned long";
+
+String Symbol2 =
+    Symbol2Alts Spacing;
+
+transient String Symbol2Alts =
+    "<=" / "<<" / ">=" / ">>" / "++" / "==" / "!=" / "--";
+
+String Symbol12 =
+    Symbol12Alts Spacing;
+
+transient String Symbol12Alts =
+    "unsigned int";
+
+String Symbol11 =
+    Symbol11Alts Spacing;
+
+transient String Symbol11Alts =
+    "long double" / "signed char";
+
+public Program Program =
+    Spacing v1:(Stm)* EOF {
+        yyValue = new Program (v1);
+    }
+    ;
+
+public Stm Stm =
+    v1:Type v2:Loc void:"=":Symbol1 v3:Exp void:";":Symbol1 {
+        yyValue = new DeclAsgnC (v1, v2, v3);
+    }
+    / v1:Type v2:Loc void:";":Symbol1 {
+        yyValue = new DeclC (v1, v2);
+    }
+    / v1:Assign {
+        yyValue = new AsgnC (v1);
+    }
+    / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:"{":Symbol1 v2:(Stm)*  void:"}":Symbol1 {
+        yyValue = new IfC (v1, v2);
+    }
+    / void:"switch":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:"{":Symbol1 v2:(CaseStmC)*  void:"}":Symbol1 {
+        yyValue = new SwitchC (v1, v2);
+    }
+    / void:"while":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:"{":Symbol1 v2:(Stm)*  void:"}":Symbol1 {
+        yyValue = new WhileC (v1, v2);
+    }
+    / void:"do":Word void:"{":Symbol1 v1:(Stm)*  void:"}":Symbol1 void:"while":Word void:"(":Symbol1 v2:Exp void:")":Symbol1 {
+        yyValue = new DoWhileC (v1, v2);
+    }
+    / void:"for":Word void:"(":Symbol1 v1:Type v2:Loc void:"=":Symbol1 v3:Exp void:";":Symbol1 v4:Exp void:";":Symbol1 v5:Exp void:")":Symbol1 {
+        yyValue = new ForC (v1, v2, v3, v4, v5);
+    }
+    / v1:Type v2:Loc void:"(":Symbol1 v3:ParametersC void:")":Symbol1 void:"{":Symbol1 v4:(Stm)*  void:"}":Symbol1 {
+        yyValue = new FunctionDeclC (v1, v2, v3, v4);
+    }
+    / void:"return":Word v1:Exp {
+        yyValue = new ReturnC (v1);
+    }
+    / void:"break":Word {
+        yyValue = new BreakC ();
+    }
+    ;
+
+public Type Type =
+    void:"char":Word {
+        yyValue = new CharTypeC ();
+    }
+    / void:"unsigned char":Symbol13 {
+        yyValue = new UnsgnCharTypeC ();
+    }
+    / void:"signed char":Symbol11 {
+        yyValue = new SgnCharTypeC ();
+    }
+    / void:"int":Word {
+        yyValue = new IntTypeC ();
+    }
+    / void:"unsigned int":Symbol12 {
+        yyValue = new UnsgnIntTypeC ();
+    }
+    / void:"short":Word {
+        yyValue = new ShortTypeC ();
+    }
+    / void:"unsigned short":Symbol14 {
+        yyValue = new UnsgnShortTypeC ();
+    }
+    / void:"long":Word {
+        yyValue = new LongTypeC ();
+    }
+    / void:"unsigned long":Symbol13 {
+        yyValue = new UnsgnLongTypeC ();
+    }
+    / void:"float":Word {
+        yyValue = new FloatTypeC ();
+    }
+    / void:"double":Word {
+        yyValue = new DoubleTypeC ();
+    }
+    / void:"long double":Symbol11 {
+        yyValue = new LongDoubleTypeC ();
+    }
+    / void:"void":Word {
+        yyValue = new VoidTypeC ();
+    }
+    ;
+
+public Exp Exp =
+    v1:ExpLevel5 
+    ;
+
+public Exp Assign =
+    v1:Loc  void:"=":Symbol1 v2:Exp void:";":Symbol1 {
+        yyValue = new Assign (v1, v2);
+    }
+    ;
+
+public Exp Increment =
+    v1:Loc void:"++":Symbol2 {
+        yyValue = new Increment (v1);
+    }
+    ;
+
+public Exp Decrement =
+    v1:Loc void:"--":Symbol2 {
+        yyValue = new Decrement (v1);
+    }
+    ;
+
+public CaseStmC CaseStmC =
+    void:"case":Word v1:Exp void:":":Symbol1 v2:(Stm)*  {
+        yyValue = new CaseStmC (v1, v2);
+    }
+    ;
+
+public ParametersC ParametersC =
+    v1:Type v2:Loc v3:(CommTypeLoc)* {
+        yyValue = new ParametersC (v1, v2, v3);
+    }
+    ;
+
+public Exp Lit =
+    v1:NullLiteralC {
+        yyValue = new NullLitC (v1);
+    }
+    / v1:CharacterLiteralC {
+        yyValue = new CharLitC (v1);
+    }
+    / v1:IntegerLiteralC {
+        yyValue = new IntLitC (Integer.parseInt (v1));
+    }
+    ;
+
+public NullLiteralC NullLiteralC =
+    void:"NULL":Word {
+        yyValue = new NullLiteralC ();
+    }
+    ;
+
+public String IntegerLiteralC =
+    IntegerLiteralCForm Spacing
+    ;
+
+public String IntegerLiteralCForm =
+    DecimalNumeral
+    ;
+
+public String DecimalNumeral =
+    "0"
+    / NonZeroDigit Digits
+    ;
+
+public CharacterLiteralC CharacterLiteralC =
+    void:"'":Symbol1 v1:Character void:"'":Symbol1 {
+        yyValue = new CharacterLiteralC (v1);
+    }
+    ;
+
+public String Character =
+    CharacterForm Spacing
+    ;
+
+public String CharacterForm =
+    [\-a-zA-Z$._0-9]
+    ;
+
+public String Digits =
+    (Digit)*
+    ;
+
+public String NonZeroDigit =
+    [1-9]
+    ;
+
+public String Digit =
+    [0-9]
+    ;
+
+public Loc Loc =
+    v1:Identifier {
+        yyValue = new Loc (v1);
+    }
+    ;
+
+public String Lab =
+    Identifier
+    ;
+
+public CommTypeLoc CommTypeLoc =
+    void:",":Symbol1 v1:Type v2:Loc {
+        yyValue = new CommTypeLoc (v1, v2);
+    }
+    ;
+
+public Exp ExpLevel0 =
+    void:"!":Symbol1 v1:ExpLevel0 {
+        yyValue = new Not (v1);
+    }
+    / void:"-":Symbol1 v1:ExpLevel0 {
+        yyValue = new Neg (v1);
+    }
+    / v1:Assign 
+    / v1:Increment {
+        yyValue = new Incr (v1);
+    }
+    / v1:Decrement {
+        yyValue = new Decr (v1);
+    }
+    / v1:Loc {
+        yyValue = new Use (v1);
+    }
+    / v1:Lit 
+    ;
+
+public Exp ExpLevel5 =
+    v1:ExpLevel4 v2:(ExpLevel5Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel5Tail =
+     void:"==":Symbol2 v1:ExpLevel4 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                EQ node = new EQ (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"!=":Symbol2 v1:ExpLevel4 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                NE node = new NE (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel1 =
+    v1:ExpLevel0 v2:(ExpLevel1Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel1Tail =
+     void:"*":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Mul node = new Mul (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"/":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Div node = new Div (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"%":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Rem node = new Rem (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel2 =
+    v1:ExpLevel1 v2:(ExpLevel2Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel2Tail =
+     void:"+":Symbol1 v1:ExpLevel1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Add node = new Add (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"-":Symbol1 v1:ExpLevel1 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Sub node = new Sub (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel3 =
+    v1:ExpLevel2 v2:(ExpLevel3Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel3Tail =
+     void:"<<":Symbol2 v1:ExpLevel2 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                Lsh node = new Lsh (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:">>":Symbol2 v1:ExpLevel2 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                ARsh node = new ARsh (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+public Exp ExpLevel4 =
+    v1:ExpLevel3 v2:(ExpLevel4Tail)* {
+        yyValue = ParserSupport.apply(v2, v1);
+    }
+    ;
+
+constant Action<Exp> ExpLevel4Tail =
+     void:"<":Symbol1 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                LT node = new LT (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:"<=":Symbol2 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                LE node = new LE (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:">":Symbol1 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                GT node = new GT (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    /  void:">=":Symbol2 v1:ExpLevel3 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                GE node = new GE (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    ;
+
+// Default spacing specification
+public transient void Spacing   = (Space / Comment)*;
+
+
+// Default layout specification
+public transient void Space     = ' ' / '\t' / '\f' / EOL;
+public transient void EOL       = '\r' '\n' / '\r' / '\n';
+
+
+// Default comment specification
+public transient void Comment   = SLComment / MLComment;
+public transient void SLComment = "//" (!EOL _)* (EOL / EOF);
+public transient void MLComment = "/*" (MLComment / !"*/" _)* "*/";
+
+
+// Default word specification
+public String Identifier =
+    Word &{
+        ! contains (KEYWORDS, yyValue)
+    };
+
+public String Word =
+    WordCharacters Spacing;
+
+public transient String WordCharacters =
+    h:_ &{
+        Character.isJavaIdentifierStart (h)
+    } (t:_ &{
+        Character.isJavaIdentifierPart (t)
+    })*;
+
+public transient void EOF      = !_;
