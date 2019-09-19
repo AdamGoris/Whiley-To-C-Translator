@@ -13,7 +13,7 @@ Stm {line} =
   | Modifier Stm                                                                              {Modify}
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
-  | Assign                                                                                    {Asgn}
+  | Assign                                                                                    {AsgnStm}
   | "type" Loc sp "is" '('? Type Loc? ')'? WhereExpr*                                         {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
   | "if" Exp ':' nest (Stm*)\n ElseIf* Else?                                                  {If}
@@ -216,9 +216,9 @@ LVal =
 		Loc '.' Identifier 																		                                      {FieldAsgn}
 	| Loc '[' Exp ']'																				                                      {ListAsgn}	
 	| '*' Exp																								                                      {Pointer}
-	| Identifier																						                                      {IdnAsgn}.
+	| Loc.
 
-Loc = 
+Loc : LVal = 
     Identifier.
 
 Length : Exp = 
