@@ -10,7 +10,10 @@ Program =
 Stm {line} =
     "package" Loc DotLoc*                                                                     {PackageDecl}
   | "import" LocOrStar "from" Loc DotLocOrStar*                                               {ImportDecl}
-  | Modifier Stm                                                                              {Modify}
+  | "public" Stm                                                                              {Public}
+  | "private" Stm                                                                             {Private}
+  | "native" Stm                                                                              {Native}
+  | "export" Stm                                                                              {Export}
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {Asgn}
@@ -158,12 +161,6 @@ Parameters =
 ReturnType = 
     '->' '(' Parameters ')'                                                                   {RtnParams}
   | '->' Type                                                                                 {RtnType}.
-
-Modifier =
-	  "public"																																									{Public}
-	| "private"																																									{Private}
-	| "native"																																									{Native}
-	| "export"                                                                                  {Export}.
 
 Lit : Exp =
 		NullLiteral																																								{NullLit}
