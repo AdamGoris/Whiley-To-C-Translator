@@ -10,7 +10,10 @@ Program =
 Stm {line} =
     "package" Loc DotLoc*                                                                     {PackageDecl}
   | "import" LocOrStar "from" Loc DotLocOrStar*                                               {ImportDecl}
-  | Modifier Stm                                                                              {Modify}
+  | "public" Stm                                                                              {Public}
+  | "private" Stm                                                                             {Private}
+  | "native" Stm                                                                              {Native}
+  | "export" Stm                                                                              {Export}
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type LVal                                                                                 {Decl}
   | Assign                                                                                    {AsgnStm}
@@ -21,7 +24,7 @@ Stm {line} =
   | "while" Exp WhereExpr* ':' nest (Stm*)\n                                                  {While}
   | "do" ':' nest (Stm*)\n "while" nest (Exp) WhereExpr*                                      {DoWhile}
   | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n         {FnDecl}
-  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n           {MthdDecl} 
+  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n           {MthdDecl}
   | "return" Exp CommExp*                                                                     {RtnStm}
   | "assert" Exp                                                                              {Assert}
   | "assume" Exp                                                                              {Assume}
@@ -138,10 +141,10 @@ NoSomeAll =
   | "all"                                                                                     {All}.
 
 ElseIf = 
-    "else if" Exp ':' nest (Stm*).
+    "else if" Exp ':' nest (Stm*)\n.
 
 Else =
-    "else" ':' nest (Stm*).
+    "else" ':' nest (Stm*)\n.
 
 CaseStm = 
 		"case" Exp CommExp* ':' nest (Stm*)\n                                                     {Case}
@@ -158,12 +161,6 @@ Parameters =
 ReturnType = 
     '->' '(' Parameters ')'                                                                   {RtnParams}
   | '->' Type                                                                                 {RtnType}.
-
-Modifier =
-	  "public"																																									{Public}
-	| "private"																																									{Private}
-	| "native"																																									{Native}
-	| "export"                                                                                  {Export}.
 
 Lit : Exp =
 		NullLiteral																																								{NullLit}
