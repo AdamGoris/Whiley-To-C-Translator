@@ -36,8 +36,8 @@ Stm {line} =
 
 Type =
     TermType
-  | UnionType                                                                                {Union}
-  | IntersectionType                                                                         {IntrsctnType}.
+  | UnionType                                                                                	{Union}
+  | IntersectionType                                                                         	{IntrsctnType}.
 
 UnionType : Type = 
     IntersectionType ('|' IntersectionType)*.
@@ -124,7 +124,7 @@ Exp {paren} =
 	| Length
   | QuantExp                                                                                  {QuantifierExp}
 	| Loc                                                                                       {Use}                                                                               
-  | Lit.
+  | Literal                                                                            {Lit}.
 
 Assign : Exp = 
     LVal sp "=" Exp.
@@ -162,19 +162,13 @@ ReturnType =
     '->' '(' Parameters ')'                                                                   {RtnParams}
   | '->' Type                                                                                 {RtnType}.
 
-Lit : Exp =
-		NullLiteral																																								{NullLit}
-  | ByteLiteral																																								{ByteLit}
-  | IntegerLiteral                                                                            {IntLit, 1: Integer.parseInt : Int}
-  | BooleanLiteral																																						{BoolLit}
-	| CharacterLiteral																																					{CharLit}
-	| StringLiteral																																							{StringLit}.
-
-NullLiteral =
-		'null'.
-
-ByteLiteral : Exp = 
-  	'0b' Bit*.
+Literal =
+	'null'																			        {NullLit} 
+  | '0b' Bit*																			    {ByteLit}
+  | IntegerLiteral                                                                          {IntLit, 1: Integer.parseInt : Int}
+  | BooleanLiteral                                                                          {BoolLit}
+    | CharacterLiteral
+    | StringLiteral.
 
 IntegerLiteral : Token =
     DecimalNumeral.
@@ -183,15 +177,15 @@ DecimalNumeral : String =
     '0'
   | NonZeroDigit Digits.
 
-BooleanLiteral : Exp =
+BooleanLiteral =
     'false'                                                                                    {False}
   | 'true'                                                                                     {True}.
 
-CharacterLiteral = 
-		"'" Character "'".
+CharacterLiteral : Literal = 
+		"'" Character "'"																		{CharLit}.
 
-StringLiteral  =
-		 '"' Character* '"'.
+StringLiteral : Literal =
+		 '"' Character* '"'																		{StringLit}.
 
 Character : Token = 
 		[\-a-zA-Z$._0-9].
@@ -205,7 +199,7 @@ NonZeroDigit : String =
 Digit : String =
 		[0-9].
 
-Bit : String = 
+Bit : Token = 
     [0|1].
 
 // Used in Assign and DeclAsgn Statements
@@ -234,7 +228,7 @@ CommLocInExp =
     ',' Loc "in" Exp.
 
 CommLit =
-    ',' Lit.
+    ',' Literal.
 
 CommTypeLoc = 
     ',' TypeLoc.
