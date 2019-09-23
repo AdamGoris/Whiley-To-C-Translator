@@ -5,7 +5,13 @@ class Translator {
 	import whiley.WhileyISyntax._
 
 	def translate(p : Program) : String = {
-		translateStm(p.optStms(0))
+		//translateStm(p.optStms(0))
+
+		var translated = "";
+		for (stm <- p.optStms) {
+			translated = translated + translateStm(stm) + "\n"
+		}
+		return translated
 	}
 
 	def translateStm(stm : Stm) : String = {
@@ -14,21 +20,26 @@ class Translator {
 
 			//case ImportDecl(locOrStar, loc, optDotLocOrStars) =>
 
-			//case Public(stm) =>
+			case Public(stm) =>
+				translateStm(stm)
 
-			//case Private(stm) =>
+			case Private(stm) =>
+				translateStm(stm)
 
-			//case Native(stm) => 
+			case Native(stm) => 
+				translateStm(stm)
 
-			//case Export(stm) =>
+			case Export(stm) =>
+				translateStm(stm)
 
 			//case DeclAsgn(typeField, lVal, optCommTypeLocs, exp, optCommExps) =>
 
-			case Decl(typ, lVal) =>
-
+			//case Decl(typ, lVal) =>
+			//	return translateType(typ) + translateLVal(lVal) + ';'
 
 			case AsgnStm(assign) =>
-
+				return translateExp(assign) + ';'
+/*
 			case TypeDecl(loc, typ, optLoc, optWhereExprs) =>
 
 			case ConstDecl(loc, exp) =>
@@ -60,9 +71,10 @@ class Translator {
 			case ContStm() =>
 
 			case FailStm() =>
+			*/
 		}
 	}
-
+/*
 	def translateType() : String = {
 
 	}
@@ -130,51 +142,70 @@ class Translator {
 	def translateMethodType(parameters1 : Parameters, parameters2 : Parameters) : String = {
 		
 	}	
-
+*/
 	def translateExp(exp : Exp) : String = {
 		exp match {
-			case Iff(leftExp, rightExp) =>
+			//case Iff(leftExp, rightExp) =>
 
-			case Implies(leftExp, rightExp) =>
+			//case Implies(leftExp, rightExp) =>
 
 			case Or(leftExp, rightExp) =>
+				return translateExp(leftExp) + "||" + translateExp(rightExp)
 
 			case Xor(leftExp, rightExp) =>
+				return translateExp(leftExp) + "^" + translateExp(rightExp)
 
 			case And(leftExp, rightExp) =>
+				return translateExp(leftExp) + "&&" + translateExp(rightExp)
 
 			case BitWiseAnd(leftExp, rightExp) =>
+				return translateExp(leftExp) + "&" + translateExp(rightExp)
 
 			case EQ(leftExp, rightExp) =>
+				return translateExp(leftExp) + "==" + translateExp(rightExp)
 
 			case NE(leftExp, rightExp) =>
+				return translateExp(leftExp) + "!=" + translateExp(rightExp)
 
 			case LT(leftExp, rightExp) =>
+				return translateExp(leftExp) + "<" + translateExp(rightExp)
 
 			case LE(leftExp, rightExp) =>
+				return translateExp(leftExp) + "<=" + translateExp(rightExp)
 
 			case GT(leftExp, rightExp) =>
+				return translateExp(leftExp) + ">" + translateExp(rightExp)
 
 			case GE(leftExp, rightExp) =>
+				return translateExp(leftExp) + ">=" + translateExp(rightExp)
 
 			case Lsh(leftExp, rightExp) =>
+				return translateExp(leftExp) + "<<" + translateExp(rightExp)
 
 			case ARsh(leftExp, rightExp) =>
+				return translateExp(leftExp) + ">>" + translateExp(rightExp)
 
 			case Add(leftExp, rightExp) =>
+				return translateExp(leftExp) + "+" + translateExp(rightExp)
 
 			case Sub(leftExp, rightExp) =>
+				return translateExp(leftExp) + "-" + translateExp(rightExp)
 
 			case Mul(leftExp, rightExp) =>
+				return translateExp(leftExp) + "*" + translateExp(rightExp)
 
 			case Div(leftExp, rightExp) =>
+				return translateExp(leftExp) + "/" + translateExp(rightExp)
 
 			case Rem(leftExp, rightExp) =>
+				return translateExp(leftExp) + "%" + translateExp(rightExp)
 
 			case Not(exp) =>
+				return "!" + translateExp(exp)
 
 			case Neg(exp) =>
-
+				return "-" + translateExp(exp)
+/*
 			case FunctionCall(loc, exp) =>
 
 			case ArrAccess(exp1, exp2) =>
@@ -184,24 +215,26 @@ class Translator {
 			case ArrInit(optExps, exp) =>
 
 			case ExpList(exp1, exp2) =>
-
+*/
 			case Assign(lVal, exp) =>
-
+				return translateLVal(lVal) +  " = " + translateExp(exp)
+/*
 			case Length() =>
 
 			case QuantifierExp(quantExp) =>
+*/
+			case Use(lVal) =>
+				return translateLVal(lVal)
 
-			case Use(loc) =>
-
-			case Lit() =>
-
+			case Lit(lit) =>
+				return translateLit(lit)
 		}
 	}
 
-	def translateAssign(lval : Lval, exp : Exp) : String = {
+	//def translateAssign(lVal, exp) : String = {
 		
-	}
-
+	//}
+/*
 	def translateWhereExp(exp : Exp) : String = {
 
 	}
@@ -281,71 +314,90 @@ class Translator {
 	def translateRtnType(typ : Type) : String = {
 
 	}
+*/
+	def translateLit(lit : Literal) : String = {
+		lit match {
+			case NullLit() =>
+				return "NULL"
 
-	def translateLit() : String = {
+			case ByteLit(optBits) =>
+				return optBits.mkString("")
 
+			case IntLit(intLit) =>
+				return translateIntLit(intLit)
+
+			case BoolLit(boolLit) =>
+				return translateBoolLit(boolLit)
+
+			case CharLit(charLit) =>
+				return translateCharLit(charLit)
+
+			//case StringLit(stringLit) =>
+			//	return translateStringLit(stringLit)
+		}
 	}
 
-	def translateNullLit(nullLit : NullLiteral) : String = {
-
-	}
-
-	def translateByteLit(byteLit : ByteLiteral) : String = {
-
-	}
-
-	def translateByteLiteral(optBits : Vector[String]) : String = {
-
+	def translateByteLit(byteLit : ByteLit) : String = {
+		byteLit match {
+			case ByteLit(optBits) =>
+				return optBits.mkString("")
+		}
 	}
 	
 	def translateIntLit(intLit : Int) : String = {
-
+		return intLit.toString
 	}
 
-	def translateBoolLit(boolLit : Exp) : String = {
+	def translateBoolLit(boolLit : BooleanLiteral) : String = {
+		boolLit match {
+			case False() =>
+				return "0"
 
+			case True() =>
+				return "1"
+		}
 	}
 	
-	def translateFalse() : String = {
+	//def translateFalse() : String = {
 
-	}
+	//}
 
-	def translateTrue() : String = {
+	//def translateTrue() : String = {
 		
+	//}
+
+	def translateCharLit(char : String) : String = {
+		return char
 	}
 
-	def translateCharLit(charLit : CharacterLiteral) : String = {
+	//def translateStringLit(strLit : StringLiteral) : String = {
 
-	}
+	//}
 
-	def translateStringLit(strLit : StringLiteral) : String = {
+	//def translateNullLit() : String = {
 
-	}
+	//}
 
-	def translateNullLit() : String = {
+	def translateLVal(lVal : LVal) : String = {
+		lVal match {
+			//case FieldAsgn(loc, idn) =>
+			//	return translateFieldAsgn(loc, idn)
 
-	}
+			//case ListAsgn(loc, exp) =>
+			//	return translateListAsgn(loc, exp)
 
-	def translateLVal() : String = {
+			case Pointer(exp) =>
+				return "*" + translateExp(exp)
 
-	}
-
-	def translateFieldAsgn(loc : LVal, identifier : String) = {
-
-	}
-
-	def translateListAsgn(loc : LVal, exp : Exp) : String = {
-
-	}
-
-	def translatePointer(exp : Exp) : String = {
-
+			case Loc(idn) =>
+				return translateLoc(idn)
+		}
 	}
 
 	def translateLoc(identifier : String) : String = {
-
+		return identifier
 	}
-
+/*
 	def translateLen(loc : LVal) : String = {
 
 	}
@@ -397,4 +449,5 @@ class Translator {
 	def translateTypeLoc(typ : Type, loc : LVal) : String = {
 
 	}
+	*/
 }
