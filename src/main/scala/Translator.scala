@@ -116,9 +116,216 @@ class Translator {
 
 			case ExpList(exp1, exp2) =>
 
+			case Assign(lVal, exp) =>
+
+			case Length() =>
+
 			case QuantifierExp(quantExp) =>
 
 			case Use(loc) =>
+
+			case Lit() =>
+
 		}
+	}
+
+	def translateAssign(lval : Lval, exp : Exp) : String = {
+		
+	}
+
+	def translateWhereExp(exp : Exp) : String = {
+
+	}
+
+	def translateQuantExp(noSomeAll : NoSomeAll, loc : LVal, exp1 : Exp, optCommLocInExps : Vector[CommLocInExp], exp2 : Exp) : String = {
+
+	}
+
+	def translateNoSomeAll() : String = {
+
+	}
+
+	def translateNo() : String = {
+
+	}
+
+	def translateSome() : String = {
+		
+	}
+
+	def translateAll() : String = {
+		
+	}
+
+	def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
+
+	}
+
+	def translateElse(optStms : Vector[Stm]) : String = {
+
+	}
+
+	def translateCaseStm() : String = {
+
+	}
+
+	def translateClass(exp : Exp, optCommExps : Vector[CommExp], optStms : Vector[Stm]) : String = {
+
+	}
+
+	def translateDefaultCase(optStms : Vector[Stm]) : String = {
+
+	}
+
+	def translateRequiresEnsures() : String = {
+
+	}
+
+	def translateRequires(exp : Exp) : String = {
+
+	}
+
+	def translateEnsures(exp : Exp) : String = {
+
+	}
+
+	def translateParameters() : String = {
+
+	}
+
+	def translateParams(typeLoc : TypeLoc, optCommTypeLocs : Vector[CommTypeLoc]) : String = {
+
+	}
+
+	def translateTypeParam(typeField : Type) : String = {
+
+	}
+
+	def translateReturnType() : String = {
+
+	}
+
+	def translateRtnParams(parameters : Parameters) : String = {
+
+	}
+
+	def translateRtnType(typeField : Type) : String = {
+
+	}
+
+	def translateLit() : String = {
+
+	}
+
+	def translateNullLit(nullLit : NullLiteral) : String = {
+
+	}
+
+	def translateByteLit(byteLit : ByteLiteral) : String = {
+
+	}
+
+	def translateByteLiteral(optBits : Vector[String]) : String = {
+
+	}
+	
+	def translateIntLit(intLit : Int) : String = {
+
+	}
+
+	def translateBoolLit(boolLit : Exp) : String = {
+
+	}
+	
+	def translateFalse() : String = {
+
+	}
+
+	def translateTrue() : String = {
+		
+	}
+
+	def translateCharLit(charLit : CharacterLiteral) : String = {
+
+	}
+
+	def translateStringLit(strLit : StringLiteral) : String = {
+
+	}
+
+	def translateNullLit() : String = {
+
+	}
+
+	def translateLVal() : String = {
+
+	}
+
+	def translateFieldAsgn(loc : LVal, identifier : String) = {
+
+	}
+
+	def translateListAsgn(loc : LVal, exp : Exp) : String = {
+
+	}
+
+	def translatePointer(exp : Exp) : String = {
+
+	}
+
+	def translateLoc(identifier : String) : String = {
+
+	}
+
+	def translateLen(loc : LVal) : String = {
+
+	}
+
+	def translateCommExp(exp : Exp) : String = {
+
+	}
+
+	def translateCommLoc(loc : LVal) : String = {
+
+	}
+
+	def translateCommLocInExp(loc : LVal, exp : Exp) : String = {
+
+	}
+
+	def translateCommLit(lit: Exp) : String = {
+
+	}
+
+	def translateCommTypeLoc(typeLoc : TypeLoc) : String = {
+
+	}
+
+	def translateCommTypeLoc(typeLoc : TypeLoc) : String ={
+
+	}
+
+	def translateDotLoc(loc: LVal) : String = {
+
+	}
+
+	def tranlsateLocOrStar() : String = {
+
+	}
+
+	def translateImpAll() : String = {
+
+	}
+
+	def translateSpcfc(loc : LVal) : String = {
+
+	}
+
+	def translateDotLocOrStar(locOrStar : LocOrStar) : String = {
+
+	}
+
+	def translateTypeLoc(typeField : Type, loc : LVal) : String = {
+		
 	}
 }
