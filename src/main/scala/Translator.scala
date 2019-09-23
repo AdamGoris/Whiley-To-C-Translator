@@ -324,28 +324,17 @@ class Translator {
 				return optBits.mkString("")
 
 			case IntLit(intLit) =>
-				return translateIntLit(intLit)
+				return intLit.toString
 
 			case BoolLit(boolLit) =>
 				return translateBoolLit(boolLit)
 
 			case CharLit(charLit) =>
-				return translateCharLit(charLit)
+				return "'" + charLit + "'"
 
-			//case StringLit(stringLit) =>
-			//	return translateStringLit(stringLit)
+			case StringLit(stringLit) =>
+				return '"' + strLit.mkString + '"'
 		}
-	}
-
-	def translateByteLit(byteLit : ByteLit) : String = {
-		byteLit match {
-			case ByteLit(optBits) =>
-				return optBits.mkString("")
-		}
-	}
-	
-	def translateIntLit(intLit : Int) : String = {
-		return intLit.toString
 	}
 
 	def translateBoolLit(boolLit : BooleanLiteral) : String = {
@@ -357,26 +346,6 @@ class Translator {
 				return "1"
 		}
 	}
-	
-	//def translateFalse() : String = {
-
-	//}
-
-	//def translateTrue() : String = {
-		
-	//}
-
-	def translateCharLit(char : String) : String = {
-		return char
-	}
-
-	//def translateStringLit(strLit : StringLiteral) : String = {
-
-	//}
-
-	//def translateNullLit() : String = {
-
-	//}
 
 	def translateLVal(lVal : LVal) : String = {
 		lVal match {
