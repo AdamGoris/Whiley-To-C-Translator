@@ -10,25 +10,26 @@ class Translator {
 
 	def translateStm(stm : Stm) : String = {
 		stm match {
-			case PackageDecl(loc, optDotLocs) =>
+			//case PackageDecl(loc, optDotLocs) =>
 
-			case ImportDecl(locOrStar, loc, optDotLocOrStars) =>
+			//case ImportDecl(locOrStar, loc, optDotLocOrStars) =>
 
-			case Public(stm) =>
+			//case Public(stm) =>
 
-			case Private(stm) =>
+			//case Private(stm) =>
 
-			case Native(stm) => 
+			//case Native(stm) => 
 
-			case Export(stm) =>
+			//case Export(stm) =>
 
-			case DeclAsgn(typeField, lVal, optCommTypeLocs, exp, optCommExps) =>
+			//case DeclAsgn(typeField, lVal, optCommTypeLocs, exp, optCommExps) =>
 
-			case Decl(typeField, lVal) =>
+			case Decl(typ, lVal) =>
+
 
 			case AsgnStm(assign) =>
 
-			case TypeDecl(loc, typeField, optLoc, optWhereExprs) =>
+			case TypeDecl(loc, typ, optLoc, optWhereExprs) =>
 
 			case ConstDecl(loc, exp) =>
 
@@ -61,6 +62,74 @@ class Translator {
 			case FailStm() =>
 		}
 	}
+
+	def translateType() : String = {
+
+	}
+
+	def translateUnionType(unionType : Type) : String = {
+
+	}
+
+	def translateIntrsctnType(intersectionType : Type, optIntersectionTypes : Vector[Type]) : String = {
+
+	}
+
+	def translateTermType() : String = {
+
+	}
+
+	def translateRecType(recordType : Type) : String = {
+
+	}
+
+	def translateRefType(referenceType : Type) : String = {
+
+	}
+
+	def translateArrType(arrayType : Type) : String = {
+		
+	}
+
+	def translateNegType(negationType : Type) : String = {
+		
+	}
+
+	def translateFuncType(functionType : Type) : String = {
+		
+	}
+
+	def translateMthdType(methodType : Type) : String = {
+		
+	}
+
+	def translateNmnlType(identifier : String) : String = {
+		
+	}
+
+	def translateMixedType() : String = {
+
+	}
+
+	def translateMix(typeField : Type, loc : LVal) : String = {
+
+	}
+
+	def translateMixFunc(loc : LVal, parameters1 : Parameters, parameters2 : Parameters) : String = {
+
+	}
+
+	def translateMixMthd(loc : LVal, parameters1 : Parameters, parameters2 : Parameters) : String = {
+
+	}
+
+	def translateFunctionType(parameters1 : Parameters, parameters2 : Parameters) : String = {
+		
+	}
+
+	def translateMethodType(parameters1 : Parameters, parameters2 : Parameters) : String = {
+		
+	}	
 
 	def translateExp(exp : Exp) : String = {
 		exp match {
@@ -197,7 +266,7 @@ class Translator {
 
 	}
 
-	def translateTypeParam(typeField : Type) : String = {
+	def translateTypeParam(typ : Type) : String = {
 
 	}
 
@@ -209,7 +278,7 @@ class Translator {
 
 	}
 
-	def translateRtnType(typeField : Type) : String = {
+	def translateRtnType(typ : Type) : String = {
 
 	}
 
@@ -325,7 +394,7 @@ class Translator {
 
 	}
 
-	def translateTypeLoc(typeField : Type, loc : LVal) : String = {
-		
+	def translateTypeLoc(typ : Type, loc : LVal) : String = {
+
 	}
 }
