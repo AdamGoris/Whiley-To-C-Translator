@@ -47,7 +47,7 @@ class Translator {
 			case ConstDecl(loc, exp) =>
 */
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
+                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse.get)
 
 			case Switch(exp, optCaseStms) =>
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}\n" 
@@ -57,11 +57,13 @@ class Translator {
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
                 return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n"
-/*
+
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateStms(optStms) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateStms(optStms) + "}"
+/*
 			case RtnStm(exp, optCommExps) =>
 
 			case Assert(exp) =>
@@ -92,6 +94,7 @@ class Translator {
             case BoolType() =>
                 return "int"
         }
+        return "void"
 	}
 /*
 	def translateUnionType(unionType : Type) : String = {
@@ -297,8 +300,8 @@ class Translator {
         }
     }
 
-	def translateElse(oe : Option[Else]) : String = {
-        oe.get match {
+	def translateElse(e : Else) : String = {
+        e match {
             case Else(optStms) =>
                 return "else\n" + "{\n" + translateStms(optStms) + "}\n" 
         }
@@ -336,22 +339,36 @@ class Translator {
 
 	}
 
-	def translateParameters() : String = {
+	def translateParameters(params : Option[Parameters]) : String = {
+        var translate = ""
+        for (param <- params) {
+            translate = translate + translateParameter(param)
+        }
+        return translate
+	}
+*/
+	def translateParameters(params : Option[Parameters]) : String = {
+        params.getOrElse(return "") match {
+            case Params(typeLoc, optCommTypeLocs) =>
+                return translateTypeLoc(typeLoc) + translateCommTypeLocs(optCommTypeLocs)
 
+            case TypeParam(typ) =>
+                return translateType(typ)
+        }
 	}
 
-	def translateParams(typeLoc : TypeLoc, optCommTypeLocs : Vector[CommTypeLoc]) : String = {
 
+	def translateReturnType(rtn : Option[ReturnType]) : String = {
+        rtn.getOrElse(return "void") match {
+            case RtnParams(params) =>
+                return translateParameters(Option(params))
+
+            case RtnType(typ) =>
+                return translateType(typ)
+        }
 	}
 
-	def translateTypeParam(typ : Type) : String = {
-
-	}
-
-	def translateReturnType() : String = {
-
-	}
-
+/*
 	def translateRtnParams(parameters : Parameters) : String = {
 
 	}
@@ -434,15 +451,24 @@ class Translator {
 	def translateCommLit(lit: Exp) : String = {
 
 	}
+*/
 
-	def translateCommTypeLoc(typeLoc : TypeLoc) : String = {
-
+	def translateTypeLoc(typeLoc : TypeLoc) : String = {
+        typeLoc match{
+            case TypeLoc(typ, loc) =>
+                return translateType(typ) + " " + translateLoc(loc)
+        }
 	}
 
-	def translateCommTypeLoc(typeLoc : TypeLoc) : String ={
-
+	def translateCommTypeLocs(vctl : Vector[TypeLoc]) : String = {
+        var translate = ""
+        for (tl <- vctl) {
+            translate = translate + ", " + translateTypeLoc(tl)
+        }
+        return translate
 	}
 
+/*
 	def translateDotLoc(loc: LVal) : String = {
 
 	}
@@ -460,10 +486,6 @@ class Translator {
 	}
 
 	def translateDotLocOrStar(locOrStar : LocOrStar) : String = {
-
-	}
-
-	def translateTypeLoc(typ : Type, loc : LVal) : String = {
 
 	}
 	*/
