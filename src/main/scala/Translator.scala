@@ -5,14 +5,16 @@ class Translator {
 	import whiley.WhileyISyntax._
 
 	def translate(p : Program) : String = {
-		//translateStm(p.optStms(0))
+        return translateStms(p.optStms)
+	}
 
-		var translated = "";
-		for (stm <- p.optStms) {
+    def translateStms(stms : Vector[Stm]) : String = {
+        var translated = "";
+		for (stm <- stms) {
 			translated = translated + translateStm(stm) + "\n"
 		}
 		return translated
-	}
+    }
 
 	def translateStm(stm : Stm) : String = {
 		stm match {
@@ -32,10 +34,10 @@ class Translator {
 			case Export(stm) =>
 				translateStm(stm)
 
-			//case DeclAsgn(typeField, lVal, optCommTypeLocs, exp, optCommExps) =>
+			//case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
 
-			//case Decl(typ, lVal) =>
-			//	return translateType(typ) + translateLVal(lVal) + ';'
+			case Decl(typ, loc) =>
+				return translateType(typ) + " " + translateLoc(loc) + ';'
 
 			case AsgnStm(assign) =>
 				return translateExp(assign) + ';'
@@ -43,15 +45,19 @@ class Translator {
 			case TypeDecl(loc, typ, optLoc, optWhereExprs) =>
 
 			case ConstDecl(loc, exp) =>
-
+*/
 			case If(exp, optStms, optElseIfs, optElse) =>
+                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
 
 			case Switch(exp, optCaseStms) =>
+                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}\n" 
 
 			case While(exp, optWhereExprs, optStms) =>
+                return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "}\n" 
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-
+                return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n"
+/*
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
@@ -74,11 +80,20 @@ class Translator {
 			*/
 		}
 	}
-/*
-	def translateType() : String = {
 
+	def translateType(typ : Type) : String = {
+        typ match {
+            case IntType() =>
+                return "int"
+
+            case ByteType() =>
+                return "int"
+
+            case BoolType() =>
+                return "int"
+        }
 	}
-
+/*
 	def translateUnionType(unionType : Type) : String = {
 
 	}
@@ -150,61 +165,61 @@ class Translator {
 			//case Implies(leftExp, rightExp) =>
 
 			case Or(leftExp, rightExp) =>
-				return translateExp(leftExp) + "||" + translateExp(rightExp)
+				return translateExp(leftExp) + " || " + translateExp(rightExp)
 
 			case Xor(leftExp, rightExp) =>
-				return translateExp(leftExp) + "^" + translateExp(rightExp)
+				return translateExp(leftExp) + " ^ " + translateExp(rightExp)
 
 			case And(leftExp, rightExp) =>
-				return translateExp(leftExp) + "&&" + translateExp(rightExp)
+				return translateExp(leftExp) + " && " + translateExp(rightExp)
 
 			case BitWiseAnd(leftExp, rightExp) =>
-				return translateExp(leftExp) + "&" + translateExp(rightExp)
+				return translateExp(leftExp) + " & " + translateExp(rightExp)
 
 			case EQ(leftExp, rightExp) =>
-				return translateExp(leftExp) + "==" + translateExp(rightExp)
+				return translateExp(leftExp) + " == " + translateExp(rightExp)
 
 			case NE(leftExp, rightExp) =>
-				return translateExp(leftExp) + "!=" + translateExp(rightExp)
+				return translateExp(leftExp) + " != " + translateExp(rightExp)
 
 			case LT(leftExp, rightExp) =>
-				return translateExp(leftExp) + "<" + translateExp(rightExp)
+				return translateExp(leftExp) + " < " + translateExp(rightExp)
 
 			case LE(leftExp, rightExp) =>
-				return translateExp(leftExp) + "<=" + translateExp(rightExp)
+				return translateExp(leftExp) + " <= " + translateExp(rightExp)
 
 			case GT(leftExp, rightExp) =>
-				return translateExp(leftExp) + ">" + translateExp(rightExp)
+				return translateExp(leftExp) + " > " + translateExp(rightExp)
 
 			case GE(leftExp, rightExp) =>
-				return translateExp(leftExp) + ">=" + translateExp(rightExp)
+				return translateExp(leftExp) + " >= " + translateExp(rightExp)
 
 			case Lsh(leftExp, rightExp) =>
-				return translateExp(leftExp) + "<<" + translateExp(rightExp)
+				return translateExp(leftExp) + " << " + translateExp(rightExp)
 
 			case ARsh(leftExp, rightExp) =>
-				return translateExp(leftExp) + ">>" + translateExp(rightExp)
+				return translateExp(leftExp) + " >> " + translateExp(rightExp)
 
 			case Add(leftExp, rightExp) =>
-				return translateExp(leftExp) + "+" + translateExp(rightExp)
+				return translateExp(leftExp) + " + " + translateExp(rightExp)
 
 			case Sub(leftExp, rightExp) =>
-				return translateExp(leftExp) + "-" + translateExp(rightExp)
+				return translateExp(leftExp) + " - " + translateExp(rightExp)
 
 			case Mul(leftExp, rightExp) =>
-				return translateExp(leftExp) + "*" + translateExp(rightExp)
+				return translateExp(leftExp) + " * " + translateExp(rightExp)
 
 			case Div(leftExp, rightExp) =>
-				return translateExp(leftExp) + "/" + translateExp(rightExp)
+				return translateExp(leftExp) + " / " + translateExp(rightExp)
 
 			case Rem(leftExp, rightExp) =>
-				return translateExp(leftExp) + "%" + translateExp(rightExp)
+				return translateExp(leftExp) + " % " + translateExp(rightExp)
 
 			case Not(exp) =>
-				return "!" + translateExp(exp)
+				return " !" + translateExp(exp)
 
 			case Neg(exp) =>
-				return "-" + translateExp(exp)
+				return " -" + translateExp(exp)
 /*
 			case FunctionCall(loc, exp) =>
 
@@ -223,22 +238,29 @@ class Translator {
 
 			case QuantifierExp(quantExp) =>
 */
-			case Use(lVal) =>
-				return translateLVal(lVal)
+			case Use(loc) =>
+				return translateLoc(loc)
 
 			case Lit(lit) =>
 				return translateLit(lit)
 		}
 	}
 
-	//def translateAssign(lVal, exp) : String = {
-		
-	//}
-/*
-	def translateWhereExp(exp : Exp) : String = {
-
+	def translateWhereExpVector(vwe : Vector[WhereExpr]) : String = {
+        var translation = ""
+        for (we <- vwe) {
+            translation = translation + translateWhereExp(we) + "\n"
+        }
+        return translation
 	}
 
+    def translateWhereExp(we : WhereExpr) : String = {
+        we match {
+            case WhereExp(exp) =>
+                return "assert (" + translateExp(exp) + ");"
+        }
+    }
+/*
 	def translateQuantExp(noSomeAll : NoSomeAll, loc : LVal, exp1 : Exp, optCommLocInExps : Vector[CommLocInExp], exp2 : Exp) : String = {
 
 	}
@@ -258,27 +280,50 @@ class Translator {
 	def translateAll() : String = {
 		
 	}
-
-	def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
-
+*/
+	def translateElseIfVector(vei : Vector[ElseIf]) : String = {
+        //for all elseifs, translate else if
+        var translation = ""
+        for (ei <- vei) {
+            translation = translation + translateElseIf(ei)
+        }
+        return translation
 	}
 
-	def translateElse(optStms : Vector[Stm]) : String = {
+    def translateElseIf(ei : ElseIf) : String = {
+        ei match {
+            case ElseIf(exp, optStms) =>
+                return "else if " + "(" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
+        }
+    }
 
+	def translateElse(oe : Option[Else]) : String = {
+        oe.get match {
+            case Else(optStms) =>
+                return "else\n" + "{\n" + translateStms(optStms) + "}\n" 
+        }
+        return ""
 	}
 
-	def translateCaseStm() : String = {
-
+	def translateCaseStmVector(ocs : Vector[CaseStm]) : String = {
+        var translation = ""
+        for (cs <- ocs) {
+            translation = translation + translateCaseStm(cs)
+        }
+        return translation
 	}
 
-	def translateClass(exp : Exp, optCommExps : Vector[CommExp], optStms : Vector[Stm]) : String = {
+    def translateCaseStm(cs : CaseStm) : String = {
+        cs match {
+            case Case(exp, optCommExps, optStms) =>
+                return "case " + translateExp(exp) + ":\n" + translateStms(optStms) 
 
-	}
+            case DefaultCase(optStms) =>
+                return "default:\n" + translateStms(optStms) 
+        }
+    }
 
-	def translateDefaultCase(optStms : Vector[Stm]) : String = {
-
-	}
-
+/*
 	def translateRequiresEnsures() : String = {
 
 	}
@@ -321,7 +366,7 @@ class Translator {
 				return "NULL"
 
 			case ByteLit(optBits) =>
-				return optBits.mkString("")
+				return "0b" + optBits.mkString("")
 
 			case IntLit(intLit) =>
 				return intLit.toString
@@ -332,7 +377,7 @@ class Translator {
 			case CharLit(charLit) =>
 				return "'" + charLit + "'"
 
-			case StringLit(stringLit) =>
+			case StringLit(strLit) =>
 				return '"' + strLit.mkString + '"'
 		}
 	}
@@ -358,13 +403,16 @@ class Translator {
 			case Pointer(exp) =>
 				return "*" + translateExp(exp)
 
-			case Loc(idn) =>
-				return translateLoc(idn)
+			case LocAsgn(loc) =>
+				return translateLoc(loc)
 		}
 	}
 
-	def translateLoc(identifier : String) : String = {
-		return identifier
+	def translateLoc(loc : Loc) : String = {
+		loc match {
+            case Loc(idn) =>
+                return idn
+        }
 	}
 /*
 	def translateLen(loc : LVal) : String = {
