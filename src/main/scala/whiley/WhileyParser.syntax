@@ -15,7 +15,7 @@ Stm {line} =
   | "native" Stm                                                                              {Native}
   | "export" Stm                                                                              {Export}
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
-  | Type LVal                                                                                 {Decl}
+  | Type Loc                                                                                  {Decl}
   | Assign                                                                                    {AsgnStm}
   | "type" Loc sp "is" '('? Type Loc? ')'? WhereExpr*                                         {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
@@ -54,7 +54,7 @@ TermType : Type =
   | MethodType                                                                                {MthdType}
   | '(' Type ')'
   | PrimitiveType
-  | Identifier                                                                                {NmnlType}.
+  | Loc                                                                                       {NmnlType}.
 
 PrimitiveType : Type =
     "null"                                                                                    {NullType}
@@ -78,7 +78,7 @@ ReferenceType : Type =
     '&' Type.
 
 NominalType : Type = 
-    Identifier.
+    Loc.
 
 ArrayType : Type = 
     PrimitiveType "[]".
@@ -122,9 +122,9 @@ Exp {paren} =
   | Exp ',' Exp                                                                               {ExpList, left, 1}
 	| Assign
 	| Length
-  | QuantExp                                                                                  {QuantifierExp}
-	| Loc                                                                                       {Use}                                                                               
-  | Literal                                                                            {Lit}.
+  | QuantExp                                                                                  {QuantifierExp}                                                                               
+  | Literal                                                                                   {Lit}
+  | Loc                                                                                       {Use}.
 
 Assign : Exp = 
     LVal sp "=" Exp.
@@ -207,9 +207,9 @@ LVal =
 		Loc '.' Identifier 																		                                      {FieldAsgn}
 	| Loc '[' Exp ']'																				                                      {ListAsgn}	
 	| '*' Exp																								                                      {Pointer}
-	| Loc.
+	| Loc                                                                                         {LocAsgn}.
 
-Loc : LVal = 
+Loc = 
     Identifier.
 
 Length : Exp = 
@@ -217,6 +217,12 @@ Length : Exp =
 
 Lab : String =
 		Identifier.
+
+TypeLoc = 
+    Type Loc.
+
+CommTypeLoc : TypeLoc = 
+    ',' TypeLoc.
 
 CommExp = 
     ',' Exp.
@@ -229,9 +235,6 @@ CommLocInExp =
 
 CommLit =
     ',' Literal.
-
-CommTypeLoc = 
-    ',' TypeLoc.
     
 DotLoc =
     '.' Loc.
@@ -242,6 +245,3 @@ LocOrStar =
 
 DotLocOrStar = 
     '.' LocOrStar.
-
-TypeLoc = 
-    Type Loc.
