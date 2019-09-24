@@ -58,28 +58,34 @@ class Translator {
 			case DoWhile(optStms, exp, optWhereExprs) =>
                 return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n"
 
+            // Need to sort out the Requires and Ensures
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateStms(optStms) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateStms(optStms) + "}"
-/*
+
+            // Need to sort out the commExps
 			case RtnStm(exp, optCommExps) =>
+                return "return " + translateExp(exp) + ";"
 
 			case Assert(exp) =>
-			
+                return "assert (" + translateExp(exp) + ");" 
+/*			
 			case Assume(exp) =>
 
 			case DebugExp(exp) =>
-
+*/
 			case SkipStm() =>
+                return ""
 
 			case BreakStm() =>
+                return "break;"
 
 			case ContStm() =>
+                return "continue;"
 
-			case FailStm() =>
-			*/
+//			case FailStm() =>
 		}
 	}
 
