@@ -60,10 +60,10 @@ class Translator {
 
             // Need to sort out the Requires and Ensures
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateStms(optStms) + "}" 
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateStms(optStms) + "}"
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms) + "}"
 
             // Need to sort out the commExps
 			case RtnStm(exp, optCommExps) =>
@@ -242,9 +242,10 @@ class Translator {
 */
 			case Assign(lVal, exp) =>
 				return translateLVal(lVal) +  " = " + translateExp(exp)
-/*
-			case Length() =>
 
+			case Len(loc) =>
+                return "sizeof(" + translateLoc(loc) + ") / sizeof(int)"
+/*
 			case QuantifierExp(quantExp) =>
 */
 			case Use(loc) =>
@@ -332,33 +333,41 @@ class Translator {
         }
     }
 
-/*
-	def translateRequiresEnsures() : String = {
 
-	}
+	def translateRequiresEnsures(optRequiresEnsures : Vector[RequiresEnsures], optStms : Vector[Stm]) : String = {
+        var requires = Vector[Exp]()
+        var ensures = Vector[Exp]()
+        var translation = ""
 
-	def translateRequires(exp : Exp) : String = {
-
-	}
-
-	def translateEnsures(exp : Exp) : String = {
-
-	}
-
-	def translateParameters(params : Option[Parameters]) : String = {
-        var translate = ""
-        for (param <- params) {
-            translate = translate + translateParameter(param)
+        for (re <- optRequiresEnsures) {
+            re match {
+                case Requires(exp) =>
+                    requires = requires :+ exp
+                
+                case Ensures(exp) =>
+                    ensures = ensures :+ exp
+            }
         }
-        return translate
+
+        for (r <- requires) {
+            translation = translation + "assert (" + translateExp(r) + ");\n"
+        }
+
+        translation = translation + translateStms(optStms)
+
+        for (e <- ensures) {
+            translation = translation + "assert (" + translateExp(e) + ");\n"
+        }
+
+        return translation
 	}
-*/
+
 	def translateParameters(params : Option[Parameters]) : String = {
         params.getOrElse(return "") match {
             case Params(typeLoc, optCommTypeLocs) =>
                 return translateTypeLoc(typeLoc) + translateCommTypeLocs(optCommTypeLocs)
 
-            case TypeParam(typ) =>
+            case TypeParam(typ, optCommTypes) =>
                 return translateType(typ)
         }
 	}
@@ -374,15 +383,6 @@ class Translator {
         }
 	}
 
-/*
-	def translateRtnParams(parameters : Parameters) : String = {
-
-	}
-
-	def translateRtnType(typ : Type) : String = {
-
-	}
-*/
 	def translateLit(lit : Literal) : String = {
 		lit match {
 			case NullLit() =>
