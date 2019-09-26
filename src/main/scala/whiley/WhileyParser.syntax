@@ -48,20 +48,20 @@ IntersectionType : Type =
 TermType : Type = 
     RecordType                                                                                {RecType}
   | ReferenceType                                                                             {RefType}
-  | Type "[]"                                                                                 {ArrType}
   | NegationType                                                                              {NegType}
+  |  ArrayType                                                                                {ArrType}
   | FunctionType                                                                              {FuncType}
   | MethodType                                                                                {MthdType}
   | '(' Type ')'
-  | PrimitiveType
-  | Loc                                                                                       {NmnlType}.
+  | PrimitiveType.
 
 PrimitiveType : Type =
     "null"                                                                                    {NullType}
   | "int"                                                                                     {IntType}
   | "byte"                                                                                    {ByteType}
   | "bool"                                                                                    {BoolType}
-  | "real"                                                                                    {RealType}.
+  | "real"                                                                                    {RealType}
+  | Loc                                                                                       {NmnlType}.
 
 RecordType : Type =
     '{' MixedType CommMixedType* ','? '...'? '}'.
@@ -80,8 +80,8 @@ ReferenceType : Type =
 NominalType : Type = 
     Loc.
 
-ArrayType = 
-    Type "[]".
+ArrayType : Type = 
+    PrimitiveType "[]".
 
 NegationType : Type = 
     '!' Type.
