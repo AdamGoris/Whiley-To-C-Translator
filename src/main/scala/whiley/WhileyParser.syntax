@@ -14,7 +14,7 @@ Stm {line} =
   | "private" Stm                                                                             {Private}
   | "native" Stm                                                                              {Native}
   | "export" Stm                                                                              {Export}
-  | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
+  | Type LVal CommTypeLVal* sp "=" Exp CommExp*                                               {DeclAsgn}
   | Type Loc                                                                                  {Decl}
   | Assign                                                                                    {AsgnStm}
   | "type" Loc sp "is" '('? Type Loc? ')'? WhereExp*                                          {TypeDecl}
@@ -228,6 +228,12 @@ TypeLoc =
 
 CommTypeLoc : TypeLoc = 
     ',' TypeLoc.
+
+TypeLVal =
+    Type LVal.
+
+CommTypeLVal : TypeLVal =
+    ", " Type LVal
 
 CommExp = 
     ',' Exp.
