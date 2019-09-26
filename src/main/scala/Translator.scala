@@ -34,18 +34,20 @@ class Translator {
 			case Export(stm) =>
 				translateStm(stm)
 
-			//case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
+			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
+				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";\n" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 
 			case Decl(typ, loc) =>
-				return translateType(typ) + " " + translateLoc(loc) + ';'
+				return translateType(typ) + " " + translateLoc(loc) + ";"
 
 			case AsgnStm(assign) =>
-				return translateExp(assign) + ';'
+				return translateExp(assign) + ";"
 /*
 			case TypeDecl(loc, typ, optLoc, optWhereExprs) =>
-
-			case ConstDecl(loc, exp) =>
 */
+			case ConstDecl(loc, exp) =>
+				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
+
 			case If(exp, optStms, optElseIfs, optElse) =>
                 return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
 
@@ -229,17 +231,18 @@ class Translator {
 
 			case Neg(exp) =>
 				return " -" + translateExp(exp)
-/*
+
 			case FunctionCall(loc, exp) =>
+				return translateLoc(loc) + "(" + translateExp(exp) + ")"
 
 			case ArrAccess(exp1, exp2) =>
+				return translateExp(exp1) + "[" + translateExp(exp2) + "]"
 
-			case ArrGen(exp1, exp2) =>
+			//case ArrGen(exp1, exp2) =>
 
-			case ArrInit(optExps, exp) =>
+			case ArrInit(exp, optExps) =>
+				return "{" + translateExp(exp) + translateCommExp(optExps) + "}"
 
-			case ExpList(exp1, exp2) =>
-*/
 			case Assign(lVal, exp) =>
 				return translateLVal(lVal) +  " = " + translateExp(exp)
 
@@ -256,10 +259,10 @@ class Translator {
 		}
 	}
 
-	def translateWhereExpVector(vwe : Vector[WhereExp]) : String = {
+	def translateWhereExpVector(vWhereExp : Vector[WhereExp]) : String = {
         var translation = ""
-        for (we <- vwe) {
-            translation = translation + translateWhereExp(we.exp) + "\n"
+        for (whereExp <- vWhereExp) {
+            translation = translation + translateWhereExp(whereExp.exp) + "\n"
         }
         return translation
 	}
@@ -288,11 +291,11 @@ class Translator {
 		
 	}
 */
-	def translateElseIfVector(vei : Vector[ElseIf]) : String = {
+	def translateElseIfVector(vElseIf : Vector[ElseIf]) : String = {
         //for all elseifs, translate else if
         var translation = ""
-        for (ei <- vei) {
-            translation = translation + translateElseIf(ei.exp, ei.optStms)
+        for (elseif <- vElseIf) {
+            translation = translation + translateElseIf(elseif.exp, elseif.optStms)
         }
         return translation
 	}
@@ -301,8 +304,8 @@ class Translator {
         return "else if " + "(" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
     }
 
-	def translateElse(oelse : Option[Else]) : String = {
-        return "else\n" + "{\n" + translateStms(oelse.getOrElse(return "").optStms) + "}\n"
+	def translateElse(optElse : Option[Else]) : String = {
+        return "else\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}\n"
 	}
 
 	def translateCaseStmVector(ocaseStm : Vector[CaseStm]) : String = {
@@ -329,8 +332,8 @@ class Translator {
         var ensures = Vector[Exp]()
         var translation = ""
 
-        for (re <- optRequiresEnsures) {
-            re match {
+        for (requiresEnsures <- optRequiresEnsures) {
+            requiresEnsures match {
                 case Requires(exp) =>
                     requires = requires :+ exp
                 
@@ -339,21 +342,21 @@ class Translator {
             }
         }
 
-        for (r <- requires) {
-            translation = translation + "assert (" + translateExp(r) + ");\n"
+        for (require <- requires) {
+            translation = translation + "assert (" + translateExp(require) + ");\n"
         }
 
         translation = translation + translateStms(optStms)
 
-        for (e <- ensures) {
-            translation = translation + "assert (" + translateExp(e) + ");\n"
+        for (ensure <- ensures) {
+            translation = translation + "assert (" + translateExp(ensure) + ");\n"
         }
 
         return translation
 	}
 
-	def translateParameters(params : Option[Parameters]) : String = {
-        params.getOrElse(return "") match {
+	def translateParameters(optParams : Option[Parameters]) : String = {
+        optParams.getOrElse(return "") match {
             case Params(typeLoc, optCommTypeLocs) =>
                 return translateTypeLoc(typeLoc) + translateCommTypeLocs(optCommTypeLocs)
 
@@ -363,8 +366,8 @@ class Translator {
 	}
 
 
-	def translateReturnType(rtn : Option[ReturnType]) : String = {
-        rtn.getOrElse(return "void") match {
+	def translateReturnType(optReturnType : Option[ReturnType]) : String = {
+        optReturnType.getOrElse(return "void") match {
             case RtnParams(params) =>
                 return translateParameters(Option(params))
 
@@ -422,24 +425,26 @@ class Translator {
 	}
 
 	def translateLoc(loc : Loc) : String = {
-		loc match {
-            case Loc(idn) =>
-                return idn
-        }
+        return loc.identifier
+	}
+
+
+	def translateCommExp(vExp : Vector[Exp]) : String = {
+		var translate = ""
+		for (exp <- vExp) {
+			translate = translate + ", " + translateExp(exp)
+		}
+		return translate
+	}
+
+	def translateCommLoc(vLoc : Vector[Loc]) : String = {
+		var translate = ""
+		for (loc <- vLoc){
+			translate = translate + ", " + translateLoc(loc)
+		}
+		return translate
 	}
 /*
-	def translateLen(loc : LVal) : String = {
-
-	}
-
-	def translateCommExp(exp : Exp) : String = {
-
-	}
-
-	def translateCommLoc(loc : LVal) : String = {
-
-	}
-
 	def translateCommLocInExp(loc : LVal, exp : Exp) : String = {
 
 	}
@@ -456,19 +461,19 @@ class Translator {
         }
 	}
 
-	def translateCommTypeLocs(vctl : Vector[TypeLoc]) : String = {
+	def translateCommTypeLocs(vTypeLoc : Vector[TypeLoc]) : String = {
         var translate = ""
-        for (tl <- vctl) {
-            translate = translate + ", " + translateTypeLoc(tl)
+        for (typeLoc <- vTypeLoc) {
+            translate = translate + ", " + translateTypeLoc(typeLoc)
         }
         return translate
 	}
 
-/*
-	def translateDotLoc(loc: LVal) : String = {
 
+	def translateDotLoc(lVal: LVal) : String = {
+		return '.' + translateLVal(lVal)
 	}
-
+/*
 	def tranlsateLocOrStar() : String = {
 
 	}
