@@ -17,12 +17,12 @@ Stm {line} =
   | Type LVal CommTypeLoc* sp "=" Exp CommExp*                                                {DeclAsgn}
   | Type Loc                                                                                  {Decl}
   | Assign                                                                                    {AsgnStm}
-  | "type" Loc sp "is" '('? Type Loc? ')'? WhereExpr*                                         {TypeDecl}
+  | "type" Loc sp "is" '('? Type Loc? ')'? WhereExp*                                          {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
   | "if" Exp ':' nest (Stm*)\n ElseIf* Else?                                                  {If}
   | "switch" Exp ':' CaseStm*                                                                 {Switch}
-  | "while" Exp WhereExpr* ':' nest (Stm*)\n                                                  {While}
-  | "do" ':' nest (Stm*)\n "while" nest (Exp) WhereExpr*                                      {DoWhile}
+  | "while" Exp WhereExp* ':' nest (Stm*)\n                                                   {While}
+  | "do" ':' nest (Stm*)\n "while" nest (Exp) WhereExp*                                       {DoWhile}
   | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n         {FnDecl}
   | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n           {MthdDecl}
   | "return" Exp CommExp*                                                                     {RtnStm}
@@ -35,9 +35,9 @@ Stm {line} =
   | "fail"                                                                                    {FailStm}.
 
 Type =
-    UnionType                                                                                	{Union}
-  | IntersectionType                                                                         	{IntrsctnType}
-  | TermType.
+    TermType
+  | UnionType                                                                                 {Union}
+  | IntersectionType                                                                          {IntrsctnType}.
 
 UnionType : Type = 
     IntersectionType ('|' IntersectionType)*.
@@ -49,7 +49,7 @@ TermType : Type =
     RecordType                                                                                {RecType}
   | ReferenceType                                                                             {RefType}
   | NegationType                                                                              {NegType}
-  |  ArrayType                                                                                {ArrType}
+  | ArrayType                                                                                 {ArrType}
   | FunctionType                                                                              {FuncType}
   | MethodType                                                                                {MthdType}
   | '(' Type ')'
@@ -119,7 +119,7 @@ Exp {paren} =
   | '{' RecordInitialiser '}'
   | Exp '[' Exp ']'                                                                         {ArrAccess, left, 1}
   | '[' Exp ';' Exp ']'                                                                     {ArrGen}
-  | '[' (Exp ',')* Exp ']'                                                                  {ArrInit}
+  | '[' Exp (',' Exp)* ']'                                                                  {ArrInit}
   //| Exp ',' Exp                                                                             {ExpList, left, 1}
   | '&' Exp                                                                                 {RefExp}
   | Assign
@@ -134,8 +134,8 @@ RecordInitialiser : Exp =
 Assign : Exp = 
     LVal sp "=" Exp.
 
-WhereExpr =
-    "where" Exp                                                                             {WhereExp}.
+WhereExp =
+    sp "where" Exp.
 
 QuantExp =
     NoSomeAll '{' Loc 'in' Exp CommLocInExp* '|' Exp '}'.
