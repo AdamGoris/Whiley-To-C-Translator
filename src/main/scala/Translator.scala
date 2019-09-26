@@ -47,7 +47,7 @@ class Translator {
 			case ConstDecl(loc, exp) =>
 */
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse.get)
+                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
 
 			case Switch(exp, optCaseStms) =>
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}\n" 
@@ -256,19 +256,16 @@ class Translator {
 		}
 	}
 
-	def translateWhereExpVector(vwe : Vector[WhereExpr]) : String = {
+	def translateWhereExpVector(vwe : Vector[WhereExp]) : String = {
         var translation = ""
         for (we <- vwe) {
-            translation = translation + translateWhereExp(we) + "\n"
+            translation = translation + translateWhereExp(we.exp) + "\n"
         }
         return translation
 	}
 
-    def translateWhereExp(we : WhereExpr) : String = {
-        we match {
-            case WhereExp(exp) =>
-                return "assert (" + translateExp(exp) + ");"
-        }
+    def translateWhereExp(exp : Exp) : String = {
+        return "assert (" + translateExp(exp) + ");"
     }
 /*
 	def translateQuantExp(noSomeAll : NoSomeAll, loc : LVal, exp1 : Exp, optCommLocInExps : Vector[CommLocInExp], exp2 : Exp) : String = {
@@ -295,36 +292,29 @@ class Translator {
         //for all elseifs, translate else if
         var translation = ""
         for (ei <- vei) {
-            translation = translation + translateElseIf(ei)
+            translation = translation + translateElseIf(ei.exp, ei.optStms)
         }
         return translation
 	}
 
-    def translateElseIf(ei : ElseIf) : String = {
-        ei match {
-            case ElseIf(exp, optStms) =>
-                return "else if " + "(" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
-        }
+    def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
+        return "else if " + "(" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
     }
 
-	def translateElse(e : Else) : String = {
-        e match {
-            case Else(optStms) =>
-                return "else\n" + "{\n" + translateStms(optStms) + "}\n" 
-        }
-        return ""
+	def translateElse(oelse : Option[Else]) : String = {
+        return "else\n" + "{\n" + translateStms(oelse.getOrElse(return "").optStms) + "}\n"
 	}
 
-	def translateCaseStmVector(ocs : Vector[CaseStm]) : String = {
+	def translateCaseStmVector(ocaseStm : Vector[CaseStm]) : String = {
         var translation = ""
-        for (cs <- ocs) {
+        for (cs <- ocaseStm) {
             translation = translation + translateCaseStm(cs)
         }
         return translation
 	}
 
-    def translateCaseStm(cs : CaseStm) : String = {
-        cs match {
+    def translateCaseStm(caseStm : CaseStm) : String = {
+        caseStm match {
             case Case(exp, optCommExps, optStms) =>
                 return "case " + translateExp(exp) + ":\n" + translateStms(optStms) 
 
