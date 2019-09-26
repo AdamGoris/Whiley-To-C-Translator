@@ -35,9 +35,9 @@ Stm {line} =
   | "fail"                                                                                    {FailStm}.
 
 Type =
-    TermType
-  | UnionType                                                                                	{Union}
-  | IntersectionType                                                                         	{IntrsctnType}.
+    UnionType                                                                                	{Union}
+  | IntersectionType                                                                         	{IntrsctnType}
+  | TermType.
 
 UnionType : Type = 
     IntersectionType ('|' IntersectionType)*.
@@ -48,7 +48,7 @@ IntersectionType : Type =
 TermType : Type = 
     RecordType                                                                                {RecType}
   | ReferenceType                                                                             {RefType}
-  | ArrayType                                                                                 {ArrType}
+  | Type "[]"                                                                                 {ArrType}
   | NegationType                                                                              {NegType}
   | FunctionType                                                                              {FuncType}
   | MethodType                                                                                {MthdType}
@@ -64,7 +64,7 @@ PrimitiveType : Type =
   | "real"                                                                                    {RealType}.
 
 RecordType : Type =
-  '{' MixedType CommMixedType* ',' '...' '}'.
+    '{' MixedType CommMixedType* ','? '...'? '}'.
 
 MixedType = 
     Type Loc                                                                                  {Mix}
@@ -80,8 +80,8 @@ ReferenceType : Type =
 NominalType : Type = 
     Loc.
 
-ArrayType : Type = 
-    PrimitiveType "[]".
+ArrayType = 
+    Type "[]".
 
 NegationType : Type = 
     '!' Type.
@@ -93,52 +93,57 @@ MethodType : Type =
     "method" '(' Parameters ')' '->' Parameters.
 
 Exp {paren} = 
-    Exp sp "<==>" Exp                                                                         {Iff, left, 10}
-  | Exp sp "==>" Exp                                                                          {Implies, left, 9}
-	|	Exp sp "||" Exp																																						{Or, none, 8}
-  |	Exp sp "^" Exp																																						{Xor, left, 7}
-  |	Exp sp "&&" Exp																																						{And, left, 6}
-  | Exp sp "&" Exp                                                                            {BitWiseAnd, left, 6}
-  |	Exp sp "==" Exp                                                                           {EQ, left, 5}
-  | Exp sp "!=" Exp                                                                           {NE, left, 5}
-  | Exp sp "<"  Exp                                                                           {LT, left, 4}
-  | Exp sp "<=" Exp                                                                           {LE, left, 4}
-  | Exp sp ">"  Exp                                                                           {GT, left, 4}
-  | Exp sp ">=" Exp                                                                           {GE, left, 4}
-  | Exp sp "<<" Exp                                                                           {Lsh, left, 3}
-  | Exp sp ">>" Exp                                                                           {ARsh, left, 3}
-  | Exp sp "+" Exp                                                                            {Add, left, 2}
-  | Exp sp "-" Exp                                                                            {Sub, left, 2}
-  | Exp sp "*" Exp                                                                            {Mul, left, 1}
-  | Exp sp "/" Exp                                                                            {Div, left, 1}
-  | Exp sp "%" Exp                                                                            {Rem, left, 1}
-  | '!' Exp                                                                                   {Not}
-  | '-' Exp                                                                                   {Neg}
-  | Loc '(' Exp ')'                                                                           {FunctionCall}
+    Exp sp "<==>" Exp                                                                       {Iff, left, 10}
+  | Exp sp "==>" Exp                                                                        {Implies, left, 9}
+  | Exp sp "||" Exp                                                                         {Or, none, 8}
+  | Exp sp "^" Exp																			{Xor, left, 7}
+  | Exp sp "&&" Exp																			{And, left, 6}
+  | Exp sp "&" Exp                                                                          {BitWiseAnd, left, 6}
+  | Exp sp "==" Exp                                                                         {EQ, left, 5}
+  | Exp sp "!=" Exp                                                                         {NE, left, 5}
+  | Exp sp "<"  Exp                                                                         {LT, left, 4}
+  | Exp sp "<=" Exp                                                                         {LE, left, 4}
+  | Exp sp ">"  Exp                                                                         {GT, left, 4}
+  | Exp sp ">=" Exp                                                                         {GE, left, 4}
+  | Exp sp "<<" Exp                                                                         {Lsh, left, 3}
+  | Exp sp ">>" Exp                                                                         {ARsh, left, 3}
+  | Exp sp "+" Exp                                                                          {Add, left, 2}
+  | Exp sp "-" Exp                                                                          {Sub, left, 2}
+  | Exp sp "*" Exp                                                                          {Mul, left, 1}
+  | Exp sp "/" Exp                                                                          {Div, left, 1}
+  | Exp sp "%" Exp                                                                          {Rem, left, 1}
+  | '!' Exp                                                                                 {Not}
+  | '-' Exp                                                                                 {Neg}
+  | Loc '(' Exp ')'                                                                         {FunctionCall}
   | '(' Exp ')'
-  | Exp '[' Exp ']'                                                                           {ArrAccess, left, 1}
-  | '[' Exp ';' Exp ']'                                                                       {ArrGen}
-  | '[' (Exp ',')* Exp ']'                                                                    {ArrInit}
-  | Exp ',' Exp                                                                               {ExpList, left, 1}
-	| Assign
-	| Length
-  | QuantExp                                                                                  {QuantifierExp}                                                                               
-  | Literal                                                                                   {Lit}
-  | Loc                                                                                       {Use}.
+  | '{' RecordInitialiser '}'
+  | Exp '[' Exp ']'                                                                         {ArrAccess, left, 1}
+  | '[' Exp ';' Exp ']'                                                                     {ArrGen}
+  | '[' (Exp ',')* Exp ']'                                                                  {ArrInit}
+  //| Exp ',' Exp                                                                             {ExpList, left, 1}
+  | '&' Exp                                                                                 {RefExp}
+  | Assign
+  | Length
+  | QuantExp                                                                                {QuantifierExp}                                                                               
+  | Literal                                                                                 {Lit}
+  | Loc                                                                                     {Use}.
+
+RecordInitialiser : Exp =
+    Loc ':' Exp CommLocColonExp*                                                            {RecInit}.
 
 Assign : Exp = 
     LVal sp "=" Exp.
 
 WhereExpr =
-    "where" Exp                                                                               {WhereExp}.
+    "where" Exp                                                                             {WhereExp}.
 
 QuantExp =
     NoSomeAll '{' Loc 'in' Exp CommLocInExp* '|' Exp '}'.
 
 NoSomeAll = 
-    "no"                                                                                      {No}
-  | "some"                                                                                    {Some}
-  | "all"                                                                                     {All}.
+    "no"                                                                                    {No}
+  | "some"                                                                                  {Some}
+  | "all"                                                                                   {All}.
 
 ElseIf = 
     "else if" Exp ':' nest (Stm*)\n.
@@ -147,28 +152,28 @@ Else =
     "else" ':' nest (Stm*)\n.
 
 CaseStm = 
-		"case" Exp CommExp* ':' nest (Stm*)\n                                                     {Case}
-	| "default" ':' nest (Stm*)\n	                                                              {DefaultCase}.
+	"case" Exp CommExp* ':' nest (Stm*)\n                                                   {Case}
+  | "default" ':' nest (Stm*)\n	                                                            {DefaultCase}.
 
 RequiresEnsures = 
-		"requires" Exp																																						{Requires}
-	| "ensures" Exp																																							{Ensures}.
+	"requires" Exp																			{Requires}
+  | "ensures" Exp																			{Ensures}.
 
 Parameters = 
-    TypeLoc CommTypeLoc*                                                                      {Params}
-  | Type                                                                                      {TypeParam}.
+    TypeLoc CommTypeLoc*                                                                    {Params}
+  | Type CommType*                                                                          {TypeParam}.
 
 ReturnType = 
-    '->' '(' Parameters ')'                                                                   {RtnParams}
-  | '->' Type                                                                                 {RtnType}.
+    '->' '(' Parameters ')'                                                                 {RtnParams}
+  | '->' Type                                                                               {RtnType}.
 
 Literal =
-	'null'																			        {NullLit} 
+    'null'																			        {NullLit} 
   | '0b' Bit*																			    {ByteLit}
   | IntegerLiteral                                                                          {IntLit, 1: Integer.parseInt : Int}
   | BooleanLiteral                                                                          {BoolLit}
-    | CharacterLiteral
-    | StringLiteral.
+  | CharacterLiteral
+  | StringLiteral.
 
 IntegerLiteral : Token =
     DecimalNumeral.
@@ -178,45 +183,45 @@ DecimalNumeral : String =
   | NonZeroDigit Digits.
 
 BooleanLiteral =
-    'false'                                                                                    {False}
-  | 'true'                                                                                     {True}.
+    'false'                                                                                 {False}
+  | 'true'                                                                                  {True}.
 
 CharacterLiteral : Literal = 
-		"'" Character "'"																		{CharLit}.
+	"'" Character "'"																		{CharLit}.
 
 StringLiteral : Literal =
-		 '"' Character* '"'																		{StringLit}.
+	'"' Character* '"'																		{StringLit}.
 
 Character : Token = 
-		[\-a-zA-Z$._0-9].
+	[\-a-zA-Z$._0-9].
 
 Digits : String = 
-		Digit*.
+	Digit*.
 
 NonZeroDigit : String =
     [1-9].
 
 Digit : String =
-		[0-9].
+	[0-9].
 
 Bit : Token = 
     [0|1].
 
 // Used in Assign and DeclAsgn Statements
 LVal = 
-		Loc '.' Identifier 																		                                      {FieldAsgn}
-	| Loc '[' Exp ']'																				                                      {ListAsgn}	
-	| '*' Exp																								                                      {Pointer}
-	| Loc                                                                                         {LocAsgn}.
+	Loc '.' Identifier 																		{FieldAsgn}
+  | Loc '[' Exp ']'																			{ListAsgn}	
+  | '*' Exp																					{Pointer}
+  | Loc                                                                                     {LocAsgn}.
 
 Loc = 
     Identifier.
 
 Length : Exp = 
-		'|' Loc '|'																						                                      {Len}.
+	'|' Loc '|'																				{Len}.
 
 Lab : String =
-		Identifier.
+	Identifier.
 
 TypeLoc = 
     Type Loc.
@@ -233,15 +238,21 @@ CommLoc =
 CommLocInExp = 
     ',' Loc "in" Exp.
 
+CommLocColonExp =
+    ',' Loc ':' Exp.
+
 CommLit =
     ',' Literal.
+
+CommType = 
+    ',' Type.
     
 DotLoc =
     '.' Loc.
 
 LocOrStar = 
-    '*'                                                                                          {ImpAll}
-  | Loc                                                                                          {Spcfc}.
+    '*'                                                                                     {ImpAll}
+  | Loc                                                                                     {Spcfc}.
 
 DotLocOrStar = 
     '.' LocOrStar.
