@@ -36,22 +36,22 @@ Stm {line} =
 
 Type =
     TermType
-  | UnionType                                                                                 {Union}
-  | IntersectionType                                                                          {IntrsctnType}.
+  | UnionType
+  | IntersectionType.
 
 UnionType : Type = 
-    IntersectionType ('|' IntersectionType)*.
+    IntersectionType ('|' IntersectionType)*                                                  {Union}.
 
 IntersectionType : Type = 
-    TermType ('&' TermType)*.
+    TermType ('&' TermType)*                                                                  {Intersection}.
 
 TermType : Type = 
-    RecordType                                                                                {RecType}
-  | ReferenceType                                                                             {RefType}
-  | NegationType                                                                              {NegType}
-  | ArrayType                                                                                 {ArrType}
-  | FunctionType                                                                              {FuncType}
-  | MethodType                                                                                {MthdType}
+    '{' MixedType CommMixedType* ','? '...'? '}'                                              {RecType}
+  | '&' Type                                                                                  {RefType}
+  | '!' Type                                                                                  {NegType}
+  | PrimitiveType "[]"                                                                        {ArrType}
+  | "function" '(' Parameters ')' sp '->' sp Parameters                                             {FuncType}
+  | "method" '(' Parameters ')' sp '->' sp Parameters                                               {MthdType}
   | '(' Type ')'
   | PrimitiveType.
 
@@ -63,34 +63,13 @@ PrimitiveType : Type =
   | "real"                                                                                    {RealType}
   | Loc                                                                                       {NmnlType}.
 
-RecordType : Type =
-    '{' MixedType CommMixedType* ','? '...'? '}'.
-
 MixedType = 
     Type Loc                                                                                  {Mix}
-  | "function" Loc '(' Parameters ')' '->' Parameters                                         {MixFunc}
-  | "method" Loc '(' Parameters ')' '->' Parameters                                           {MixMthd}.
+  | "function" Loc '(' Parameters ')' sp '->' sp Parameters                                   {MixFunc}
+  | "method" Loc '(' Parameters ')' sp '->' sp Parameters                                     {MixMthd}.
 
 CommMixedType = 
     ',' MixedType.
-
-ReferenceType : Type =
-    '&' Type.
-
-NominalType : Type = 
-    Loc.
-
-ArrayType : Type = 
-    PrimitiveType "[]".
-
-NegationType : Type = 
-    '!' Type.
-
-FunctionType : Type = 
-    "function" '(' Parameters ')' '->' Parameters.
-
-MethodType : Type = 
-    "method" '(' Parameters ')' '->' Parameters.
 
 Exp {paren} = 
     Exp sp "<==>" Exp                                                                       {Iff, left, 10}
@@ -160,12 +139,12 @@ RequiresEnsures =
   | "ensures" Exp																			{Ensures}.
 
 Parameters = 
-    TypeLoc CommTypeLoc*                                                                    {Params}
-  | Type CommType*                                                                          {TypeParam}.
+    TypeLoc CommTypeLoc*                                                                  {Params}
+  | Type CommType*                                                                        {TypeParam}.
 
 ReturnType = 
-    '->' '(' Parameters ')'                                                                 {RtnParams}
-  | '->' Type                                                                               {RtnType}.
+    sp '->' sp '(' Parameters ')'\n                                                         {RtnParams}
+  | sp '->' sp Type\n                                                                       {RtnType}.
 
 Literal =
     'null'																			        {NullLit} 
@@ -233,7 +212,7 @@ TypeLVal =
     Type LVal.
 
 CommTypeLVal : TypeLVal =
-    ", " Type LVal
+    ", " TypeLVal.
 
 CommExp = 
     ',' Exp.
