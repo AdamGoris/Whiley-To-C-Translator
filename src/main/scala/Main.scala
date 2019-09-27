@@ -22,6 +22,7 @@ object Main extends Messaging with PositionStore {
             val v = p.value(pr).asInstanceOf[Program]
             println(show(v, 1))
             println(pretty(any(v)).layout)
+            println("")
             println(translator.translate(v))
         } else {
             val m = p.errorToMessage(pr.parseError)
