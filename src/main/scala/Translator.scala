@@ -5,7 +5,8 @@ class Translator {
 	import whiley.WhileyISyntax._
 
 	def translate(p : Program) : String = {
-        return translateStms(p.optStms)
+		var translated = "#include <stdio.h>\n#include <assert.h>\n\n"
+        return translated + translateStms(p.optStms)
 	}
 
     def translateStms(stms : Vector[Stm]) : String = {
@@ -22,6 +23,7 @@ class Translator {
 
 			//case ImportDecl(locOrStar, loc, optDotLocOrStars) =>
 
+			// no public, private, native, export in C
 			case Public(stm) =>
 				translateStm(stm)
 
@@ -60,7 +62,7 @@ class Translator {
 			case DoWhile(optStms, exp, optWhereExprs) =>
                 return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n"
 
-            // Need to sort out the Requires and Ensures
+            //FIXME: Ensures statement problem, can't assert before or after return
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms) + "}" 
 
@@ -73,9 +75,11 @@ class Translator {
 
 			case Assert(exp) =>
                 return "assert (" + translateExp(exp) + ");" 
-/*			
+			
+			//FIXME: currently treating assume like an assert
 			case Assume(exp) =>
-
+				return "assert (" + translateExp(exp) + ");" 
+/*
 			case DebugExp(exp) =>
 */
 			case SkipStm() =>
@@ -93,6 +97,30 @@ class Translator {
 
 	def translateType(typ : Type) : String = {
         typ match {
+			//FIXME:
+			case RecType(mixedType, optCommMixedTypes) =>
+				return ""
+
+			//FIXME:
+			case RefType(typ) =>
+				return ""
+
+			//FIXME:
+			case NegType(typeField) =>
+				return ""
+
+			//FIXME:
+			case ArrType(primitiveType) =>
+				return primitiveType + "[]"
+
+			//FIXME:
+			case FuncType(parameters1, parameters2) =>
+				return ""
+
+			//FIXME:
+			case MthdType(parameters1, parameters2) =>
+				return ""				
+
             case IntType() =>
                 return "int"
 
@@ -101,73 +129,19 @@ class Translator {
 
             case BoolType() =>
                 return "int"
+			
+			//FIXME:
+			case NmnlType(loc) =>
+				return ""
         }
         return "void"
 	}
 /*
-	def translateUnionType(unionType : Type) : String = {
-
-	}
-
-	def translateIntrsctnType(intersectionType : Type, optIntersectionTypes : Vector[Type]) : String = {
-
-	}
-
-	def translateTermType() : String = {
-
-	}
-
-	def translateRecType(recordType : Type) : String = {
-
-	}
-
-	def translateRefType(referenceType : Type) : String = {
-
-	}
-
-	def translateArrType(arrayType : Type) : String = {
-		
-	}
-
-	def translateNegType(negationType : Type) : String = {
-		
-	}
-
-	def translateFuncType(functionType : Type) : String = {
-		
-	}
-
-	def translateMthdType(methodType : Type) : String = {
-		
-	}
-
-	def translateNmnlType(identifier : String) : String = {
-		
-	}
-
 	def translateMixedType() : String = {
-
+		Mix(typeField : Type, loc : Loc)
+		MixFunc(loc : Loc, parameters1 : Parameters, parameters2 : Parameters)
+		MixMthd(loc : Loc, parameters1 : Parameters, parameters2 : Parameters)
 	}
-
-	def translateMix(typeField : Type, loc : LVal) : String = {
-
-	}
-
-	def translateMixFunc(loc : LVal, parameters1 : Parameters, parameters2 : Parameters) : String = {
-
-	}
-
-	def translateMixMthd(loc : LVal, parameters1 : Parameters, parameters2 : Parameters) : String = {
-
-	}
-
-	def translateFunctionType(parameters1 : Parameters, parameters2 : Parameters) : String = {
-		
-	}
-
-	def translateMethodType(parameters1 : Parameters, parameters2 : Parameters) : String = {
-		
-	}	
 */
 	def translateExp(exp : Exp) : String = {
 		exp match {
