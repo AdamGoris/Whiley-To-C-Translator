@@ -44,9 +44,11 @@ class Translator {
 
 			case AsgnStm(assign) =>
 				return translateExp(assign) + ";"
-/*
-			case TypeDecl(loc, typ, optLoc, optWhereExprs) =>
-*/
+
+			//FIXME:
+			case TypeDecl(loc, typ, optLoc, optCommTypeLocs, optWhereExps) =>
+				return "typedef " + translateType(typ) + " " + translateLoc(loc) + ";\n" + translateWhereExpVector(optWhereExps) 
+
 			case ConstDecl(loc, exp) =>
 				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
@@ -64,10 +66,10 @@ class Translator {
 
             //FIXME: Ensures statement problem, can't assert before or after return
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms) + "}" 
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms) + "}"
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}"
 
             // Need to sort out the commExps
 			case RtnStm(exp, optCommExps) =>
@@ -111,7 +113,7 @@ class Translator {
 
 			//FIXME:
 			case ArrType(primitiveType) =>
-				return primitiveType + "[]"
+				return translateType(primitiveType) + "[]"
 
 			//FIXME:
 			case FuncType(parameters1, parameters2) =>
@@ -221,10 +223,11 @@ class Translator {
 				return translateLVal(lVal) +  " = " + translateExp(exp)
 
 			case Len(loc) =>
-                return "sizeof(" + translateLoc(loc) + ") / sizeof(int)"
-/*
-			case QuantifierExp(quantExp) =>
-*/
+                return "sizeof (" + translateLoc(loc) + ") / sizeof (int)"
+
+			case QuantExp(noSomeAll, loc, exp1, optCommLocInExps, exp2) =>
+				return translateQuantExp(noSomeAll, loc, exp1, optCommLocInExps, exp2)
+
 			case Use(loc) =>
 				return translateLoc(loc)
 
@@ -242,13 +245,60 @@ class Translator {
 	}
 
     def translateWhereExp(exp : Exp) : String = {
-        return "assert (" + translateExp(exp) + ");"
+		exp match {
+			case QuantExp(noSomeAll, loc, exp1, exp2, exp3) =>
+				return translateQuantExp(noSomeAll, loc, exp1, exp2, exp3)
+			
+			case (_) =>
+				return "assert (" + translateExp(exp) + ");"
+		}
     }
-/*
-	def translateQuantExp(noSomeAll : NoSomeAll, loc : LVal, exp1 : Exp, optCommLocInExps : Vector[CommLocInExp], exp2 : Exp) : String = {
 
+	def translateQuantExp(noSomeAll : NoSomeAll, loc : Loc, exp1 : Exp, exp2 : Exp, exp3 : Exp) : String = {
+		noSomeAll match {
+			case All() =>
+				return "for (int " + translateLoc(loc) + " = " + translateExp(exp1) + "; " + translateLoc(loc) + " < " + translateExp(exp2) + "; " + translateLoc(loc) + "++)\n" + "{\n" + "assert (" + translateExp(exp3) + ");\n" + "}"  
+
+			case No() =>
+				return "for (int " + translateLoc(loc) + " = " + translateExp(exp1) + "; " + translateLoc(loc) + " < " + translateExp(exp2) + "; " + translateLoc(loc) + "++)\n" + "{\n" + "assert (" + translateExpOppositeSign(exp3) + ");\n" + "}"
+		}
 	}
 
+	def translateExpOppositeSign(exp : Exp) : String = {
+		exp match {
+			case EQ(exp1, exp2) =>
+				return translateExp(exp1) +  " != " + translateExp(exp2)
+
+			case NE(exp1, exp2) =>
+				return translateExp(exp1) +  " == " + translateExp(exp2)
+
+			case LT(exp1, exp2) =>
+				return translateExp(exp1) +  " >= " + translateExp(exp2)
+			
+			case LE(exp1, exp2) =>
+				return translateExp(exp1) +  " > " + translateExp(exp2)
+
+			case GT(exp1, exp2) =>
+				return translateExp(exp1) +  " <= " + translateExp(exp2)
+			
+			case GE(exp1, exp2) =>
+				return translateExp(exp1) +  " < " + translateExp(exp2)
+
+			case Not(exp) =>
+				return translateExp(exp)
+
+			case Neg(exp) =>
+				return translateExp(exp)
+
+			case And(exp1, exp2) =>
+				return translateExp(exp1) + translateExp(exp2)
+
+			case Or(exp1, exp2) =>
+				return translateExp(exp1) + translateExp(exp2)				
+		}
+	}
+
+/*
 	def translateNoSomeAll() : String = {
 
 	}
@@ -275,16 +325,16 @@ class Translator {
 	}
 
     def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
-        return "else if " + "(" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
+        return "else if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
     }
 
 	def translateElse(optElse : Option[Else]) : String = {
         return "else\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}\n"
 	}
 
-	def translateCaseStmVector(ocaseStm : Vector[CaseStm]) : String = {
+	def translateCaseStmVector(vCaseStm : Vector[CaseStm]) : String = {
         var translation = ""
-        for (cs <- ocaseStm) {
+        for (cs <- vCaseStm) {
             translation = translation + translateCaseStm(cs)
         }
         return translation
@@ -301,7 +351,7 @@ class Translator {
     }
 
 
-	def translateRequiresEnsures(optRequiresEnsures : Vector[RequiresEnsures], optStms : Vector[Stm]) : String = {
+	def translateRequiresEnsures(optRequiresEnsures : Vector[RequiresEnsures], optStms : Vector[Stm], optReturnType : Option[ReturnType]) : String = {
         var requires = Vector[Exp]()
         var ensures = Vector[Exp]()
         var translation = ""
@@ -320,11 +370,41 @@ class Translator {
             translation = translation + "assert (" + translateExp(require) + ");\n"
         }
 
-        translation = translation + translateStms(optStms)
+		// If there is a specified value to be returned, i.e. -> (int r), that value first needs to be initialised in C
+		optReturnType.getOrElse() match {
+			case RtnParams(params) =>
+				params match {
+					case Params(typeLoc, optCommTypeLocs) =>
+						translation = translation + translateTypeLoc(typeLoc) + ";\n"
+				}
+		}
+
+		// if the function has a return type, the last statement is a return statement. Ensures statements need to be manipulated around the return statement.
+		optReturnType.getOrElse(translation = translation + translateStms(optStms)) match {
+			case (_) =>
+				for (i <- 0 until optStms.length) {
+					translation = translation + translateStm(optStms(i))
+				}
+		}
+
+		// set the initialised return value to be equal to the return expression
+		optReturnType.getOrElse() match {
+			case RtnParams(params) =>
+				params match {
+					case Params(typeLoc, optCommTypeLocs) =>
+						translation = translation + translateLoc(typeLoc.loc) + " = " + translateStm(optStms(optStms.length - 1))
+				}
+		}
 
         for (ensure <- ensures) {
             translation = translation + "assert (" + translateExp(ensure) + ");\n"
         }
+
+		//return statement
+		optReturnType.getOrElse() match {
+			case _ => 
+				translation = translation + translateStm(optStms(optStms.length - 1))
+		}
 
         return translation
 	}
