@@ -17,7 +17,7 @@ Stm {line} =
   | Type LVal CommTypeLVal* sp "=" Exp CommExp*                                               {DeclAsgn}
   | Type Loc                                                                                  {Decl}
   | Assign                                                                                    {AsgnStm}
-  | "type" Loc sp "is" '('? Type Loc? ')'? WhereExp*                                          {TypeDecl}
+  | "type" Loc sp "is" '('? Type Loc? CommTypeLoc* ')'? WhereExp*                             {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
   | "if" Exp ':' nest (Stm*)\n ElseIf* Else?                                                  {If}
   | "switch" Exp ':' CaseStm*                                                                 {Switch}
@@ -50,8 +50,8 @@ TermType : Type =
   | '&' Type                                                                                  {RefType}
   | '!' Type                                                                                  {NegType}
   | PrimitiveType "[]"                                                                        {ArrType}
-  | "function" '(' Parameters ')' sp '->' sp Parameters                                             {FuncType}
-  | "method" '(' Parameters ')' sp '->' sp Parameters                                               {MthdType}
+  | "function" '(' Parameters ')' sp '->' sp Parameters                                       {FuncType}
+  | "method" '(' Parameters ')' sp '->' sp Parameters                                         {MthdType}
   | '(' Type ')'
   | PrimitiveType.
 
@@ -103,7 +103,7 @@ Exp {paren} =
   | '&' Exp                                                                                 {RefExp}
   | Assign
   | Length
-  | QuantExp                                                                                {QuantifierExp}                                                                               
+  | QuantExp                                                                               
   | Literal                                                                                 {Lit}
   | Loc                                                                                     {Use}.
 
@@ -116,8 +116,8 @@ Assign : Exp =
 WhereExp =
     sp "where" Exp.
 
-QuantExp =
-    NoSomeAll '{' Loc 'in' Exp CommLocInExp* '|' Exp '}'.
+QuantExp : Exp =
+    NoSomeAll '{' Loc sp 'in' sp Exp sp ".." Exp sp '|' sp Exp '}'.
 
 NoSomeAll = 
     "no"                                                                                    {No}
@@ -139,8 +139,8 @@ RequiresEnsures =
   | "ensures" Exp																			{Ensures}.
 
 Parameters = 
-    TypeLoc CommTypeLoc*                                                                  {Params}
-  | Type CommType*                                                                        {TypeParam}.
+    TypeLoc CommTypeLoc*                                                                    {Params}
+  | Type CommType*                                                                          {TypeParam}.
 
 ReturnType = 
     sp '->' sp '(' Parameters ')'\n                                                         {RtnParams}
