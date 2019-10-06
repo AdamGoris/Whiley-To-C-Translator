@@ -37,7 +37,7 @@ class Translator {
 				translateStm(stm)
 
 			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
-				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";\n" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
+				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 
 			case Decl(typ, loc) =>
 				return translateType(typ) + " " + translateLoc(loc) + ";"
@@ -56,13 +56,13 @@ class Translator {
                 return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
 
 			case Switch(exp, optCaseStms) =>
-                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}\n" 
+                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
-                return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "}\n" 
+                return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "}" 
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-                return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n"
+                return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");"
 
             //FIXME: Ensures statement problem, can't assert before or after return
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
@@ -379,32 +379,11 @@ class Translator {
 				}
 		}
 
-		// if the function has a return type, the last statement is a return statement. Ensures statements need to be manipulated around the return statement.
-		optReturnType.getOrElse(translation = translation + translateStms(optStms)) match {
-			case (_) =>
-				for (i <- 0 until optStms.length) {
-					translation = translation + translateStm(optStms(i))
-				}
-		}
-
-		// set the initialised return value to be equal to the return expression
-		optReturnType.getOrElse() match {
-			case RtnParams(params) =>
-				params match {
-					case Params(typeLoc, optCommTypeLocs) =>
-						translation = translation + translateLoc(typeLoc.loc) + " = " + translateStm(optStms(optStms.length - 1))
-				}
-		}
-
-        for (ensure <- ensures) {
-            translation = translation + "assert (" + translateExp(ensure) + ");\n"
-        }
-
-		//return statement
-		optReturnType.getOrElse() match {
-			case _ => 
-				translation = translation + translateStm(optStms(optStms.length - 1))
-		}
+		// Need to search for return statements in the body of the function
+		// Once a return statement has been found, before that return statement:
+		// first set the initialised return value to equal the expression at the return statment
+		// next make the assertion, using the ensures expression.
+		
 
         return translation
 	}
@@ -423,7 +402,13 @@ class Translator {
 	def translateReturnType(optReturnType : Option[ReturnType]) : String = {
         optReturnType.getOrElse(return "void") match {
             case RtnParams(params) =>
-                return translateParameters(Option(params))
+                params match {
+					case Params(typeLoc, optCommTypeLocs) =>
+						return translateType(typeLoc.typeField)
+					
+					case TypeParam(typ, optCommTypes) =>
+                		return translateType(typ)
+				}
 
             case RtnType(typ) =>
                 return translateType(typ)
