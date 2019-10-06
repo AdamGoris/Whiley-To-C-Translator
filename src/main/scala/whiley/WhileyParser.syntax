@@ -17,14 +17,14 @@ Stm {line} =
   | Type LVal CommTypeLVal* sp "=" Exp CommExp*                                               {DeclAsgn}
   | Type Loc                                                                                  {Decl}
   | Assign                                                                                    {AsgnStm}
-  | "type" Loc sp "is" '('? Type Loc? CommTypeLoc* ')'? WhereExp*                             {TypeDecl}
+  | "type" Loc sp "is" "("? Type Loc? CommTypeLoc* ")"? WhereExp*                             {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
-  | "if" Exp ':' nest (Stm*)\n ElseIf* Else?                                                  {If}
-  | "switch" Exp ':' CaseStm*                                                                 {Switch}
-  | "while" Exp WhereExp* ':' nest (Stm*)\n                                                   {While}
-  | "do" ':' nest (Stm*)\n "while" nest (Exp) WhereExp*                                       {DoWhile}
-  | "function" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n         {FnDecl}
-  | "method" Loc '(' Parameters? ')' ReturnType? RequiresEnsures* ':' nest (Stm*)\n           {MthdDecl}
+  | "if" Exp ":" nest (Stm*)\n ElseIf* Else?                                                  {If}
+  | "switch" Exp ":" CaseStm*                                                                 {Switch}
+  | "while" Exp WhereExp* ":" nest(Stm*)\n                                                    {While}
+  | "do" ":" nest (Stm*)\n "while" nest (Exp) WhereExp*                                       {DoWhile}
+  | "function" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n         {FnDecl}
+  | "method" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n           {MthdDecl}
   | "return" Exp CommExp*                                                                     {RtnStm}
   | "assert" Exp                                                                              {Assert}
   | "assume" Exp                                                                              {Assume}
@@ -40,19 +40,19 @@ Type =
   | IntersectionType.
 
 UnionType : Type = 
-    IntersectionType ('|' IntersectionType)*                                                  {Union}.
+    IntersectionType ("|" IntersectionType)*                                                  {Union}.
 
 IntersectionType : Type = 
-    TermType ('&' TermType)*                                                                  {Intersection}.
+    TermType ("&" TermType)*                                                                  {Intersection}.
 
 TermType : Type = 
-    '{' MixedType CommMixedType* ','? '...'? '}'                                              {RecType}
-  | '&' Type                                                                                  {RefType}
-  | '!' Type                                                                                  {NegType}
+    "{" MixedType CommMixedType* ","? "..."? "}"                                              {RecType}
+  | "&" Type                                                                                  {RefType}
+  | "!" Type                                                                                  {NegType}
   | PrimitiveType "[]"                                                                        {ArrType}
-  | "function" '(' Parameters ')' sp '->' sp Parameters                                       {FuncType}
-  | "method" '(' Parameters ')' sp '->' sp Parameters                                         {MthdType}
-  | '(' Type ')'
+  | "function" "(" Parameters ")" sp "->" sp Parameters                                       {FuncType}
+  | "method" "(" Parameters ")" sp "->" sp Parameters                                         {MthdType}
+  | "(" Type ")"
   | PrimitiveType.
 
 PrimitiveType : Type =
@@ -65,11 +65,11 @@ PrimitiveType : Type =
 
 MixedType = 
     Type Loc                                                                                  {Mix}
-  | "function" Loc '(' Parameters ')' sp '->' sp Parameters                                   {MixFunc}
-  | "method" Loc '(' Parameters ')' sp '->' sp Parameters                                     {MixMthd}.
+  | "function" Loc "(" Parameters ")" sp "->" sp Parameters                                   {MixFunc}
+  | "method" Loc "(" Parameters ")" sp "->" sp Parameters                                     {MixMthd}.
 
 CommMixedType = 
-    ',' MixedType.
+    "," MixedType.
 
 Exp {paren} = 
     Exp sp "<==>" Exp                                                                       {Iff, left, 10}
@@ -91,16 +91,16 @@ Exp {paren} =
   | Exp sp "*" Exp                                                                          {Mul, left, 1}
   | Exp sp "/" Exp                                                                          {Div, left, 1}
   | Exp sp "%" Exp                                                                          {Rem, left, 1}
-  | '!' Exp                                                                                 {Not}
-  | '-' Exp                                                                                 {Neg}
-  | Loc '(' Exp ')'                                                                         {FunctionCall}
-  | '(' Exp ')'
-  | '{' RecordInitialiser '}'
-  | Exp '[' Exp ']'                                                                         {ArrAccess, left, 1}
-  | '[' Exp ';' Exp ']'                                                                     {ArrGen}
-  | '[' Exp (',' Exp)* ']'                                                                  {ArrInit}
+  | "!" Exp                                                                                 {Not}
+  | "-" Exp                                                                                 {Neg}
+  | Loc "(" Exp ")"                                                                         {FunctionCall}
+  | "(" Exp ")"
+  | "{" RecordInitialiser "}"
+  | Exp "[" Exp "]"                                                                         {ArrAccess, left, 1}
+  | "[" Exp ";" Exp "]"                                                                     {ArrGen}
+  | "[" Exp ("," Exp)* "]"                                                                  {ArrInit}
   //| Exp ',' Exp                                                                             {ExpList, left, 1}
-  | '&' Exp                                                                                 {RefExp}
+  | "&" Exp                                                                                 {RefExp}
   | Assign
   | Length
   | QuantExp                                                                               
@@ -108,7 +108,7 @@ Exp {paren} =
   | Loc                                                                                     {Use}.
 
 RecordInitialiser : Exp =
-    Loc ':' Exp CommLocColonExp*                                                            {RecInit}.
+    Loc ":" Exp CommLocColonExp*                                                            {RecInit}.
 
 Assign : Exp = 
     LVal sp "=" Exp.
@@ -117,7 +117,7 @@ WhereExp =
     sp "where" Exp.
 
 QuantExp : Exp =
-    NoSomeAll '{' Loc sp 'in' sp Exp sp ".." Exp sp '|' sp Exp '}'.
+    NoSomeAll "{" Loc sp "in" sp Exp sp ".." Exp sp "|" sp Exp "}".
 
 NoSomeAll = 
     "no"                                                                                    {No}
@@ -125,30 +125,30 @@ NoSomeAll =
   | "all"                                                                                   {All}.
 
 ElseIf = 
-    "else if" Exp ':' nest (Stm*)\n.
+    "else if" Exp ":" nest (Stm*)\n.
 
 Else =
-    "else" ':' nest (Stm*)\n.
+    "else" ":" nest (Stm*)\n.
 
 CaseStm = 
-	"case" Exp CommExp* ':' nest (Stm*)\n                                                   {Case}
-  | "default" ':' nest (Stm*)\n	                                                            {DefaultCase}.
+	"case" Exp CommExp* ":" nest (Stm*)\n                                                   {Case}
+  | "default" ":" nest (Stm*)\n	                                                            {DefaultCase}.
 
 RequiresEnsures = 
 	"requires" Exp																			{Requires}
   | "ensures" Exp																			{Ensures}.
 
 Parameters = 
-    TypeLoc CommTypeLoc*                                                                    {Params}
+    TypeLoc sp CommTypeLoc*                                                                 {Params}
   | Type CommType*                                                                          {TypeParam}.
 
 ReturnType = 
-    sp '->' sp '(' Parameters ')'\n                                                         {RtnParams}
-  | sp '->' sp Type\n                                                                       {RtnType}.
+    sp "->" sp "(" Parameters ")"                                                           {RtnParams}
+  | sp "->" sp Type                                                                         {RtnType}.
 
 Literal =
-    'null'																			        {NullLit} 
-  | '0b' Bit*																			    {ByteLit}
+    "null"																			        {NullLit} 
+  | "0b" Bit*																			    {ByteLit}
   | IntegerLiteral                                                                          {IntLit, 1: Integer.parseInt : Int}
   | BooleanLiteral                                                                          {BoolLit}
   | CharacterLiteral
@@ -158,12 +158,12 @@ IntegerLiteral : Token =
     DecimalNumeral.
 
 DecimalNumeral : String =
-    '0'
+    "0"
   | NonZeroDigit Digits.
 
 BooleanLiteral =
-    'false'                                                                                 {False}
-  | 'true'                                                                                  {True}.
+    "false"                                                                                 {False}
+  | "true"                                                                                  {True}.
 
 CharacterLiteral : Literal = 
 	"'" Character "'"																		{CharLit}.
@@ -188,16 +188,16 @@ Bit : Token =
 
 // Used in Assign and DeclAsgn Statements
 LVal = 
-	Loc '.' Identifier 																		{FieldAsgn}
-  | Loc '[' Exp ']'																			{ListAsgn}	
-  | '*' Exp																					{Pointer}
+	Loc "." Identifier 																		{FieldAsgn}
+  | Loc "[" Exp "]"																			{ListAsgn}	
+  | "*" Exp																					{Pointer}
   | Loc                                                                                     {LocAsgn}.
 
 Loc = 
     Identifier.
 
 Length : Exp = 
-	'|' Loc '|'																				{Len}.
+	"|" Loc "|"																				{Len}.
 
 Lab : String =
 	Identifier.
@@ -206,7 +206,7 @@ TypeLoc =
     Type Loc.
 
 CommTypeLoc : TypeLoc = 
-    ',' TypeLoc.
+    ", " TypeLoc.
 
 TypeLVal =
     Type LVal.
@@ -215,29 +215,29 @@ CommTypeLVal : TypeLVal =
     ", " TypeLVal.
 
 CommExp = 
-    ',' Exp.
+    "," Exp.
 
 CommLoc =
-    ',' Loc.
+    "," Loc.
 
 CommLocInExp = 
-    ',' Loc "in" Exp.
+    "," Loc "in" Exp.
 
 CommLocColonExp =
-    ',' Loc ':' Exp.
+    "," Loc ":" Exp.
 
 CommLit =
-    ',' Literal.
+    "," Literal.
 
 CommType = 
-    ',' Type.
+    "," Type.
     
 DotLoc =
-    '.' Loc.
+    "." Loc.
 
 LocOrStar = 
-    '*'                                                                                     {ImpAll}
+    "*"                                                                                     {ImpAll}
   | Loc                                                                                     {Spcfc}.
 
 DotLocOrStar = 
-    '.' LocOrStar.
+    "." LocOrStar.
