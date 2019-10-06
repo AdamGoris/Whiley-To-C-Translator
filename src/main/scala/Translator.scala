@@ -25,16 +25,16 @@ class Translator {
 
 			// no public, private, native, export in C
 			case Public(stm) =>
-				translateStm(stm)
+				return translateStm(stm)
 
 			case Private(stm) =>
-				translateStm(stm)
+				return translateStm(stm)
 
 			case Native(stm) => 
-				translateStm(stm)
+				return translateStm(stm)
 
 			case Export(stm) =>
-				translateStm(stm)
+				return translateStm(stm)
 
 			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
 				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
@@ -73,7 +73,7 @@ class Translator {
 
             // Need to sort out the commExps
 			case RtnStm(exp, optCommExps) =>
-                return "return " + translateExp(exp) + ";"
+				return "return " + translateExp(exp) + ";"
 
 			case Assert(exp) =>
                 return "assert (" + translateExp(exp) + ");" 
@@ -352,22 +352,22 @@ class Translator {
 
 
 	def translateRequiresEnsures(optRequiresEnsures : Vector[RequiresEnsures], optStms : Vector[Stm], optReturnType : Option[ReturnType]) : String = {
-        var requires = Vector[Exp]()
-        var ensures = Vector[Exp]()
+        var requires = Vector[Requires]()
+        var ensures = Vector[Ensures]()
         var translation = ""
 
         for (requiresEnsures <- optRequiresEnsures) {
             requiresEnsures match {
                 case Requires(exp) =>
-                    requires = requires :+ exp
+                    requires = requires :+ Requires(exp)
                 
                 case Ensures(exp) =>
-                    ensures = ensures :+ exp
+                    ensures = ensures :+ Ensures(exp)
             }
         }
 
         for (require <- requires) {
-            translation = translation + "assert (" + translateExp(require) + ");\n"
+            translation = translation + "assert (" + translateExp(require.exp) + ");\n"
         }
 
 		// If there is a specified value to be returned, i.e. -> (int r), that value first needs to be initialised in C
@@ -383,10 +383,105 @@ class Translator {
 		// Once a return statement has been found, before that return statement:
 		// first set the initialised return value to equal the expression at the return statment
 		// next make the assertion, using the ensures expression.
-		
+		translation = translation + translateStmsSearchRtn(optReturnType, ensures, optStms)
 
         return translation
 	}
+
+def translateStmsSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stms : Vector[Stm]) : String = {
+	var translate = ""
+	for (stm <- stms) {
+		translate = translate + translateStmSearchRtn(optRtnType, vEnsures, stm)
+	}
+	return translate
+}
+
+def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stm : Stm) : String = {
+		stm match {
+			//case PackageDecl(loc, optDotLocs) =>
+
+			//case ImportDecl(locOrStar, loc, optDotLocOrStars) =>
+
+			// no public, private, native, export in C
+			case Public(stm) =>
+				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+
+			case Private(stm) =>
+				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+
+			case Native(stm) => 
+				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+
+			case Export(stm) =>
+				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+
+			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
+				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
+
+			case Decl(typ, loc) =>
+				return translateType(typ) + " " + translateLoc(loc) + ";"
+
+			case AsgnStm(assign) =>
+				return translateExp(assign) + ";"
+
+			//FIXME:
+			case TypeDecl(loc, typ, optLoc, optCommTypeLocs, optWhereExps) =>
+				return "typedef " + translateType(typ) + " " + translateLoc(loc) + ";\n" + translateWhereExpVector(optWhereExps) 
+
+			case ConstDecl(loc, exp) =>
+				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
+
+			case If(exp, optStms, optElseIfs, optElse) =>
+                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
+
+			case Switch(exp, optCaseStms) =>
+                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
+
+			case While(exp, optWhereExprs, optStms) =>
+                return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}" 
+
+			case DoWhile(optStms, exp, optWhereExprs) =>
+                return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "} while (" + translateExp(exp) + ");"
+
+            //FIXME: Ensures statement problem, can't assert before or after return
+			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}" 
+
+			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
+                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}"
+
+            //FIXME: Need to sort out the commExps
+			case RtnStm(exp, optCommExps) =>
+				var translate = ""
+				translate = translate + translateReturnType(optRtnType) + " = " + translateExp(exp) + ";"
+				for (ensure <- vEnsures) {
+					translate = translate + translateExp(ensure.exp)
+				}
+				translate = translate + "return " + translateExp(exp) + ";"
+                return translate
+
+			case Assert(exp) =>
+                return "assert (" + translateExp(exp) + ");" 
+			
+			//FIXME: currently treating assume like an assert
+			case Assume(exp) =>
+				return "assert (" + translateExp(exp) + ");" 
+/*
+			case DebugExp(exp) =>
+*/
+			case SkipStm() =>
+                return ""
+
+			case BreakStm() =>
+                return "break;"
+
+			case ContStm() =>
+                return "continue;"
+
+//			case FailStm() =>
+		}
+	}
+
 
 	def translateParameters(optParams : Option[Parameters]) : String = {
         optParams.getOrElse(return "") match {
