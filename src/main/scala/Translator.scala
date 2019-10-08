@@ -206,7 +206,7 @@ class Translator {
 				return " !" + translateExp(exp)
 
 			case Neg(exp) =>
-				return " -" + translateExp(exp)
+				return "-" + translateExp(exp)
 
 			case FunctionCall(loc, exp) =>
 				return translateLoc(loc) + "(" + translateExp(exp) + ")"
@@ -443,21 +443,19 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 			case DoWhile(optStms, exp, optWhereExprs) =>
                 return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "} while (" + translateExp(exp) + ");"
 
-            //FIXME: Ensures statement problem, can't assert before or after return
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}"
 
-            //FIXME: Need to sort out the commExps
 			case RtnStm(exp, optCommExps) =>
-				var translate = ""
-				translate = translate + translateReturnType(optRtnType) + " = " + translateExp(exp) + ";"
+				var translate = "\n"
+				translate = translate + translateReturnTypeLoc(optRtnType) + " = " + translateExp(exp) + ";\n"
 				for (ensure <- vEnsures) {
-					translate = translate + translateExp(ensure.exp)
+					translate = translate + "assert (" + translateExp(ensure.exp) + ");\n"
 				}
-				translate = translate + "return " + translateExp(exp) + ";"
+				translate = translate + "return " + translateExp(exp) + ";\n"
                 return translate
 
 			case Assert(exp) =>
@@ -508,6 +506,17 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
             case RtnType(typ) =>
                 return translateType(typ)
         }
+	}
+
+	def translateReturnTypeLoc(optReturnType : Option[ReturnType]) : String = {
+		optReturnType.getOrElse(return "") match {
+			case RtnParams(params) =>
+				params match {
+					case Params(typeLoc, optCommTypeLocs) =>
+						return translateLoc(typeLoc.loc)
+				}
+		}
+		return ""
 	}
 
 	def translateLit(lit : Literal) : String = {
