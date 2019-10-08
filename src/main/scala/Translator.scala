@@ -59,10 +59,10 @@ class Translator {
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
-                return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "}" 
+                return translateWhereExpVector(optWhereExprs) + "while (" + translateExp(exp) + ")\n" + "{\n" + translateStms(optStms) + translateWhereExpVector(optWhereExprs) + "}\n" + translateWhereExpVector(optWhereExprs) 
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-                return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");"
+                return translateWhereExpVector(optWhereExprs) + "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n" + translateWhereExpVector(optWhereExprs)
 
             //FIXME: Ensures statement problem, can't assert before or after return
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
