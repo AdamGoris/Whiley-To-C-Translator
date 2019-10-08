@@ -1,3 +1,6 @@
-function divide(int a, int b) -> int
-requires b != 0:
-    return a / b
+function abs(int x) -> (int y)
+ensures y >= 0:
+    if x < 0:
+        x = -x
+    return x
+
