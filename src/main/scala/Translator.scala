@@ -211,6 +211,9 @@ class Translator {
 			case FunctionCall(loc, exp) =>
 				return translateLoc(loc) + "(" + translateExp(exp) + ")"
 
+			case RecordInitialiser(loc, exp, optCommLocColonExps) =>
+				return "{" + translateExp(exp) + translateOptCommLocColonExps(optCommLocColonExps) + "}"
+
 			case ArrAccess(exp1, exp2) =>
 				return translateExp(exp1) + "[" + translateExp(exp2) + "]"
 
@@ -253,6 +256,14 @@ class Translator {
 				return "assert (" + translateExp(exp) + ");"
 		}
     }
+
+	def translateOptCommLocColonExps(vCommLocColonExp : Vector[CommLocColonExp]) : String = {
+		var translate = ""
+		for (commLocColonExp <- vCommLocColonExp) {
+			translate = translate + ", " + translateExp(commLocColonExp.exp)
+		}
+		return translate
+	}
 
 	def translateQuantExp(noSomeAll : NoSomeAll, loc : Loc, exp1 : Exp, exp2 : Exp, exp3 : Exp) : String = {
 		noSomeAll match {
