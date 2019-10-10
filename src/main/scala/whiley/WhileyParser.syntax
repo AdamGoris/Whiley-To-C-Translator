@@ -95,7 +95,7 @@ Exp {paren} =
   | "-" Exp                                                                                 {Neg}
   | Loc "(" Exp ")"                                                                         {FunctionCall}
   | "(" Exp ")"
-  | "{" RecordInitialiser "}"
+  | RecordInitialiser
   | Exp "[" Exp "]"                                                                         {ArrAccess, left, 1}
   | "[" Exp ";" Exp "]"                                                                     {ArrGen}
   | "[" Exp ("," Exp)* "]"                                                                  {ArrInit}
@@ -108,7 +108,7 @@ Exp {paren} =
   | Loc                                                                                     {Use}.
 
 RecordInitialiser : Exp =
-    Loc ":" Exp CommLocColonExp*                                                            {RecInit}.
+    "{" Loc ":" Exp CommLocColonExp* "}".
 
 Assign : Exp = 
     LVal sp "=" Exp.
