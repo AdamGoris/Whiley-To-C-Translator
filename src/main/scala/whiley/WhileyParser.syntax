@@ -19,12 +19,12 @@ Stm {line} =
   | Assign                                                                                    {AsgnStm}
   | "type" Loc sp "is" "("? Type Loc? CommTypeLoc* ")"? WhereExp*                             {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
-  | "if" Exp ":" nest (Stm*)\n ElseIf* Else?                                                  {If}
+  | "if" Exp ":" nest (Stm*)\n ElseIf* Else? "end"\n                                          {If}
   | "switch" Exp ":" CaseStm*                                                                 {Switch}
-  | "while" Exp WhereExp* ":" nest(Stm*)\n                                                    {While}
+  | "while" Exp WhereExp* ":" nest(Stm*)\n "end"\n                                            {While}
   | "do" ":" nest (Stm*)\n "while" nest (Exp) WhereExp*                                       {DoWhile}
-  | "function" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n         {FnDecl}
-  | "method" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n           {MthdDecl}
+  | "function" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n {FnDecl}
+  | "method" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n   {MthdDecl}
   | "return" Exp CommExp*                                                                     {RtnStm}
   | "assert" Exp                                                                              {Assert}
   | "assume" Exp                                                                              {Assume}
@@ -131,8 +131,8 @@ Else =
     "else" ":" nest (Stm*)\n.
 
 CaseStm = 
-	"case" Exp CommExp* ":" nest (Stm*)\n                                                   {Case}
-  | "default" ":" nest (Stm*)\n	                                                            {DefaultCase}.
+	"case" Exp CommExp* ":" nest (Stm*)\n "end"\n                                           {Case}
+  | "default" ":" nest (Stm*)\n	"end"\n                                                     {DefaultCase}.
 
 RequiresEnsures = 
 	"requires" Exp																			{Requires}
