@@ -64,21 +64,18 @@ class Translator {
 			case DoWhile(optStms, exp, optWhereExprs) =>
                 return translateWhereExpVector(optWhereExprs) + "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n" + translateWhereExpVector(optWhereExprs)
 
-            //FIXME: Ensures statement problem, can't assert before or after return
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}"
 
-            // Need to sort out the commExps
 			case RtnStm(exp, optCommExps) =>
 				return "return " + translateExp(exp) + ";"
 
 			case Assert(exp) =>
                 return "assert (" + translateExp(exp) + ");" 
 			
-			//FIXME: currently treating assume like an assert
 			case Assume(exp) =>
 				return "assert (" + translateExp(exp) + ");" 
 /*
@@ -336,11 +333,11 @@ class Translator {
 	}
 
     def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
-        return "else if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n"
+        return "else if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}"
     }
 
 	def translateElse(optElse : Option[Else]) : String = {
-        return "else\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}\n"
+        return "else\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}"
 	}
 
 	def translateCaseStmVector(vCaseStm : Vector[CaseStm]) : String = {
@@ -402,7 +399,7 @@ class Translator {
 def translateStmsSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stms : Vector[Stm]) : String = {
 	var translate = ""
 	for (stm <- stms) {
-		translate = translate + translateStmSearchRtn(optRtnType, vEnsures, stm)
+		translate = translate + translateStmSearchRtn(optRtnType, vEnsures, stm) + "\n"
 	}
 	return translate
 }
@@ -443,7 +440,7 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
+                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n" + translateElseIfVectorSearchRtn(optRtnType, vEnsures, optElseIfs) + translateElseSearchRtn(optRtnType, vEnsures, optElse)
 
 			case Switch(exp, optCaseStms) =>
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
@@ -466,7 +463,7 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 				for (ensure <- vEnsures) {
 					translate = translate + "assert (" + translateExp(ensure.exp) + ");\n"
 				}
-				translate = translate + "return " + translateExp(exp) + ";\n"
+				translate = translate + "return " + translateExp(exp) + ";"
                 return translate
 
 			case Assert(exp) =>
@@ -491,6 +488,21 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 		}
 	}
 
+	def translateElseIfVectorSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vElseIfs : Vector[ElseIf]) : String = {
+		var translation = ""
+        	for (elseif <- vElseIfs) {
+            	translation = translation + translateElseIfSearchRtn(optRtnType, vEnsures, elseif.exp, elseif.optStms)
+        	}
+        	return translation
+	}
+
+	def translateElseIfSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], exp : Exp, optStms : Vector[Stm]) : String = {
+		return "else if (" + translateExp(exp) + ")" + "\n{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n"
+	}
+
+	def translateElseSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], optElse : Option[Else]) : String = {
+		return "else\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optElse.getOrElse(return "").optStms) + "}"
+	}
 
 	def translateParameters(optParams : Option[Parameters]) : String = {
         optParams.getOrElse(return "") match {
@@ -501,7 +513,6 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
                 return translateType(typ)
         }
 	}
-
 
 	def translateReturnType(optReturnType : Option[ReturnType]) : String = {
         optReturnType.getOrElse(return "void") match {
