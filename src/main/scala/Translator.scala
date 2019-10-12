@@ -443,7 +443,7 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
                 return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n" + translateElseIfVectorSearchRtn(optRtnType, vEnsures, optElseIfs) + translateElseSearchRtn(optRtnType, vEnsures, optElse)
 
 			case Switch(exp, optCaseStms) =>
-                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
+                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVectorSearchRtn(optRtnType, vEnsures, optCaseStms) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
                 return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}" 
@@ -503,6 +503,24 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 	def translateElseSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], optElse : Option[Else]) : String = {
 		return "else\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optElse.getOrElse(return "").optStms) + "}"
 	}
+
+	def translateCaseStmVectorSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vCaseStm : Vector[CaseStm]) : String = {
+        var translation = ""
+        for (cs <- vCaseStm) {
+            translation = translation + translateCaseStmSearchRtn(optRtnType, vEnsures, cs)
+        }
+        return translation
+	}
+
+    def translateCaseStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], caseStm : CaseStm) : String = {
+        caseStm match {
+            case Case(exp, optCommExps, optStms) =>
+                return "case " + translateExp(exp) + ":\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) 
+
+            case DefaultCase(optStms) =>
+                return "default:\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) 
+        }
+    }
 
 	def translateParameters(optParams : Option[Parameters]) : String = {
         optParams.getOrElse(return "") match {
