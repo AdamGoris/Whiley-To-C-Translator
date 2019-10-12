@@ -53,7 +53,7 @@ class Translator {
 				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
+                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
 
 			case Switch(exp, optCaseStms) =>
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
@@ -203,7 +203,7 @@ class Translator {
 				return translateExp(leftExp) + " % " + translateExp(rightExp)
 
 			case Not(exp) =>
-				return " !" + translateExp(exp)
+				return "!" + translateExp(exp)
 
 			case Neg(exp) =>
 				return "-" + translateExp(exp)
