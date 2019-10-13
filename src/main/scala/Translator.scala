@@ -53,7 +53,7 @@ class Translator {
 				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStms(optStms) + "}\n" + translateElseIfVector(optElseIfs) + translateElse(optElse)
+                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStms(optStms) + "}" + translateElseIfVector(optElseIfs) + translateElse(optElse)
 
 			case Switch(exp, optCaseStms) =>
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
@@ -333,11 +333,11 @@ class Translator {
 	}
 
     def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
-        return "else if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}"
+        return "\nelse if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}"
     }
 
 	def translateElse(optElse : Option[Else]) : String = {
-        return "else\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}"
+        return "\nelse\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}"
 	}
 
 	def translateCaseStmVector(vCaseStm : Vector[CaseStm]) : String = {
@@ -440,7 +440,7 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n" + translateElseIfVectorSearchRtn(optRtnType, vEnsures, optElseIfs) + translateElseSearchRtn(optRtnType, vEnsures, optElse)
+                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}" + translateElseIfVectorSearchRtn(optRtnType, vEnsures, optElseIfs) + translateElseSearchRtn(optRtnType, vEnsures, optElse)
 
 			case Switch(exp, optCaseStms) =>
                 return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVectorSearchRtn(optRtnType, vEnsures, optCaseStms) + "}" 
@@ -497,11 +497,11 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 	}
 
 	def translateElseIfSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], exp : Exp, optStms : Vector[Stm]) : String = {
-		return "else if (" + translateExp(exp) + ")" + "\n{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}\n"
+		return "\nelse if (" + translateExp(exp) + ")" + "\n{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}"
 	}
 
 	def translateElseSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], optElse : Option[Else]) : String = {
-		return "else\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optElse.getOrElse(return "").optStms) + "}"
+		return "\nelse\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optElse.getOrElse(return "").optStms) + "}"
 	}
 
 	def translateCaseStmVectorSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vCaseStm : Vector[CaseStm]) : String = {
