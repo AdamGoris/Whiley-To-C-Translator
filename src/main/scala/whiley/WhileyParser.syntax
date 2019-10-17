@@ -20,7 +20,7 @@ Stm {line} =
   | "type" Loc sp "is" "("? Type Loc? CommTypeLoc* ")"? WhereExp*                             {TypeDecl}
   | "const" Loc sp "is" Exp                                                                   {ConstDecl}                                                                  
   | "if" Exp ":" nest (Stm*)\n ElseIf* Else? "end"\n                                          {If}
-  | "switch" Exp ":" CaseStm*                                                                 {Switch}
+  | "switch" Exp ":"\n nest(CaseStm*)\n                                                       {Switch}
   | "while" Exp WhereExp* ":" nest(Stm*)\n "end"\n                                            {While}
   | "do" ":" nest (Stm*)\n "while" nest (Exp) WhereExp*                                       {DoWhile}
   | "function" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n {FnDecl}
