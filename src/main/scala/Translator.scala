@@ -6,18 +6,18 @@ class Translator {
 
 	def translate(p : Program) : String = {
 		var translated = "#include <stdio.h>\n#include <assert.h>\n\n"
-        return translated + translateStms(p.optStms)
+        return translated + translateStms(0, p.optStms)
 	}
 
-    def translateStms(stms : Vector[Stm]) : String = {
+    def translateStms(ind : Int, stms : Vector[Stm]) : String = {
         var translated = "";
 		for (stm <- stms) {
-			translated = translated + translateStm(stm) + "\n"
+			translated = translated + translateStm(ind, stm) + "\n"
 		}
 		return translated
     }
 
-	def translateStm(stm : Stm) : String = {
+	def translateStm(ind : Int, stm : Stm) : String = {
 		stm match {
 			//case PackageDecl(loc, optDotLocs) =>
 
@@ -25,59 +25,59 @@ class Translator {
 
 			// no public, private, native, export in C
 			case Public(stm) =>
-				return translateStm(stm)
+				return translateStm(ind, stm)
 
 			case Private(stm) =>
-				return translateStm(stm)
+				return translateStm(ind, stm)
 
 			case Native(stm) => 
-				return translateStm(stm)
+				return translateStm(ind, stm)
 
 			case Export(stm) =>
-				return translateStm(stm)
+				return translateStm(ind, stm)
 
 			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
-				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
+				return ("\t" * ind) + translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 
 			case Decl(typ, loc) =>
-				return translateType(typ) + " " + translateLoc(loc) + ";"
+				return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + ";"
 
 			case AsgnStm(assign) =>
-				return translateExp(assign) + ";"
+				return ("\t" * ind) + translateExp(assign) + ";"
 
 			//FIXME:
 			case TypeDecl(loc, typ, optLoc, optCommTypeLocs, optWhereExps) =>
-				return "typedef " + translateType(typ) + " " + translateLoc(loc) + ";\n" + translateWhereExpVector(optWhereExps) 
+				return ("\t" * ind) + "typedef " + translateType(typ) + " " + translateLoc(loc) + ";\n" + translateWhereExpVector(ind, optWhereExps) 
 
 			case ConstDecl(loc, exp) =>
-				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
+				return ("\t" * ind) + "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStms(optStms) + "}" + translateElseIfVector(optElseIfs) + translateElse(optElse)
+                return ("\t" * ind) + "if (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateStms(ind + 1, optStms) + ("\t" * ind) + "}" + translateElseIfVector(ind, optElseIfs) + translateElse(ind, optElse)
 
 			case Switch(exp, optCaseStms) =>
-                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVector(optCaseStms) + "}" 
+                return ("\t" * ind) + "switch (" + translateExp(exp) + ")" + "\n" + ("\t" * ind) + "{\n" + translateCaseStmVector(ind + 1, optCaseStms) + ("\t" * ind) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
-                return translateWhereExpVector(optWhereExprs) + "while (" + translateExp(exp) + ")\n" + "{\n" + translateStms(optStms) + translateWhereExpVector(optWhereExprs) + "}\n" + translateWhereExpVector(optWhereExprs) 
+                return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "while (" + translateExp(exp) + ")\n" + "{\n" + translateStms(ind + 1, optStms) + translateWhereExpVector(ind + 1, optWhereExprs) + "}\n" + translateWhereExpVector(0, optWhereExprs) 
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-                return translateWhereExpVector(optWhereExprs) + "do {\n" + translateWhereExpVector(optWhereExprs) + translateStms(optStms) + "} while (" + translateExp(exp) + ");\n" + translateWhereExpVector(optWhereExprs)
+                return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "do\n" + ("\t" * ind) + "{\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStms(ind + 1, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");\n" + translateWhereExpVector(0, optWhereExprs)
 
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}" 
+                return ("\t" * ind) + translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + ("\t" * ind) + "{\n" + translateRequiresEnsures(ind + 1, optRequiresEnsuress, optStms, optReturnType) + ("\t" * ind) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}"
+                return ("\t" * ind) + translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + ("\t" * ind) + "{\n" + translateRequiresEnsures(ind + 1, optRequiresEnsuress, optStms, optReturnType) + ("\t" * ind) + "}"
 
 			case RtnStm(exp, optCommExps) =>
-				return "return " + translateExp(exp) + ";"
+				return ("\t" * ind) + "return " + translateExp(exp) + ";"
 
 			case Assert(exp) =>
-                return "assert (" + translateExp(exp) + ");" 
+                return ("\t" * ind) + "assert (" + translateExp(exp) + ");" 
 			
 			case Assume(exp) =>
-				return "assert (" + translateExp(exp) + ");" 
+				return ("\t" * ind) + "assert (" + translateExp(exp) + ");" 
 /*
 			case DebugExp(exp) =>
 */
@@ -85,10 +85,10 @@ class Translator {
                 return ""
 
 			case BreakStm() =>
-                return "break;"
+                return ("\t" * ind) + "break;"
 
 			case ContStm() =>
-                return "continue;"
+                return ("\t" * ind) + "continue;"
 
 //			case FailStm() =>
 		}
@@ -236,21 +236,21 @@ class Translator {
 		}
 	}
 
-	def translateWhereExpVector(vWhereExp : Vector[WhereExp]) : String = {
+	def translateWhereExpVector(ind : Int, vWhereExp : Vector[WhereExp]) : String = {
         var translation = ""
         for (whereExp <- vWhereExp) {
-            translation = translation + translateWhereExp(whereExp.exp) + "\n"
+            translation = translation + translateWhereExp(ind, whereExp.exp) + "\n"
         }
         return translation
 	}
 
-    def translateWhereExp(exp : Exp) : String = {
+    def translateWhereExp(ind : Int, exp : Exp) : String = {
 		exp match {
 			case QuantExp(noSomeAll, loc, exp1, exp2, exp3) =>
-				return translateQuantExp(noSomeAll, loc, exp1, exp2, exp3)
+				return ("\t" * ind) + translateQuantExp(noSomeAll, loc, exp1, exp2, exp3)
 			
 			case (_) =>
-				return "assert (" + translateExp(exp) + ");"
+				return ("\t" * ind) + "assert (" + translateExp(exp) + ");"
 		}
     }
 
@@ -323,43 +323,43 @@ class Translator {
 		
 	}
 */
-	def translateElseIfVector(vElseIf : Vector[ElseIf]) : String = {
+	def translateElseIfVector(ind : Int, vElseIf : Vector[ElseIf]) : String = {
         //for all elseifs, translate else if
         var translation = ""
         for (elseif <- vElseIf) {
-            translation = translation + translateElseIf(elseif.exp, elseif.optStms)
+            translation = translation + translateElseIf(ind, elseif.exp, elseif.optStms)
         }
         return translation
 	}
 
-    def translateElseIf(exp : Exp, optStms : Vector[Stm]) : String = {
-        return "\nelse if (" + translateExp(exp) + ")" + "\n{\n" + translateStms(optStms) + "}"
+    def translateElseIf(ind : Int, exp : Exp, optStms : Vector[Stm]) : String = {
+        return "\n" + ("\t" * ind) + "else if (" + translateExp(exp) + ")" + "\n" + ("\t" * ind) + "{\n" + translateStms(ind + 1, optStms) + ("\t" * ind) + "}"
     }
 
-	def translateElse(optElse : Option[Else]) : String = {
-        return "\nelse\n" + "{\n" + translateStms(optElse.getOrElse(return "").optStms) + "}"
+	def translateElse(ind : Int, optElse : Option[Else]) : String = {
+        return "\n" + ("\t" * ind) + "else\n" + ("\t" * ind) + "{\n" + translateStms(ind + 1, optElse.getOrElse(return "").optStms) + ("\t" * ind) + "}"
 	}
 
-	def translateCaseStmVector(vCaseStm : Vector[CaseStm]) : String = {
+	def translateCaseStmVector(ind : Int, vCaseStm : Vector[CaseStm]) : String = {
         var translation = ""
         for (cs <- vCaseStm) {
-            translation = translation + translateCaseStm(cs)
+            translation = translation + translateCaseStm(ind, cs)
         }
         return translation
 	}
 
-    def translateCaseStm(caseStm : CaseStm) : String = {
+    def translateCaseStm(ind : Int, caseStm : CaseStm) : String = {
         caseStm match {
             case Case(exp, optCommExps, optStms) =>
-                return "case " + translateExp(exp) + ":\n" + translateStms(optStms) 
+                return ("\t" * ind) + "case " + translateExp(exp) + ":\n" + translateStms(ind + 1, optStms) 
 
             case DefaultCase(optStms) =>
-                return "default:\n" + translateStms(optStms) 
+                return ("\t" * ind) + "default:\n" + translateStms(ind + 1, optStms) 
         }
     }
 
 
-	def translateRequiresEnsures(optRequiresEnsures : Vector[RequiresEnsures], optStms : Vector[Stm], optReturnType : Option[ReturnType]) : String = {
+	def translateRequiresEnsures(ind : Int, optRequiresEnsures : Vector[RequiresEnsures], optStms : Vector[Stm], optReturnType : Option[ReturnType]) : String = {
         var requires = Vector[Requires]()
         var ensures = Vector[Ensures]()
         var translation = ""
@@ -375,7 +375,7 @@ class Translator {
         }
 
         for (require <- requires) {
-            translation = translation + "assert (" + translateExp(require.exp) + ");\n"
+            translation = translation + ("\t" * ind) + "assert (" + translateExp(require.exp) + ");\n"
         }
 
 		// If there is a specified value to be returned, i.e. -> (int r), that value first needs to be initialised in C
@@ -383,7 +383,7 @@ class Translator {
 			case RtnParams(params) =>
 				params match {
 					case Params(typeLoc, optCommTypeLocs) =>
-						translation = translation + translateTypeLoc(typeLoc) + ";\n"
+						translation = translation + ("\t" * ind) + translateTypeLoc(typeLoc) + ";\n"
 				}
 		}
 
@@ -391,20 +391,20 @@ class Translator {
 		// Once a return statement has been found, before that return statement:
 		// first set the initialised return value to equal the expression at the return statment
 		// next make the assertion, using the ensures expression.
-		translation = translation + translateStmsSearchRtn(optReturnType, ensures, optStms)
+		translation = translation + translateStmsSearchRtn(ind, optReturnType, ensures, optStms)
 
         return translation
 	}
 
-def translateStmsSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stms : Vector[Stm]) : String = {
+def translateStmsSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stms : Vector[Stm]) : String = {
 	var translate = ""
 	for (stm <- stms) {
-		translate = translate + translateStmSearchRtn(optRtnType, vEnsures, stm) + "\n"
+		translate = translate + translateStmSearchRtn(ind, optRtnType, vEnsures, stm) + "\n"
 	}
 	return translate
 }
 
-def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stm : Stm) : String = {
+def translateStmSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], stm : Stm) : String = {
 		stm match {
 			//case PackageDecl(loc, optDotLocs) =>
 
@@ -412,66 +412,65 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
 
 			// no public, private, native, export in C
 			case Public(stm) =>
-				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+				return translateStmSearchRtn(ind, optRtnType, vEnsures, stm)
 
 			case Private(stm) =>
-				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+				return translateStmSearchRtn(ind, optRtnType, vEnsures, stm)
 
 			case Native(stm) => 
-				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+				return translateStmSearchRtn(ind, optRtnType, vEnsures, stm)
 
 			case Export(stm) =>
-				return translateStmSearchRtn(optRtnType, vEnsures, stm)
+				return translateStmSearchRtn(ind, optRtnType, vEnsures, stm)
 
 			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
-				return translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
+				return ("\t" * ind) + translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 
 			case Decl(typ, loc) =>
-				return translateType(typ) + " " + translateLoc(loc) + ";"
+				return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + ";"
 
 			case AsgnStm(assign) =>
-				return translateExp(assign) + ";"
+				return ("\t" * ind) + translateExp(assign) + ";"
 
 			//FIXME:
 			case TypeDecl(loc, typ, optLoc, optCommTypeLocs, optWhereExps) =>
-				return "typedef " + translateType(typ) + " " + translateLoc(loc) + ";\n" + translateWhereExpVector(optWhereExps) 
+				return ("\t" * ind) + "typedef " + translateType(typ) + " " + translateLoc(loc) + ";\n" + translateWhereExpVector(ind, optWhereExps) 
 
 			case ConstDecl(loc, exp) =>
-				return "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
+				return ("\t" * ind) + "const int " + translateLoc(loc) + " = " + translateExp(exp) + ";"
 
 			case If(exp, optStms, optElseIfs, optElse) =>
-                return "if (" + translateExp(exp) + ")\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}" + translateElseIfVectorSearchRtn(optRtnType, vEnsures, optElseIfs) + translateElseSearchRtn(optRtnType, vEnsures, optElse)
+                return ("\t" * ind) + "if (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "}" + translateElseIfVectorSearchRtn(ind, optRtnType, vEnsures, optElseIfs) + translateElseSearchRtn(ind, optRtnType, vEnsures, optElse)
 
 			case Switch(exp, optCaseStms) =>
-                return "switch (" + translateExp(exp) + ")" + "\n{\n" + translateCaseStmVectorSearchRtn(optRtnType, vEnsures, optCaseStms) + "}" 
+                return ("\t" * ind) + "switch (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateCaseStmVectorSearchRtn(ind + 1, optRtnType, vEnsures, optCaseStms) + ("\t" * ind) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
-                return "while (" + translateExp(exp) + ")\n" + "{\n" + translateWhereExpVector(optWhereExprs) + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}" 
+                return ("\t" * ind) + "while (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "}" 
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-                return "do {\n" + translateWhereExpVector(optWhereExprs) + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "} while (" + translateExp(exp) + ");"
+                return ("\t" * ind) + "do {\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");"
 
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}" 
+                return ("\t" * ind) + translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + ("\t" * ind) + "{\n" + translateRequiresEnsures(ind + 1, optRequiresEnsuress, optStms, optReturnType) + ("\t" * ind) + "}" 
 
 			case MthdDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
-                return translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + "{\n" + translateRequiresEnsures(optRequiresEnsuress, optStms, optReturnType) + "}"
+                return ("\t" * ind) + translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + ("\t" * ind) + "{\n" + translateRequiresEnsures(ind + 1, optRequiresEnsuress, optStms, optReturnType) + ("\t" * ind) + "}"
 
 			case RtnStm(exp, optCommExps) =>
 				var translate = "\n"
-				translate = translate + translateReturnTypeLoc(optRtnType) + " = " + translateExp(exp) + ";\n"
+				translate = translate + ("\t" * ind) + translateReturnTypeLoc(optRtnType) + " = " + translateExp(exp) + ";\n"
 				for (ensure <- vEnsures) {
-					translate = translate + "assert (" + translateExp(ensure.exp) + ");\n"
+					translate = translate + ("\t" * ind) + "assert (" + translateExp(ensure.exp) + ");\n"
 				}
-				translate = translate + "return " + translateExp(exp) + ";"
+				translate = translate + ("\t" * ind) + "return " + translateExp(exp) + ";"
                 return translate
 
 			case Assert(exp) =>
-                return "assert (" + translateExp(exp) + ");" 
+                return ("\t" * ind) + "assert (" + translateExp(exp) + ");" 
 			
-			//FIXME: currently treating assume like an assert
 			case Assume(exp) =>
-				return "assert (" + translateExp(exp) + ");" 
+				return ("\t" * ind) + "assert (" + translateExp(exp) + ");" 
 /*
 			case DebugExp(exp) =>
 */
@@ -479,46 +478,46 @@ def translateStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ens
                 return ""
 
 			case BreakStm() =>
-                return "break;"
+                return ("\t" * ind) + "break;"
 
 			case ContStm() =>
-                return "continue;"
+                return ("\t" * ind) + "continue;"
 
 //			case FailStm() =>
 		}
 	}
 
-	def translateElseIfVectorSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vElseIfs : Vector[ElseIf]) : String = {
+	def translateElseIfVectorSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vElseIfs : Vector[ElseIf]) : String = {
 		var translation = ""
         	for (elseif <- vElseIfs) {
-            	translation = translation + translateElseIfSearchRtn(optRtnType, vEnsures, elseif.exp, elseif.optStms)
+            	translation = translation + translateElseIfSearchRtn(ind, optRtnType, vEnsures, elseif.exp, elseif.optStms)
         	}
         	return translation
 	}
 
-	def translateElseIfSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], exp : Exp, optStms : Vector[Stm]) : String = {
-		return "\nelse if (" + translateExp(exp) + ")" + "\n{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) + "}"
+	def translateElseIfSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], exp : Exp, optStms : Vector[Stm]) : String = {
+		return "\n" + ("\t" * ind) + "else if (" + translateExp(exp) + ")" + "\n" + ("\t" * ind) + "{\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "}"
 	}
 
-	def translateElseSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], optElse : Option[Else]) : String = {
-		return "\nelse\n" + "{\n" + translateStmsSearchRtn(optRtnType, vEnsures, optElse.getOrElse(return "").optStms) + "}"
+	def translateElseSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], optElse : Option[Else]) : String = {
+		return "\n" + ("\t" * ind) + "else\n" + ("\t" * ind) + "{\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optElse.getOrElse(return "").optStms) + ("\t" * ind) + "}"
 	}
 
-	def translateCaseStmVectorSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vCaseStm : Vector[CaseStm]) : String = {
+	def translateCaseStmVectorSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], vCaseStm : Vector[CaseStm]) : String = {
         var translation = ""
         for (cs <- vCaseStm) {
-            translation = translation + translateCaseStmSearchRtn(optRtnType, vEnsures, cs)
+            translation = translation + translateCaseStmSearchRtn(ind, optRtnType, vEnsures, cs)
         }
         return translation
 	}
 
-    def translateCaseStmSearchRtn(optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], caseStm : CaseStm) : String = {
+    def translateCaseStmSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures : Vector[Ensures], caseStm : CaseStm) : String = {
         caseStm match {
             case Case(exp, optCommExps, optStms) =>
-                return "case " + translateExp(exp) + ":\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) 
+                return ("\t" * ind) + "case " + translateExp(exp) + ":\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) 
 
             case DefaultCase(optStms) =>
-                return "default:\n" + translateStmsSearchRtn(optRtnType, vEnsures, optStms) 
+                return ("\t" * ind) + "default:\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) 
         }
     }
 
