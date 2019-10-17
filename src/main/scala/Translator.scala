@@ -223,7 +223,7 @@ class Translator {
 				return translateLVal(lVal) +  " = " + translateExp(exp)
 
 			case Len(loc) =>
-                return "sizeof (" + translateLoc(loc) + ") / sizeof (int)"
+                return "sizeof (" + translateLoc(loc) + ") / sizeof (" + translateLoc(loc) + "[0])"
 
 			case QuantExp(noSomeAll, loc, exp1, optCommLocInExps, exp2) =>
 				return translateQuantExp(noSomeAll, loc, exp1, optCommLocInExps, exp2)
