@@ -226,7 +226,7 @@ class Translator {
                 return "sizeof (" + translateLoc(loc) + ") / sizeof (" + translateLoc(loc) + "[0])"
 
 			case QuantExp(noSomeAll, loc, exp1, optCommLocInExps, exp2) =>
-				return translateQuantExp(noSomeAll, loc, exp1, optCommLocInExps, exp2)
+				return translateQuantExp(0, noSomeAll, loc, exp1, optCommLocInExps, exp2)
 
 			case Use(loc) =>
 				return translateLoc(loc)
@@ -247,7 +247,7 @@ class Translator {
     def translateWhereExp(ind : Int, exp : Exp) : String = {
 		exp match {
 			case QuantExp(noSomeAll, loc, exp1, exp2, exp3) =>
-				return ("\t" * ind) + translateQuantExp(noSomeAll, loc, exp1, exp2, exp3)
+				return translateQuantExp(ind, noSomeAll, loc, exp1, exp2, exp3)
 			
 			case (_) =>
 				return ("\t" * ind) + "assert (" + translateExp(exp) + ");"
@@ -262,13 +262,13 @@ class Translator {
 		return translate
 	}
 
-	def translateQuantExp(noSomeAll : NoSomeAll, loc : Loc, exp1 : Exp, exp2 : Exp, exp3 : Exp) : String = {
+	def translateQuantExp(ind : Int, noSomeAll : NoSomeAll, loc : Loc, exp1 : Exp, exp2 : Exp, exp3 : Exp) : String = {
 		noSomeAll match {
 			case All() =>
-				return "for (int " + translateLoc(loc) + " = " + translateExp(exp1) + "; " + translateLoc(loc) + " < " + translateExp(exp2) + "; " + translateLoc(loc) + "++)\n" + "{\n" + "assert (" + translateExp(exp3) + ");\n" + "}"  
+				return ("\t" * ind) + "for (int " + translateLoc(loc) + " = " + translateExp(exp1) + "; " + translateLoc(loc) + " < " + translateExp(exp2) + "; " + translateLoc(loc) + "++)\n" + ("\t" * ind) + "{\n" + ("\t" * (ind + 1)) + "assert (" + translateExp(exp3) + ");\n" + ("\t" * ind) + "}\n"  
 
 			case No() =>
-				return "for (int " + translateLoc(loc) + " = " + translateExp(exp1) + "; " + translateLoc(loc) + " < " + translateExp(exp2) + "; " + translateLoc(loc) + "++)\n" + "{\n" + "assert (" + translateExpOppositeSign(exp3) + ");\n" + "}"
+				return ("\t" * ind) + "for (int " + translateLoc(loc) + " = " + translateExp(exp1) + "; " + translateLoc(loc) + " < " + translateExp(exp2) + "; " + translateLoc(loc) + "++)\n" + ("\t" * ind) + "{\n" + ("\t" * (ind + 1)) + "assert (" + translateExpOppositeSign(exp3) + ");\n" + ("\t" * ind) + "}\n"
 		}
 	}
 
@@ -306,23 +306,6 @@ class Translator {
 		}
 	}
 
-/*
-	def translateNoSomeAll() : String = {
-
-	}
-
-	def translateNo() : String = {
-
-	}
-
-	def translateSome() : String = {
-		
-	}
-
-	def translateAll() : String = {
-		
-	}
-*/
 	def translateElseIfVector(ind : Int, vElseIf : Vector[ElseIf]) : String = {
         //for all elseifs, translate else if
         var translation = ""
@@ -375,7 +358,13 @@ class Translator {
         }
 
         for (require <- requires) {
-            translation = translation + ("\t" * ind) + "assert (" + translateExp(require.exp) + ");\n"
+			require.exp match {
+				case QuantExp(noSomeAll, loc, exp1, exp2, exp3) =>
+					translation = translation + translateQuantExp(ind, noSomeAll, loc, exp1, exp2, exp3)
+				
+				case _ =>
+					translation = translation + ("\t" * ind) + "assert (" + translateExp(require.exp) + ");\n"
+			} 
         }
 
 		// If there is a specified value to be returned, i.e. -> (int r), that value first needs to be initialised in C
