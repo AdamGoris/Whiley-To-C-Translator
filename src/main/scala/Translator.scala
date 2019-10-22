@@ -37,9 +37,17 @@ class Translator {
 				return translateStm(ind, stm)
 
 			case DeclAsgn(typ, lVal, optCommTypeLocs, exp, optCommExps) =>
+				typ match {
+					case ArrType(termType) =>
+						return ("\t" * ind) + translateType(termType) + " " + translateLVal(lVal) + "[]" +  " = " + translateExp(exp) + ";"
+				}
 				return ("\t" * ind) + translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 
 			case Decl(typ, loc) =>
+				typ match {
+					case ArrType(termType) =>
+						return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + "[]" + ";"
+				}
 				return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + ";"
 
 			case AsgnStm(assign) =>
@@ -109,8 +117,8 @@ class Translator {
 				return ""
 
 			//FIXME:
-			case ArrType(primitiveType) =>
-				return translateType(primitiveType) + "[]"
+			case ArrType(termType) =>
+				return translateType(termType)
 
 			//FIXME:
 			case FuncType(parameters1, parameters2) =>
