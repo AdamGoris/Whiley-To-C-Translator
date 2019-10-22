@@ -23,8 +23,8 @@ Stm {line} =
   | "switch" Exp ":"\n nest(CaseStm*)\n                                                       {Switch}
   | "while" Exp WhereExp* ":" nest(Stm*)\n "end"\n                                            {While}
   | "do" ":" nest (Stm*)\n "while" nest (Exp) WhereExp*                                       {DoWhile}
-  | "function" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n {FnDecl}
-  | "method" Loc "(" Parameters? ")" ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n   {MthdDecl}
+  | "function" Loc "(" Parameters? ")" sp "->" sp ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n {FnDecl}
+  | "method" Loc "(" Parameters? ")" sp "->" sp ReturnType? RequiresEnsures* ":" nest (Stm*)\n "end"\n   {MthdDecl}
   | "return" Exp CommExp*                                                                     {RtnStm}
   | "assert" Exp                                                                              {Assert}
   | "assume" Exp                                                                              {Assume}
@@ -143,8 +143,8 @@ Parameters =
   | Type CommType*                                                                          {TypeParam}.
 
 ReturnType = 
-    sp "->" sp "(" Parameters ")"                                                           {RtnParams}
-  | sp "->" sp Type                                                                         {RtnType}.
+    "(" Parameters ")"                                                                      {RtnParams}
+  | Type                                                                                    {RtnType}.
 
 Literal =
     "null"																			        {NullLit} 
