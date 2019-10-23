@@ -49,7 +49,7 @@ TermType : Type =
     "{" MixedType CommMixedType* ","? "..."? "}"                                              {RecType}
   | "&" Type                                                                                  {RefType}
   | "!" Type                                                                                  {NegType}
-  | PrimitiveType "[]"                                                                        {ArrType}
+  | TermType "[]"                                                                             {1, ArrType}
   | "function" "(" Parameters ")" sp "->" sp Parameters                                       {FuncType}
   | "method" "(" Parameters ")" sp "->" sp Parameters                                         {MthdType}
   | "(" Type ")"
@@ -188,8 +188,8 @@ Bit : Token =
 
 // Used in Assign and DeclAsgn Statements
 LVal = 
-	Loc "." Identifier 																		{FieldAsgn}
-  | Loc "[" Exp "]"																			{ListAsgn}	
+	LVal "." Identifier 		     														{2, FieldAsgn}
+  | LVal "[" Exp "]"																		{1, ListAsgn}	
   | "*" Exp																					{Pointer}
   | Loc                                                                                     {LocAsgn}.
 
