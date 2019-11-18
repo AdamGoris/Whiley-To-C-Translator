@@ -96,7 +96,7 @@ Exp {paren} =
   | Loc "(" Exp ")"                                                                         {FunctionCall}
   | "(" Exp ")"
   | RecordInitialiser
-  | Exp "[" Exp "]"                                                                         {ArrAccess, none, 11}
+  | Exp "[" Exp "]"                                                                         {ArrAccess, left, 1}
   | "[" Exp ";" Exp "]"                                                                     {ArrGen}
   | "[" Exp ("," Exp)* "]"                                                                  {ArrInit}
   | Exp ',' Exp                                                                             {ExpList, left, 1}
