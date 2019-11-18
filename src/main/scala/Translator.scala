@@ -40,15 +40,19 @@ class Translator {
 				typ match {
 					case ArrType(termType) =>
 						return ("\t" * ind) + translateType(termType) + " " + translateLVal(lVal) + "[]" +  " = " + translateExp(exp) + ";"
+
+					case (_) =>
+						return ("\t" * ind) + translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 				}
-				return ("\t" * ind) + translateType(typ) + " " + translateLVal(lVal) + " = " + translateExp(exp) + ";" //+ translateMutliDeclAsgn(optCommTypeLVals, optCommExps)
 
 			case Decl(typ, loc) =>
 				typ match {
 					case ArrType(termType) =>
 						return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + "[]" + ";"
+
+					case (_) =>
+						return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + ";"
 				}
-				return ("\t" * ind) + translateType(typ) + " " + translateLoc(loc) + ";"
 
 			case AsgnStm(assign) =>
 				return ("\t" * ind) + translateExp(assign) + ";"
@@ -67,10 +71,12 @@ class Translator {
                 return ("\t" * ind) + "switch (" + translateExp(exp) + ")" + "\n" + ("\t" * ind) + "{\n" + translateCaseStmVector(ind + 1, optCaseStms) + ("\t" * ind) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
-                return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "while (" + translateExp(exp) + ")\n" + "{\n" + translateStms(ind + 1, optStms) + translateWhereExpVector(ind + 1, optWhereExprs) + "}\n" + translateWhereExpVector(0, optWhereExprs) 
+                //return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "while (" + translateExp(exp) + ")\n" + "{\n" + translateStms(ind + 1, optStms) + translateWhereExpVector(ind + 1, optWhereExprs) + "}\n" + translateWhereExpVector(0, optWhereExprs)
+				return ("\t" * ind) + translateWhereExpVectorLoopInvariant(0, optWhereExprs) + "while (" + translateExp(exp) + ")\n" + "{\n" + translateStms(ind + 1, optStms) + "}\n" 
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-                return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "do\n" + ("\t" * ind) + "{\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStms(ind + 1, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");\n" + translateWhereExpVector(0, optWhereExprs)
+                //return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "do\n" + ("\t" * ind) + "{\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStms(ind + 1, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");\n" + translateWhereExpVector(0, optWhereExprs)
+				return ("\t" * ind) + translateWhereExpVectorLoopInvariant(0, optWhereExprs) + "do\n" + ("\t" * ind) + "{\n" + translateStms(ind + 1, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");\n"
 
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return ("\t" * ind) + translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + ("\t" * ind) + "{\n" + translateRequiresEnsures(ind + 1, optRequiresEnsuress, optStms, optReturnType) + ("\t" * ind) + "}" 
@@ -222,7 +228,8 @@ class Translator {
 			case ArrAccess(exp1, exp2) =>
 				return translateExp(exp1) + "[" + translateExp(exp2) + "]"
 
-			//case ArrGen(exp1, exp2) =>
+			case ArrGen(exp1, exp2) =>
+				return "FIXME ARRGEN"
 
 			case ArrInit(exp, optExps) =>
 				return "{" + translateExp(exp) + translateCommExp(optExps) + "}"
@@ -259,6 +266,24 @@ class Translator {
 			
 			case (_) =>
 				return ("\t" * ind) + "assert (" + translateExp(exp) + ");"
+		}
+    }
+
+		def translateWhereExpVectorLoopInvariant(ind : Int, vWhereExp : Vector[WhereExp]) : String = {
+        var translation = ""
+        for (whereExp <- vWhereExp) {
+            translation = translation + translateWhereExp(ind, whereExp.exp) + "\n"
+        }
+        return translation
+	}
+
+    def translateWhereExpVectorLoopInvariant(ind : Int, exp : Exp) : String = {
+		exp match {
+			case QuantExp(noSomeAll, loc, exp1, exp2, exp3) =>
+				return translateQuantExp(ind, noSomeAll, loc, exp1, exp2, exp3)
+			
+			case (_) =>
+				return ("\t" * ind) + "//@ loop invariant (" + translateExp(exp) + ");"
 		}
     }
 
@@ -310,7 +335,10 @@ class Translator {
 				return translateExp(exp1) + translateExp(exp2)
 
 			case Or(exp1, exp2) =>
-				return translateExp(exp1) + translateExp(exp2)				
+				return translateExp(exp1) + translateExp(exp2)
+
+			case (_) =>
+				return translateExp(exp)			
 		}
 	}
 
@@ -371,7 +399,7 @@ class Translator {
 					translation = translation + translateQuantExp(ind, noSomeAll, loc, exp1, exp2, exp3)
 				
 				case _ =>
-					translation = translation + ("\t" * ind) + "assert (" + translateExp(require.exp) + ");\n"
+					translation = translation + ("\t" * ind) + "__VERIFIER_assume(" + translateExp(require.exp) + ");\n"
 			} 
         }
 
@@ -443,10 +471,12 @@ def translateStmSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures :
                 return ("\t" * ind) + "switch (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateCaseStmVectorSearchRtn(ind + 1, optRtnType, vEnsures, optCaseStms) + ("\t" * ind) + "}" 
 
 			case While(exp, optWhereExprs, optStms) =>
-                return ("\t" * ind) + "while (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "}" 
+                //return ("\t" * ind) + translateWhereExpVector(0, optWhereExprs) + "while (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + translateWhereExpVector(ind + 1, optWhereExprs) + ("\t" * ind) + "}" + translateWhereExpVector(0, optWhereExprs)
+				return ("\t" * ind) + translateWhereExpVectorLoopInvariant(0, optWhereExprs) + "while (" + translateExp(exp) + ")\n" + ("\t" * ind) + "{\n" + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "}"
 
 			case DoWhile(optStms, exp, optWhereExprs) =>
-                return ("\t" * ind) + "do {\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");"
+                //return ("\t" * ind) + "do {\n" + translateWhereExpVector(ind + 1, optWhereExprs) + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");"
+				return ("\t" * ind) + "do {\n" + translateWhereExpVectorLoopInvariant(ind + 1, optWhereExprs) + translateStmsSearchRtn(ind + 1, optRtnType, vEnsures, optStms) + ("\t" * ind) + "} while (" + translateExp(exp) + ");"
 
 			case FnDecl(loc, optParameters, optReturnType, optRequiresEnsuress, optStms) =>
                 return ("\t" * ind) + translateReturnType(optReturnType) + " " + translateLoc(loc) + "(" + translateParameters(optParameters) + ")\n" + ("\t" * ind) + "{\n" + translateRequiresEnsures(ind + 1, optRequiresEnsuress, optStms, optReturnType) + ("\t" * ind) + "}" 
@@ -592,8 +622,8 @@ def translateStmSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures :
 			//case FieldAsgn(loc, idn) =>
 			//	return translateFieldAsgn(loc, idn)
 
-			//case ListAsgn(loc, exp) =>
-			//	return translateListAsgn(loc, exp)
+			case ListAsgn(lVal, exp) =>
+				return translateLVal(lVal) + "[" + translateExp(exp) + "]"
 
 			case Pointer(exp) =>
 				return "*" + translateExp(exp)
@@ -634,9 +664,15 @@ def translateStmSearchRtn(ind : Int, optRtnType : Option[ReturnType], vEnsures :
 */
 
 	def translateTypeLoc(typeLoc : TypeLoc) : String = {
-        typeLoc match{
+        typeLoc match {
             case TypeLoc(typ, loc) =>
-                return translateType(typ) + " " + translateLoc(loc)
+				typ match {
+					case ArrType(termType) =>
+						return translateType(termType) + " " + translateLoc(loc) + "[]"
+					
+					case (_) =>
+                		return translateType(typ) + " " + translateLoc(loc)
+				}
         }
 	}
 
