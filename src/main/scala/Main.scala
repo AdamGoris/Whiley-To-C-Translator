@@ -20,8 +20,14 @@ object Main extends Messaging with PositionStore {
         val pr = p.pProgram(0)
         if (pr.hasValue) {
             val v = p.value(pr).asInstanceOf[Program]
+            println("")
+            println("******** INPUT PROGRAM ********")
             println(show(v, 1))
+            println("******** ABSTRACT SYNTAX TREE ********")
+            println("")
             println(pretty(any(v)).layout)
+            println("")
+            println("******** TRANSLATED PROGRAM ********")
             println("")
             println(translator.translate(v))
         } else {
