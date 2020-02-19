@@ -60,8 +60,9 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
                 
     static {
         add (KEYWORDS, new String[] {
-            "NULL", "break", "case", "char", "do", "double", "float", "for",
-            "if", "int", "long", "return", "short", "switch", "void", "while"
+            "NULL", "assert", "break", "case", "char", "continue", "do", "double",
+            "float", "for", "if", "int", "long", "return", "short", "switch",
+            "void", "while"
         });
     }
 }
@@ -119,7 +120,7 @@ public Stm Stm =
     / v1:Type v2:Loc void:";":Symbol1 {
         yyValue = new DeclC (v1, v2);
     }
-    / v1:Assign {
+    / v1:Assign void:";":Symbol1 {
         yyValue = new AsgnC (v1);
     }
     / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:"{":Symbol1 v2:(Stm)*  void:"}":Symbol1 {
@@ -140,11 +141,17 @@ public Stm Stm =
     / v1:Type v2:Loc void:"(":Symbol1 v3:ParametersC void:")":Symbol1 void:"{":Symbol1 v4:(Stm)*  void:"}":Symbol1 {
         yyValue = new FunctionDeclC (v1, v2, v3, v4);
     }
-    / void:"return":Word v1:Exp {
+    / void:"return":Word v1:Exp void:";":Symbol1 {
         yyValue = new ReturnC (v1);
     }
-    / void:"break":Word {
+    / void:"assert":Word v1:Exp void:";":Symbol1 {
+        yyValue = new AssertC (v1);
+    }
+    / void:"break":Word void:";":Symbol1 {
         yyValue = new BreakC ();
+    }
+    / void:"continue":Word void:";":Symbol1 {
+        yyValue = new ContinueC ();
     }
     ;
 
@@ -195,7 +202,7 @@ public Exp Exp =
     ;
 
 public Exp Assign =
-    v1:Loc  void:"=":Symbol1 v2:Exp void:";":Symbol1 {
+    v1:Loc  void:"=":Symbol1 v2:Exp {
         yyValue = new Assign (v1, v2);
     }
     ;
@@ -304,6 +311,7 @@ public Exp ExpLevel0 =
     / void:"-":Symbol1 v1:ExpLevel0 {
         yyValue = new Neg (v1);
     }
+    / void:"(":Symbol1 v1:Exp void:")":Symbol1 
     / v1:Assign 
     / v1:Increment {
         yyValue = new Incr (v1);

@@ -83,3 +83,7 @@ compile
 run c:\WhileyParser\src\test\whiley\simpleTest.whiley
 compile
 run c:\WhileyParser\src\test\whiley\simpleTest.whiley
+run
+run c:\whiley-to-c-translator\src\test\whiley\simpleTest.whiley
+quit
+exit

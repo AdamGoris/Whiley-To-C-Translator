@@ -20,7 +20,9 @@ object CISyntax {
     case class ForC (typeField : Type, loc : Loc, exp1 : Exp, exp2 : Exp, exp3 : Exp) extends Stm  
     case class FunctionDeclC (typeField : Type, loc : Loc, parametersC : ParametersC, optStms : Vector[Stm]) extends Stm  
     case class ReturnC (exp : Exp) extends Stm  
+    case class AssertC (exp : Exp) extends Stm  
     case class BreakC () extends Stm  
+    case class ContinueC () extends Stm  
      
     sealed abstract class Type extends ASTNode
     case class CharTypeC () extends Type  

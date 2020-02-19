@@ -24,7 +24,7 @@ trait CIPrettyPrinter extends PP with PPP {
             case v @ DeclC (v1, v2) =>
                 line <> toDoc (v1) <> toDoc (v2) <> text (";") 
             case v @ AsgnC (v1) =>
-                line <> toDoc (v1) 
+                line <> toDoc (v1) <> text (";") 
             case v @ IfC (v1, v2) =>
                 line <> text ("if") <> space <> text ("(") <> toDoc (v1) <> text (")") <> text ("{") <> nest (ssep (v2.map (toDoc), emptyDoc)) <> line <> text ("}") 
             case v @ SwitchC (v1, v2) =>
@@ -38,9 +38,13 @@ trait CIPrettyPrinter extends PP with PPP {
             case v @ FunctionDeclC (v1, v2, v3, v4) =>
                 line <> toDoc (v1) <> toDoc (v2) <> text ("(") <> toDoc (v3) <> text (")") <> text ("{") <> nest (ssep (v4.map (toDoc), emptyDoc)) <> line <> text ("}") 
             case v @ ReturnC (v1) =>
-                line <> text ("return") <> space <> toDoc (v1) 
+                line <> text ("return") <> space <> toDoc (v1) <> text (";") 
+            case v @ AssertC (v1) =>
+                line <> text ("assert") <> space <> toDoc (v1) <> text (";") 
             case v @ BreakC () =>
-                line <> text ("break") <> space 
+                line <> text ("break") <> space <> text (";") 
+            case v @ ContinueC () =>
+                line <> text ("continue") <> space <> text (";") 
             case v @ CharTypeC () =>
                 text ("char") <> space 
             case v @ UnsgnCharTypeC () =>
@@ -66,7 +70,7 @@ trait CIPrettyPrinter extends PP with PPP {
             case v @ LongDoubleTypeC () =>
                 text ("long double") <> space 
             case v @ VoidTypeC () =>
-                text ("void") <> space                    
+                text ("void") <> space                     
             case v : Exp =>
                 toParenDoc (v)    
             case v @ CaseStmC (v1, v2) =>
@@ -122,7 +126,7 @@ trait CIPrettyPrinter extends PP with PPP {
             case v @ Use (v1) =>
                 toDoc (v1) 
             case v @ Assign (v1, v2) =>
-                toDoc (v1) <> space <> text ("=") <> toDoc (v2) <> text (";") 
+                toDoc (v1) <> space <> text ("=") <> toDoc (v2) 
             case v @ Increment (v1) =>
                 toDoc (v1) <> text ("++") <> space 
             case v @ Decrement (v1) =>

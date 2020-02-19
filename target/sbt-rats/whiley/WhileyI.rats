@@ -64,8 +64,8 @@ public String formatParseError (ParseError error, Boolean showCoord) throws IOEx
             "continue", "debug", "default", "do", "else", "ensures", "export",
             "fail", "false", "from", "function", "if", "import", "in", "int",
             "is", "method", "native", "no", "null", "package", "private", "public",
-            "requires", "return", "skip", "some", "switch", "true", "type",
-            "where", "while"
+            "real", "requires", "return", "skip", "some", "switch", "true",
+            "type", "where", "while"
         });
     }
 }
@@ -77,8 +77,9 @@ String Symbol1 =
     Symbol1Alts Spacing;
 
 transient String Symbol1Alts =
-    "*" / "%" / "}" / "." / "]" / "=" / "<" / "&" / "!" / "|" / ")" / "-" /
-    "," / ";" / "[" / "{" / "0" / "+" / "(" / ":" / "^" / "/" / ">";
+    "*" / "\"" / "%" / "}" / "." / "]" / "=" / "<" / "&" / "!" / "|" / ")" /
+    "-" / "," / ";" / "'" / "[" / "{" / "0" / "+" / "(" / ":" / "^" / "/" /
+    ">";
 
 String Symbol2 =
     Symbol2Alts Spacing;
@@ -96,7 +97,7 @@ String Symbol3 =
     Symbol3Alts Spacing;
 
 transient String Symbol3Alts =
-    "==>";
+    "==>" / "...";
 
 String Symbol4 =
     Symbol4Alts Spacing;
@@ -117,8 +118,17 @@ public Stm Stm =
     / void:"import":Word v1:LocOrStar void:"from":Word v2:Loc v3:(DotLocOrStar)* {
         yyValue = new ImportDecl (v1, v2, v3);
     }
-    / v1:Modifier v2:Stm {
-        yyValue = new Modify (v1, v2);
+    / void:"public":Word v1:Stm {
+        yyValue = new Public (v1);
+    }
+    / void:"private":Word v1:Stm {
+        yyValue = new Private (v1);
+    }
+    / void:"native":Word v1:Stm {
+        yyValue = new Native (v1);
+    }
+    / void:"export":Word v1:Stm {
+        yyValue = new Export (v1);
     }
     / v1:Type v2:LVal v3:(CommTypeLoc)*  void:"=":Symbol1 v4:Exp v5:(CommExp)* {
         yyValue = new DeclAsgn (v1, v2, v3, v4, v5);
@@ -129,28 +139,28 @@ public Stm Stm =
     / v1:Assign {
         yyValue = new Asgn (v1);
     }
-    / v1:TypeDeclaration {
-        yyValue = new TypeDecl (v1);
+    / void:"type":Word v1:Loc  void:"is":Word (void:"(":Symbol1)? v2:Type v3:(Loc)? (void:")":Symbol1)? v4:(WhereExpr)* {
+        yyValue = new TypeDecl (v1, v2, Option.apply (v3), v4);
     }
-    / void:"const":Word v1:Loc void:"is":Word v2:Exp {
+    / void:"const":Word v1:Loc  void:"is":Word v2:Exp {
         yyValue = new ConstDecl (v1, v2);
     }
-    / void:"if":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  v3:(ElseIf)* v4:(Else)? {
+    / void:"if":Word v1:Exp void:":":Symbol1 v2:(Stm)*  v3:(ElseIf)* v4:(Else)? {
         yyValue = new If (v1, v2, v3, Option.apply (v4));
     }
-    / void:"switch":Word v1:Exp void:":":Symbol1 v2:CaseStm {
+    / void:"switch":Word v1:Exp void:":":Symbol1 v2:(CaseStm)* {
         yyValue = new Switch (v1, v2);
     }
-    / void:"while":Word void:"(":Symbol1 v1:Exp void:")":Symbol1 void:":":Symbol1 v2:Stm  {
-        yyValue = new While (v1, v2);
+    / void:"while":Word v1:Exp v2:(WhereExpr)* void:":":Symbol1 v3:(Stm)*  {
+        yyValue = new While (v1, v2, v3);
     }
-    / void:"do":Word void:":":Symbol1 v1:Stm  void:"while":Word v2:Exp v3:(WhereExpr)* {
+    / void:"do":Word void:":":Symbol1 v1:(Stm)*  void:"while":Word v2:Exp v3:(WhereExpr)* {
         yyValue = new DoWhile (v1, v2, v3);
     }
-    / void:"function":Word v1:Loc void:"(":Symbol1 v2:(Parameters)? void:")":Symbol1 v3:(ReturnType)? v4:(RequiresEnsures)* void:":":Symbol1 v5:Stm  {
+    / void:"function":Word v1:Loc void:"(":Symbol1 v2:(Parameters)? void:")":Symbol1 v3:(ReturnType)? v4:(RequiresEnsures)* void:":":Symbol1 v5:(Stm)*  {
         yyValue = new FnDecl (v1, Option.apply (v2), Option.apply (v3), v4, v5);
     }
-    / void:"method":Word v1:Loc void:"(":Symbol1 v2:(Parameters)? void:")":Symbol1 v3:(ReturnType)? v4:(RequiresEnsures)* void:":":Symbol1 v5:Stm  {
+    / void:"method":Word v1:Loc void:"(":Symbol1 v2:(Parameters)? void:")":Symbol1 v3:(ReturnType)? v4:(RequiresEnsures)* void:":":Symbol1 v5:(Stm)*  {
         yyValue = new MthdDecl (v1, Option.apply (v2), Option.apply (v3), v4, v5);
     }
     / void:"return":Word v1:Exp v2:(CommExp)* {
@@ -180,20 +190,122 @@ public Stm Stm =
     ;
 
 public Type Type =
-    void:"int":Word (void:"[]":Symbol2)? {
-        yyValue = new IntType ();
+    v1:TermType 
+    / v1:UnionType {
+        yyValue = new Union (v1);
     }
-    / void:"byte":Word (void:"[]":Symbol2)? {
-        yyValue = new ByteType ();
-    }
-    / void:"bool":Word (void:"[]":Symbol2)? {
-        yyValue = new BoolType ();
+    / v1:IntersectionType {
+        yyValue = new IntrsctnType (v1);
     }
     ;
 
-public RefType RefType =
-    void:"&":Symbol1 v1:Type {
-        yyValue = new ReferenceType (v1);
+public Type UnionType =
+    v1:IntersectionType v2:(void:"|":Symbol1 IntersectionType)* {
+        yyValue = new UnionType (v1, v2);
+    }
+    ;
+
+public Type IntersectionType =
+    v1:TermType v2:(void:"&":Symbol1 TermType)* {
+        yyValue = new IntersectionType (v1, v2);
+    }
+    ;
+
+public Type TermType =
+    v1:RecordType {
+        yyValue = new RecType (v1);
+    }
+    / v1:ReferenceType {
+        yyValue = new RefType (v1);
+    }
+    / v1:ArrayType {
+        yyValue = new ArrType (v1);
+    }
+    / v1:NegationType {
+        yyValue = new NegType (v1);
+    }
+    / v1:FunctionType {
+        yyValue = new FuncType (v1);
+    }
+    / v1:MethodType {
+        yyValue = new MthdType (v1);
+    }
+    / void:"(":Symbol1 v1:Type void:")":Symbol1 
+    / v1:PrimitiveType 
+    / v1:Identifier {
+        yyValue = new NmnlType (v1);
+    }
+    ;
+
+public Type PrimitiveType =
+    void:"null":Word {
+        yyValue = new NullType ();
+    }
+    / void:"int":Word {
+        yyValue = new IntType ();
+    }
+    / void:"byte":Word {
+        yyValue = new ByteType ();
+    }
+    / void:"bool":Word {
+        yyValue = new BoolType ();
+    }
+    / void:"real":Word {
+        yyValue = new RealType ();
+    }
+    ;
+
+public Type RecordType =
+    void:"{":Symbol1 v1:MixedType v2:(CommMixedType)* void:",":Symbol1 void:"...":Symbol3 void:"}":Symbol1 {
+        yyValue = new RecordType (v1, v2);
+    }
+    ;
+
+public MixedType MixedType =
+    v1:Type v2:Loc {
+        yyValue = new Mix (v1, v2);
+    }
+    / void:"function":Word v1:Loc void:"(":Symbol1 v2:Parameters void:")":Symbol1 void:"->":Symbol2 v3:Parameters {
+        yyValue = new MixFunc (v1, v2, v3);
+    }
+    / void:"method":Word v1:Loc void:"(":Symbol1 v2:Parameters void:")":Symbol1 void:"->":Symbol2 v3:Parameters {
+        yyValue = new MixMthd (v1, v2, v3);
+    }
+    ;
+
+public CommMixedType CommMixedType =
+    void:",":Symbol1 v1:MixedType {
+        yyValue = new CommMixedType (v1);
+    }
+    ;
+
+public Type ReferenceType =
+    void:"&":Symbol1 v1:Type 
+    ;
+
+public Type NominalType =
+    v1:Identifier {
+        yyValue = new NominalType (v1);
+    }
+    ;
+
+public Type ArrayType =
+    v1:PrimitiveType void:"[]":Symbol2 
+    ;
+
+public Type NegationType =
+    void:"!":Symbol1 v1:Type 
+    ;
+
+public Type FunctionType =
+    void:"function":Word void:"(":Symbol1 v1:Parameters void:")":Symbol1 void:"->":Symbol2 v2:Parameters {
+        yyValue = new FunctionType (v1, v2);
+    }
+    ;
+
+public Type MethodType =
+    void:"method":Word void:"(":Symbol1 v1:Parameters void:")":Symbol1 void:"->":Symbol2 v2:Parameters {
+        yyValue = new MethodType (v1, v2);
     }
     ;
 
@@ -204,24 +316,6 @@ public Exp Exp =
 public Exp Assign =
     v1:LVal  void:"=":Symbol1 v2:Exp {
         yyValue = new Assign (v1, v2);
-    }
-    ;
-
-public TypeDeclaration TypeDeclaration =
-    void:"type":Word v1:Loc  void:"is":Word (void:"(":Symbol1)? v2:TypeLoc (void:")":Symbol1)? v3:(WhereExpr)* {
-        yyValue = new TypeDeclVar (v1, v2, v3);
-    }
-    / void:"type":Word v1:Loc  void:"is":Word (void:"(":Symbol1)? v2:Type (void:")":Symbol1)? v3:(WhereExpr)* {
-        yyValue = new TypeDeclType (v1, v2, v3);
-    }
-    / void:"type":Word v1:Loc  void:"is":Word v2:Lambda v3:(WhereExpr)* {
-        yyValue = new TypeDeclLambda (v1, v2, v3);
-    }
-    ;
-
-public ArgList ArgList =
-    v1:Exp v2:(CommExp)* {
-        yyValue = new ArgList (v1, v2);
     }
     ;
 
@@ -249,29 +343,23 @@ public NoSomeAll NoSomeAll =
     }
     ;
 
-public Lambda Lambda =
-    void:"function":Word void:"(":Symbol1 v1:(TypeLoc)* void:")":Symbol1 void:"->":Symbol2 v2:Type {
-        yyValue = new Lambda (v1, v2);
-    }
-    ;
-
 public ElseIf ElseIf =
-    void:"else if":Symbol7 v1:Exp void:":":Symbol1 v2:Stm {
+    void:"else if":Symbol7 v1:Exp void:":":Symbol1 v2:(Stm)* {
         yyValue = new ElseIf (v1, v2);
     }
     ;
 
 public Else Else =
-    void:"else":Word void:":":Symbol1 v1:Stm {
+    void:"else":Word void:":":Symbol1 v1:(Stm)* {
         yyValue = new Else (v1);
     }
     ;
 
 public CaseStm CaseStm =
-    void:"case":Word v1:Exp v2:(CommExp)* void:":":Symbol1 v3:Stm  {
+    void:"case":Word v1:Exp v2:(CommExp)* void:":":Symbol1 v3:(Stm)*  {
         yyValue = new Case (v1, v2, v3);
     }
-    / void:"default":Word void:":":Symbol1 v1:Stm  {
+    / void:"default":Word void:":":Symbol1 v1:(Stm)*  {
         yyValue = new DefaultCase (v1);
     }
     ;
@@ -303,21 +391,6 @@ public ReturnType ReturnType =
     }
     ;
 
-public Modifier Modifier =
-    void:"public":Word {
-        yyValue = new Public ();
-    }
-    / void:"private":Word {
-        yyValue = new Private ();
-    }
-    / void:"native":Word {
-        yyValue = new Native ();
-    }
-    / void:"export":Word {
-        yyValue = new Export ();
-    }
-    ;
-
 public Exp Lit =
     v1:NullLiteral {
         yyValue = new NullLit (v1);
@@ -330,6 +403,12 @@ public Exp Lit =
     }
     / v1:BooleanLiteral {
         yyValue = new BoolLit (v1);
+    }
+    / v1:CharacterLiteral {
+        yyValue = new CharLit (v1);
+    }
+    / v1:StringLiteral {
+        yyValue = new StringLit (v1);
     }
     ;
 
@@ -365,6 +444,26 @@ public Exp BooleanLiteral =
     / void:"true":Word {
         yyValue = new True ();
     }
+    ;
+
+public CharacterLiteral CharacterLiteral =
+    void:"'":Symbol1 v1:Character void:"'":Symbol1 {
+        yyValue = new CharacterLiteral (v1);
+    }
+    ;
+
+public StringLiteral StringLiteral =
+    void:"\"":Symbol1 v1:(Character)* void:"\"":Symbol1 {
+        yyValue = new StringLiteral (v1);
+    }
+    ;
+
+public String Character =
+    CharacterForm Spacing
+    ;
+
+public String CharacterForm =
+    [\-a-zA-Z$._0-9]
     ;
 
 public String Digits =
@@ -432,6 +531,12 @@ public CommLocInExp CommLocInExp =
     }
     ;
 
+public CommLit CommLit =
+    void:",":Symbol1 v1:Lit {
+        yyValue = new CommLit (v1);
+    }
+    ;
+
 public CommTypeLoc CommTypeLoc =
     void:",":Symbol1 v1:TypeLoc {
         yyValue = new CommTypeLoc (v1);
@@ -449,7 +554,7 @@ public LocOrStar LocOrStar =
         yyValue = new ImpAll ();
     }
     / v1:Loc {
-        yyValue = new Spc (v1);
+        yyValue = new Spcfc (v1);
     }
     ;
 
@@ -472,12 +577,15 @@ public Exp ExpLevel0 =
     / void:"-":Symbol1 v1:ExpLevel0 {
         yyValue = new Neg (v1);
     }
+    / v1:Loc void:"(":Symbol1 v2:Exp void:")":Symbol1 {
+        yyValue = new FunctionCall (v1, v2);
+    }
     / void:"(":Symbol1 v1:Exp void:")":Symbol1 
     / void:"[":Symbol1 v1:Exp void:";":Symbol1 v2:Exp void:"]":Symbol1 {
         yyValue = new ArrGen (v1, v2);
     }
-    / void:"[":Symbol1 v1:ArgList void:"]":Symbol1 {
-        yyValue = new ArrInit (v1);
+    / void:"[":Symbol1 v1:(Exp void:",":Symbol1)* v2:Exp void:"]":Symbol1 {
+        yyValue = new ArrInit (v1, v2);
     }
     / v1:Assign 
     / v1:Length 
@@ -573,6 +681,15 @@ constant Action<Exp> ExpLevel1Tail =
         yyValue = new Action<Exp>() {
             public Exp run (Exp left) {
                 ArrAccess node = new ArrAccess (left, v1);
+                copyLocation(node, left);
+                return node;
+            };
+        };
+    }
+    / void:",":Symbol1 v1:ExpLevel0 {
+        yyValue = new Action<Exp>() {
+            public Exp run (Exp left) {
+                ExpList node = new ExpList (left, v1);
                 copyLocation(node, left);
                 return node;
             };
